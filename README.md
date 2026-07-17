@@ -307,3 +307,51 @@ Screen (UI) → Bloc (Estado) → UseCase (Lógica) → Repository (Contrato) �
 - **El BLoC es el único que orquesta** — la screen jamás llama a un use case directamente
 - **Cada rol es un feature independiente** — comparten `core/` y `shared/`, pero cada uno tiene sus propias pantallas, BLoCs y lógica de negocio
 - **Las notificaciones unifican todo** — `fcm/` recibe el mensaje → `notifications/` lo persiste → el badge se actualiza desde cualquier rol
+
+---
+
+## Arquitectura actual (en construcción)
+
+### Flujo del login (http, sin Dio)
+
+```
+LoginScreen ──dispara──→ LoginEvent.formSubmitted
+                              │
+                              ▼
+                       LoginBloc
+                              │
+                              ▼
+                      LoginUseCase.run(tenant, username, password)
+                              │
+                              ▼
+                      AuthRepository.login()
+                              │
+                              ▼
+                      AuthRepositoryImpl.login()
+                              │
+                    ┌─────────┴─────────┐
+                    ▼                   ▼
+              AuthService          AuthResponse
+              (POST /auth/login)   (fromJson)
+                    │                   │
+                    └─────────┬─────────┘
+                              │
+                              ▼
+                      SuccessResource / ErrorResource
+                              │
+                              ▼
+                       LoginBloc emite estado
+                              │
+                              ▼
+                       LoginScreen se reconstruye
+```
+
+### Capas
+
+| Capa | Rol | Contiene |
+|------|-----|----------|
+| `data/` | Implementación concreta | Services (HTTP), Models (DTO), RepositoryImpl |
+| `domain/` | Lógica de negocio pura | UseCases, Repository (interfaz), Entities |
+| `presentation/` | UI y estado | Screens, Bloc (event/state) |
+| `shared/` | Utilidades transversales | Widgets, SessionStorage, BlocFormItem |
+| `core/` | Infraestructura base | Constantes, errores, temas |
