@@ -19,8 +19,11 @@ import 'package:coleapp/features/auth/data/models/auth_response.dart';
 abstract class AuthRepository {
   Future<Resource<AuthResponse>> login(
       String tenant, String username, String password);
-  Future<void> saveUserSession(AuthResponse authResponse);
+  Future<void> saveUserSession(AuthResponse authResponse,
+      {bool rememberMe = false});
   Future<AuthResponse?> getUserSession();
+  Future<String?> getSavedTenant();
+  Future<Map<String, String?>?> getSavedCredentials();
   Future<void> removeUserSession();
   Future<bool> logout();
 }

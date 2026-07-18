@@ -1,21 +1,10 @@
-// ────────────────────────────────────────────────────────────
-// DATA LAYER — Servicio HTTP para autenticación
-// ────────────────────────────────────────────────────────────
-// Capa más externa: comunicación con la API.
-// Usa package:http (NO Dio).
-// Envía POST /auth/login con tenant-id en header.
-// Recibe JSON → lo convierte a AuthResponse vía fromJson.
-//
-// domain/ no conoce esta clase — solo AuthRepositoryImpl la usa.
-//
-// Quién lo usa? → AuthRepositoryImpl (data)
-// Qué depende de él? → NADA (es hoja del árbol de dependencias)
-// ────────────────────────────────────────────────────────────
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:coleapp/core/constants/api_constants.dart';
 import 'package:coleapp/features/auth/data/models/auth_response.dart';
+
+final _log = Logger('API');
 
 class AuthService {
   final http.Client _client;
@@ -27,24 +16,38 @@ class AuthService {
     required String username,
     required String password,
   }) async {
+    final t = tenant.trim();
+    final u = username.trim();
     final uri = Uri.parse('${ApiConstants.baseUrl}/auth/login');
+    _log.info('POST $uri');
+    _log.info('tenant-id: $t');
+    _log.info('Body: username=$u password=$password');
+
     final response = await _client.post(
       uri,
       headers: {
         'Content-Type': 'application/json',
-        'tenant-id': tenant,
+        'tenant-id': t,
       },
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-      }),
+      body: jsonEncode({'username': u, 'password': password}),
     );
 
+    _log.info('Status=${response.statusCode}');
+    _log.info('Body=${response.body}');
+
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return AuthResponse.fromJson(
+      final authResponse = AuthResponse.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>,
+        tenant: t,
       );
+      _log.info('Login OK');
+      _log.info('  token=${authResponse.token}');
+      _log.info('  user.id=${authResponse.user.id} user.username=${authResponse.user.username}');
+      _log.info('  roles=${authResponse.user.roles}');
+      _log.info('  profile=${authResponse.user.profile?.type}');
+      return authResponse;
     }
+    _log.severe('Error HTTP ${response.statusCode}');
     throw Exception(
       'Error en login: ${response.statusCode} ${response.body}',
     );

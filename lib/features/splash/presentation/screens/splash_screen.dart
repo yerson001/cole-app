@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import 'package:coleapp/features/auth/domain/usecases/auth_use_cases.dart';
+import 'package:coleapp/injection.dart';
+
+final _log = Logger('SPLASH');
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -9,6 +14,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
+  final _authUseCases = getIt<AuthUseCases>();
   late final AnimationController _controller;
   late final Animation<double> _scaleAnim;
   late final Animation<double> _fadeAnim;
@@ -16,6 +22,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    _log.info('initState()');
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -27,6 +34,21 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
     _controller.forward();
+    _log.info('Animación iniciada');
+
+    Future.delayed(const Duration(seconds: 3), () async {
+      final session =
+          await _authUseCases.getusersessionUseCase.call();
+      if (mounted) {
+        if (session != null) {
+          _log.info('Sesión activa, navegando a home');
+          Navigator.pushReplacementNamed(context, 'home');
+        } else {
+          _log.info('Sin sesión, navegando a login');
+          Navigator.pushReplacementNamed(context, 'login');
+        }
+      }
+    });
   }
 
   @override
@@ -113,8 +135,7 @@ class _DotSpinnerState extends State<_DotSpinner>
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(3, (i) {
           final delay = i * 0.15;
-          final value =
-              (_anim.value - delay).clamp(0.0, 1.0);
+          final value = (_anim.value - delay).clamp(0.0, 1.0);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: Opacity(
