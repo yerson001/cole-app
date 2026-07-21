@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
-import 'package:coleapp/features/auth/domain/usecases/auth_use_cases.dart';
-import 'package:coleapp/injection.dart';
+import 'package:coleapp/features/splash/presentation/bloc/splash_bloc.dart';
+import 'package:coleapp/features/splash/presentation/bloc/splash_event.dart';
+import 'package:coleapp/features/splash/presentation/bloc/splash_state.dart';
 
 final _log = Logger('SPLASH');
 
@@ -14,39 +16,64 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  final _authUseCases = getIt<AuthUseCases>();
   late final AnimationController _controller;
-  late final Animation<double> _scaleAnim;
-  late final Animation<double> _fadeAnim;
+  late final Animation<double> _checkScale;
+  late final Animation<double> _coleWidth;
+  late final Animation<double> _coleFade;
+  late final Animation<double> _tagline1Anim;
+  late final Animation<double> _tagline2Anim;
 
   @override
   void initState() {
     super.initState();
     _log.info('initState()');
+
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(seconds: 3),
     );
-    _scaleAnim = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+
+    _checkScale = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.35, curve: Curves.elasticOut),
+      ),
     );
-    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+
+    _coleWidth = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.35, 0.6, curve: Curves.easeOut),
+      ),
     );
+
+    _coleFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.35, 0.6, curve: Curves.easeIn),
+      ),
+    );
+
+    _tagline1Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.6, 0.8, curve: Curves.easeIn),
+      ),
+    );
+
+    _tagline2Anim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.7, 0.85, curve: Curves.easeIn),
+      ),
+    );
+
     _controller.forward();
     _log.info('Animación iniciada');
 
-    Future.delayed(const Duration(seconds: 3), () async {
-      final session =
-          await _authUseCases.getusersessionUseCase.call();
+    Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
-        if (session != null) {
-          _log.info('Sesión activa, navegando a home');
-          Navigator.pushReplacementNamed(context, 'home');
-        } else {
-          _log.info('Sin sesión, navegando a login');
-          Navigator.pushReplacementNamed(context, 'login');
-        }
+        context.read<SplashBloc>().add(CheckSplashSession());
       }
     });
   }
@@ -59,37 +86,105 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF003366), Color(0xFF001a33)],
+    return BlocListener<SplashBloc, SplashState>(
+      listener: (context, state) {
+        if (state is SplashSessionFound) {
+          _log.info('Sesión activa, navegando a home');
+          Navigator.pushReplacementNamed(context, 'home');
+        } else if (state is SplashSessionNotFound) {
+          _log.info('Sin sesión, navegando a login');
+          Navigator.pushReplacementNamed(context, 'login');
+        }
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.white, Color(0xFFF5F5F5)],
+            ),
           ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) => Opacity(
-                  opacity: _fadeAnim.value,
-                  child: Transform.scale(
-                    scale: _scaleAnim.value,
-                    child: child,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(flex: 2),
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizeTransition(
+                          sizeFactor: _coleWidth,
+                          axis: Axis.horizontal,
+                          alignment: Alignment.centerLeft,
+                          child: Opacity(
+                            opacity: _coleFade.value,
+                            child: Image.asset(
+                              'assets/images/cole.png',
+                              height: 60,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Transform.scale(
+                          scale: _checkScale.value,
+                          child: Image.asset(
+                            'assets/images/check.png',
+                            height: 60,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) => Opacity(
+                    opacity: _tagline1Anim.value,
+                    child: Text(
+                      'Control Inteligente',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: const Color(0xFF003366).withValues(alpha: 0.85),
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                   ),
                 ),
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  width: 200,
-                  height: 200,
+                const SizedBox(height: 4),
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) => Opacity(
+                    opacity: _tagline2Anim.value,
+                    child: Text(
+                      'en la Gestión Educativa',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: const Color(0xFF003366).withValues(alpha: 0.6),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 48),
-              const _DotSpinner(),
-            ],
+                const Spacer(flex: 1),
+                const _DotSpinner(),
+                const SizedBox(height: 16),
+                Text(
+                  'v0.2.0',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: const Color(0xFF003366).withValues(alpha: 0.3),
+                  ),
+                ),
+                const Spacer(flex: 1),
+              ],
+            ),
           ),
         ),
       ),
@@ -140,11 +235,7 @@ class _DotSpinnerState extends State<_DotSpinner>
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: Opacity(
               opacity: value,
-              child: const Icon(
-                Icons.circle,
-                size: 10,
-                color: Color(0xFF4CAF50),
-              ),
+              child: const Icon(Icons.circle, size: 10, color: Color(0xFF4CAF50)),
             ),
           );
         }),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 
-class DefaultButton extends StatelessWidget {
+class DefauldOnboardButton extends StatelessWidget {
   final String text;
   final Function() onPressed;
   final Color color;
@@ -8,7 +9,7 @@ class DefaultButton extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final double cBorder;
 
-  const DefaultButton({
+  const DefauldOnboardButton({
     super.key,
     required this.text,
     required this.color,
@@ -21,14 +22,14 @@ class DefaultButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width,
+      width: double.infinity,
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           side: cBorder > 0
               ? BorderSide(
-                  color: const Color.fromARGB(255, 54, 56, 55),
+                  color: AppColors.border,
                   width: cBorder,
                 )
               : BorderSide.none,

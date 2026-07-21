@@ -312,39 +312,103 @@ Screen (UI) → Bloc (Estado) → UseCase (Lógica) → Repository (Contrato) �
 
 ## Arquitectura actual (en construcción)
 
-### Flujo del login (http, sin Dio)
+### Cadena de dependencias (inyección)
 
 ```
-LoginScreen ──dispara──→ LoginEvent.formSubmitted
-                              │
-                              ▼
-                       LoginBloc
-                              │
-                              ▼
-                      LoginUseCase.run(tenant, username, password)
-                              │
-                              ▼
-                      AuthRepository.login()
-                              │
-                              ▼
-                      AuthRepositoryImpl.login()
-                              │
-                    ┌─────────┴─────────┐
-                    ▼                   ▼
-              AuthService          AuthResponse
-              (POST /auth/login)   (fromJson)
-                    │                   │
-                    └─────────┬─────────┘
-                              │
-                              ▼
-                      SuccessResource / ErrorResource
-                              │
-                              ▼
-                       LoginBloc emite estado
-                              │
-                              ▼
-                       LoginScreen se reconstruye
+AuthService (HTTP) ─┐
+                    ├→ AuthRepositoryImpl → LoginUseCase ─┐
+AuthLocalStorage ───┘                                      │
+                                                           ├→ AuthUseCases → LoginBloc
+                    Saveuser, Logout, etc. (use cases) ────┘
 ```
+
+**¿Por qué `AuthRepositoryImpl` necesita `AuthService` Y `AuthLocalStorage`?**
+
+Porque el repositorio hace DOS tipos de trabajo:
+
+| Trabajo | Lo hace | Con qué |
+|---|---|---|
+| Loguear (internet) | `login()` | `AuthService` → POST HTTP al backend |
+| Guardar sesión (disco) | `saveUserSession()` | `AuthLocalStorage` → SharedPreferences |
+| Recuperar sesión (disco) | `getUserSession()` | `AuthLocalStorage` → SharedPreferences |
+| Cerrar sesión (disco) | `logout()` | `AuthLocalStorage` → SharedPreferences |
+
+Si solo tuviera `AuthService` → podría loguear pero no guardar la sesión.  
+Si solo tuviera `AuthLocalStorage` → podría guardar datos pero no loguear.  
+**Necesita ambos.**
+
+### Cómo se arma todo con `@injectable`
+
+```dart
+// di/app_module.dart
+
+@module
+abstract class AppModule {
+  // 1. Hojas (no necesitan nada)
+  @injectable
+  AuthLocalStorage get authLocalStorage => AuthLocalStorage();
+
+  @injectable
+  AuthService get authService => AuthService();
+
+  // 2. Repositorio (necesita service + storage)
+  @injectable
+  AuthRepository get authRepository => AuthRepositoryImpl(
+    authService: authService,     // ← getIt busca AuthService registrado
+    storage: authLocalStorage,    // ← getIt busca AuthLocalStorage registrado
+  );
+
+  // 3. Use cases (cada uno necesita el repositorio)
+  @injectable
+  LoginUseCase get loginUseCase => LoginUseCase(authRepository: authRepository);
+
+  // 4. Mochila que agrupa todos los use cases
+  @injectable
+  AuthUseCases get authUseCases => AuthUseCases(
+    loginUseCase: loginUseCase,
+    saveuserUseCase: saveuserUseCase,
+    getusersessionUseCase: getusersessionUseCase,
+    removeuserUseCase: removeuserUseCase,
+    logoutUseCase: logoutUseCase,
+  );
+}
+```
+
+**¿Qué significa `get` + `=>`?**
+
+- `get` = getter de Dart (propiedad que devuelve algo, como una función sin `()`)
+- `=>` = atajo de `{ return ...; }`
+- `authService: authService` → el de la derecha es el getter de arriba, GetIt lo resuelve automáticamente
+- `@injectable` = marcador para que build_runner genere el registro en GetIt
+
+**build_runner** (`dart run build_runner build`) lee los `@injectable` y genera `injection.config.dart` con el código real.
+
+### Cómo llega al BLoC
+
+```dart
+// bloc_provider.dart
+BlocProvider<LoginBloc>(
+  create: (context) {
+    return LoginBloc(getIt<AuthUseCases>());
+    //                ↑
+    // GetIt busca AuthUseCases, que necesita todos los use cases,
+    // que necesitan AuthRepository, que necesita AuthService + AuthLocalStorage
+    // → construye toda la cadena automáticamente
+  },
+);
+```
+
+### Regla de oro: ¿dónde se usa `getIt`?
+
+| Archivo | ¿Usa `getIt`? | ¿Por qué? |
+|---|---|---|
+| `main.dart` | ✅ `configureDependencies()` | Inicializa el baúl |
+| `app_module.dart` | ✅ `@injectable` | Registra cosas en el baúl |
+| `bloc_provider.dart` | ✅ `getIt<AuthUseCases>()` | Saca del baúl para crear BLoC |
+| `login_content.dart` (widget) | ❌ | Solo `context.read<LoginBloc>()` |
+| `login_bloc.dart` (BLoC) | ❌ | Recibe `AuthUseCases` por constructor |
+
+**Los widgets nunca usan `getIt`. Solo mandan eventos al BLoC.**
 
 ### Capas
 
@@ -353,5 +417,5 @@ LoginScreen ──dispara──→ LoginEvent.formSubmitted
 | `data/` | Implementación concreta | Services (HTTP), Models (DTO), RepositoryImpl |
 | `domain/` | Lógica de negocio pura | UseCases, Repository (interfaz), Entities |
 | `presentation/` | UI y estado | Screens, Bloc (event/state) |
-| `shared/` | Utilidades transversales | Widgets, SessionStorage, BlocFormItem |
+| `shared/` | Utilidades transversales | Widgets, BlocFormItem, validators |
 | `core/` | Infraestructura base | Constantes, errores, temas |

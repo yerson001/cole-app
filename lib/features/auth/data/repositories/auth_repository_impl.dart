@@ -1,3 +1,25 @@
+// ────────────────────────────────────────────────────────────
+// DATA LAYER — Implementación del repositorio
+// ────────────────────────────────────────────────────────────
+// ¿Por qué esta clase necesita AuthService y AuthLocalStorage?
+//
+// Porque el repositorio tiene DOS tipos de trabajo:
+//
+//   Trabajo 1 — COSAS DE INTERNET (remoto):
+//     - login()       → llama al backend
+//     → lo hace AuthService (HTTP)
+//
+//   Trabajo 2 — COSAS DEL CELULAR (local):
+//     - saveUserSession()  → guarda en disco
+//     - getUserSession()   → lee del disco
+//     - logout()           → borra del disco
+//     → lo hace AuthLocalStorage (SharedPreferences)
+//
+// Si solo tuviera AuthService → podría loguear, pero no guardar la sesión.
+// Si solo tuviera AuthLocalStorage → podría guardar datos, pero no loguear.
+// NECESITA AMBOS para funcionar completo.
+// ────────────────────────────────────────────────────────────
+
 import 'package:logging/logging.dart';
 import 'package:coleapp/core/errors/resource.dart';
 import 'package:coleapp/features/auth/data/datasource/local/auth_local_storage.dart';
@@ -8,6 +30,9 @@ import 'package:coleapp/features/auth/domain/repositories/auth_repository.dart';
 final _log = Logger('REPO');
 
 class AuthRepositoryImpl implements AuthRepository {
+  // ── DEPENDENCIAS ──────────────────────────────────────────
+  // _authService  → sabe hacer HTTP (llamar al backend)
+  // _storage      → sabe guardar/leer en el celular (SharedPreferences)
   final AuthService _authService;
   final AuthLocalStorage _storage;
 
@@ -17,6 +42,10 @@ class AuthRepositoryImpl implements AuthRepository {
   })  : _authService = authService,
         _storage = storage;
 
+  // ── MÉTODOS ───────────────────────────────────────────────
+
+  /// login(): USA EL SERVICIO HTTP (necesita internet)
+  /// El AuthService hace POST al backend y devuelve AuthResponse.
   @override
   Future<Resource<AuthResponse>> login(
     String tenant,
@@ -38,6 +67,8 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// saveUserSession(): USA EL STORAGE LOCAL (guarda en el celular)
+  /// Guarda tenant (siempre), user (siempre), credentials (solo si rememberMe).
   @override
   Future<void> saveUserSession(AuthResponse authResponse,
       {bool rememberMe = false}) async {
@@ -55,6 +86,7 @@ class AuthRepositoryImpl implements AuthRepository {
     _log.info('Sesión guardada');
   }
 
+  /// getUserSession(): USA EL STORAGE LOCAL (lee del celular)
   @override
   Future<AuthResponse?> getUserSession() async {
     _log.info('getUserSession()');

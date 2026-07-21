@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
 
-class DefaultTextField extends StatelessWidget {
-  final String label;
+class DefaultTexfield extends StatelessWidget {
+  final String text;
   final String? initialValue;
-  final Function(String) onChanged;
+  final Function(String text) onChanged;
   final IconData icon;
   final EdgeInsetsGeometry margin;
   final String? Function(String?)? validator;
@@ -12,10 +12,11 @@ class DefaultTextField extends StatelessWidget {
   final Color background;
   final Widget? suffixIcon;
   final TextInputType keyboardType;
+  final TextEditingController? controller;
 
-  const DefaultTextField({
+  const DefaultTexfield({
     super.key,
-    required this.label,
+    required this.text,
     required this.icon,
     required this.onChanged,
     this.margin = const EdgeInsets.only(top: 20, left: 20, right: 20),
@@ -25,6 +26,7 @@ class DefaultTextField extends StatelessWidget {
     this.initialValue,
     this.suffixIcon,
     this.keyboardType = TextInputType.text,
+    this.controller,
   });
 
   @override
@@ -32,17 +34,18 @@ class DefaultTextField extends StatelessWidget {
     return Container(
       margin: margin,
       child: TextFormField(
+        controller: controller,
         onChanged: onChanged,
-        initialValue: initialValue,
+        initialValue: controller != null ? null : initialValue,
         validator: validator,
         obscureText: isPassword,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 14, color: Colors.black87),
+        style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
         decoration: InputDecoration(
           filled: true,
           fillColor: background,
           contentPadding: const EdgeInsets.symmetric(
-            vertical: 20,
+            vertical: 12,
             horizontal: 16,
           ),
           border: OutlineInputBorder(
@@ -58,7 +61,7 @@ class DefaultTextField extends StatelessWidget {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
+            borderSide: const BorderSide(
               color: AppColors.border,
               width: 1.0,
             ),
@@ -77,10 +80,19 @@ class DefaultTextField extends StatelessWidget {
               width: 2.0,
             ),
           ),
-          labelText: label,
+          labelText: text,
           labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           errorStyle: const TextStyle(color: AppColors.error),
-          prefixIcon: Icon(icon, color: AppColors.primary),
+          prefixIcon: Container(
+            margin: const EdgeInsets.only(top: 10),
+            child: Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              children: [
+                Icon(icon, color: AppColors.primary),
+                Container(height: 20, width: 1, color: AppColors.border),
+              ],
+            ),
+          ),
           suffixIcon: suffixIcon,
         ),
       ),

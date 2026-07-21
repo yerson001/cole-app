@@ -1,3 +1,23 @@
+// ────────────────────────────────────────────────────────────
+// DATA LAYER — Servicio HTTP (remoto)
+// ────────────────────────────────────────────────────────────
+// RESPONSABILIDAD ÚNICA: hablar con el backend por HTTP.
+//
+// Esta clase NO sabe nada de:
+//   - SharedPreferences (eso es trabajo de AuthLocalStorage)
+//   - BLoC ni eventos
+//   - Use cases
+//
+// Solo sabe hacer UNA COSA: POST al backend y devolver AuthResponse.
+//
+// ¿Quién la usa?
+//   - AuthRepositoryImpl (el repositorio la llama cuando necesita internet)
+//
+// ¿Por qué existe separada?
+//   - Porque si mañana el backend cambia de URL o de formato,
+//     solo toco este archivo y el resto de la app no se entera.
+// ────────────────────────────────────────────────────────────
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
@@ -11,6 +31,8 @@ class AuthService {
 
   AuthService({http.Client? client}) : _client = client ?? http.Client();
 
+  /// Hace POST a backend.colecheck.com/auth/login
+  /// Devuelve AuthResponse con token, user, roles, etc.
   Future<AuthResponse> login({
     required String tenant,
     required String username,
