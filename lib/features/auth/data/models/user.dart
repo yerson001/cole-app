@@ -9,6 +9,17 @@ class User {
   final List<Role> roles;
   final Profile? profile;
 
+  static const Map<String, String> _roleRouteMap = {
+    'PRINCIPAL': 'director',
+    'PROMOTER': 'promoter',
+    'SECRETARY': 'secretary',
+    'ASSISTANT': 'assistant',
+    'TEACHER': 'teacher',
+    'PARENT': 'parent',
+    'HR': 'hr',
+    'DINER': 'diner',
+  };
+
   User({
     required this.id,
     required this.username,
@@ -29,7 +40,7 @@ class User {
                         id: x,
                         name: x,
                         image: '',
-                        route: '$x/home',
+                        route: '${_roleRouteMap[x] ?? x.toLowerCase()}/home',
                         createdAt: DateTime.now(),
                         updatedAt: DateTime.now(),
                       )

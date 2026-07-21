@@ -2,6 +2,29 @@
 
 App móvil de Colecheck — gestión educativa para padres, auxiliares, profesores y directores.
 
+## Credenciales de prueba (tenant: `ie-guillermo`)
+
+| Rol | Nombre | Usuario | Contraseña |
+|-----|--------|---------|------------|
+| PRINCIPAL (Director) | Percy Huillca G | `00260004` | `PE00HU260004` |
+| PROMOTER | Percy Huillca | `00260001` | `PE00HU260001` |
+| SECRETARY (Secretaria) | Secretaria Guillermo | `00260005` | `SE00GU260005` |
+| ASSISTANT (Auxiliar) | Auxiliar Guillermo | `00260010` | `AU00GU260010` |
+| TEACHER (Profesor) | Yhon Yerson Sanchez Yucra | `66392825` | `YH66SA392825` |
+
+### API → Mapeo de roles
+
+| API Role | Feature | Ruta |
+|----------|---------|------|
+| `PRINCIPAL` | `director` | `director/home` |
+| `PROMOTER` | `promoter` | `promoter/home` |
+| `SECRETARY` | `secretary` | `secretary/home` |
+| `ASSISTANT` | `assistant` | `assistant/home` |
+| `TEACHER` | `teacher` | `teacher/home` |
+| `PARENT` | `parent` | `parent/home` |
+| `HR` | `hr` | `hr/home` |
+| `DINER` | `diner` | `diner/home` |
+
 ## Estructura del proyecto
 
 ```
