@@ -16,8 +16,6 @@ class User {
     'ASSISTANT': 'assistant',
     'TEACHER': 'teacher',
     'PARENT': 'parent',
-    'HR': 'hr',
-    'DINER': 'diner',
   };
 
   User({

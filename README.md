@@ -22,8 +22,6 @@ App móvil de Colecheck — gestión educativa para padres, auxiliares, profesor
 | `ASSISTANT` | `assistant` | `assistant/home` |
 | `TEACHER` | `teacher` | `teacher/home` |
 | `PARENT` | `parent` | `parent/home` |
-| `HR` | `hr` | `hr/home` |
-| `DINER` | `diner` | `diner/home` |
 
 ## Estructura del proyecto
 
