@@ -35,6 +35,14 @@ class _TeacherScreenState extends State<TeacherScreen> {
           return pageList[state.pageIndex];
         },
       ),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () {
+          context.read<TeacherBloc>().add(Logout());
+          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+        },
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.logout, color: Colors.white),
+      ),
       drawer: BlocBuilder<TeacherBloc, TeacherState>(
         builder: (context, state) {
           return Drawer(

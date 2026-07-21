@@ -32,6 +32,14 @@ class _AssistantScreenState extends State<AssistantScreen> {
           return pageList[state.pageIndex];
         },
       ),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () {
+          context.read<AssistantBloc>().add(Logout());
+          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+        },
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.logout, color: Colors.white),
+      ),
       drawer: BlocBuilder<AssistantBloc, AssistantState>(
         builder: (context, state) {
           return Drawer(

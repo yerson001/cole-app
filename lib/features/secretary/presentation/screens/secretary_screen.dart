@@ -33,6 +33,14 @@ class _SecretaryScreenState extends State<SecretaryScreen> {
           return pageList[state.pageIndex];
         },
       ),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () {
+          context.read<SecretaryBloc>().add(Logout());
+          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+        },
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.logout, color: Colors.white),
+      ),
       drawer: BlocBuilder<SecretaryBloc, SecretaryState>(
         builder: (context, state) {
           return Drawer(

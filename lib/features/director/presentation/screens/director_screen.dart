@@ -34,6 +34,14 @@ class _DirectorScreenState extends State<DirectorScreen> {
           return pageList[state.pageIndex];
         },
       ),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () {
+          context.read<DirectorBloc>().add(Logout());
+          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+        },
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.logout, color: Colors.white),
+      ),
       drawer: BlocBuilder<DirectorBloc, DirectorState>(
         builder: (context, state) {
           return Drawer(
