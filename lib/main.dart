@@ -4,9 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart' as log;
 import 'package:coleapp/bloc_provider.dart';
 import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
-import 'package:coleapp/features/home/presentation/screens/home_screen.dart';
 import 'package:coleapp/features/roles/presentation/screens/roles_page.dart';
 import 'package:coleapp/features/splash/presentation/screens/splash_screen.dart';
+import 'package:coleapp/features/director/presentation/screens/director_screen.dart';
+import 'package:coleapp/features/promoter/presentation/screens/promoter_screen.dart';
+import 'package:coleapp/features/secretary/presentation/screens/secretary_screen.dart';
+import 'package:coleapp/features/assistant/presentation/screens/assistant_screen.dart';
+import 'package:coleapp/features/teacher/presentation/screens/teacher_screen.dart';
+import 'package:coleapp/features/parent/presentation/screens/parent_screen.dart';
 import 'package:coleapp/injection.dart';
 
 final mainLog = log.Logger('MAIN');
@@ -61,7 +66,12 @@ class ColecheckApp extends StatelessWidget {
           'splash': (BuildContext context) => const SplashScreen(),
           'login': (BuildContext context) => const LoginPage(),
           'roles': (BuildContext context) => const RolesPage(),
-          'home': (BuildContext context) => const HomeScreen(),
+          'director/home': (BuildContext context) => const DirectorScreen(),
+          'promoter/home': (BuildContext context) => const PromoterScreen(),
+          'secretary/home': (BuildContext context) => const SecretaryScreen(),
+          'assistant/home': (BuildContext context) => const AssistantScreen(),
+          'teacher/home': (BuildContext context) => const TeacherScreen(),
+          'parent/home': (BuildContext context) => const ParentScreen(),
         },
       ),
     );

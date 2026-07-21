@@ -94,8 +94,8 @@ class _SplashScreenState extends State<SplashScreen>
             _log.info('Sesión activa con múltiples roles, navegando a selector');
             Navigator.pushReplacementNamed(context, 'roles');
           } else {
-            _log.info('Sesión activa, navegando a home');
-            Navigator.pushReplacementNamed(context, 'home');
+            _log.info('Sesión activa, navegando a ${roles.first.route}');
+            Navigator.pushReplacementNamed(context, roles.first.route);
           }
         } else if (state is SplashSessionNotFound) {
           _log.info('Sin sesión, navegando a login');

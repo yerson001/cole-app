@@ -29,8 +29,8 @@ class LoginPage extends StatelessWidget {
               _log.info('Multiples roles, navegando a selector');
               Navigator.pushNamedAndRemoveUntil(context, 'roles', (route) => false);
             } else {
-              _log.info('Rol unico, navegando a home');
-              Navigator.pushReplacementNamed(context, 'home');
+              _log.info('Rol unico, navegando a ${authResponse.user.roles.first.route}');
+              Navigator.pushNamedAndRemoveUntil(context, authResponse.user.roles.first.route, (route) => false);
             }
           } else if (response is ErrorResource) {
             _log.warning('Error: ${response.message}');
