@@ -5,6 +5,7 @@ import 'package:coleapp/features/assistant/presentation/bloc/assistant_bloc.dart
 import 'package:coleapp/features/assistant/presentation/bloc/assistant_event.dart';
 import 'package:coleapp/features/assistant/presentation/bloc/assistant_state.dart';
 import 'package:coleapp/features/roles/presentation/screens/roles_page.dart';
+import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 
 class AssistantScreen extends StatefulWidget {
   const AssistantScreen({super.key});
@@ -35,7 +36,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () {
           context.read<AssistantBloc>().add(Logout());
-          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
         },
         backgroundColor: Colors.red,
         child: const Icon(Icons.logout, color: Colors.white),
@@ -111,7 +112,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           context.read<AssistantBloc>().add(Logout());
-                          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
                         },
                       ),
                     ],

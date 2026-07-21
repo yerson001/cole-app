@@ -6,6 +6,17 @@ class Role {
     DateTime createdAt;
     DateTime updatedAt;
 
+    static const Map<String, String> _displayNames = {
+      'PRINCIPAL': 'Director',
+      'PROMOTER': 'Promotor',
+      'SECRETARY': 'Secretaria',
+      'ASSISTANT': 'Auxiliar',
+      'TEACHER': 'Profesor',
+      'PARENT': 'Padre',
+    };
+
+    String get displayName => _displayNames[name.toUpperCase()] ?? name;
+
     Role({
         required this.id,
         required this.name,

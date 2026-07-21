@@ -30,7 +30,7 @@ class RolesItem extends StatelessWidget {
                   ),
           ),
           Text(
-            role.name,
+            role.displayName,
             style: const TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,

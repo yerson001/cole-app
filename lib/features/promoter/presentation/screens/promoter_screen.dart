@@ -5,6 +5,7 @@ import 'package:coleapp/features/promoter/presentation/bloc/promoter_bloc.dart';
 import 'package:coleapp/features/promoter/presentation/bloc/promoter_event.dart';
 import 'package:coleapp/features/promoter/presentation/bloc/promoter_state.dart';
 import 'package:coleapp/features/roles/presentation/screens/roles_page.dart';
+import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 
 class PromoterScreen extends StatefulWidget {
   const PromoterScreen({super.key});
@@ -36,7 +37,7 @@ class _PromoterScreenState extends State<PromoterScreen> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () {
           context.read<PromoterBloc>().add(Logout());
-          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
         },
         backgroundColor: Colors.red,
         child: const Icon(Icons.logout, color: Colors.white),
@@ -122,7 +123,7 @@ class _PromoterScreenState extends State<PromoterScreen> {
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           context.read<PromoterBloc>().add(Logout());
-                          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
                         },
                       ),
                     ],

@@ -5,6 +5,7 @@ import 'package:coleapp/features/secretary/presentation/bloc/secretary_bloc.dart
 import 'package:coleapp/features/secretary/presentation/bloc/secretary_event.dart';
 import 'package:coleapp/features/secretary/presentation/bloc/secretary_state.dart';
 import 'package:coleapp/features/roles/presentation/screens/roles_page.dart';
+import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 
 class SecretaryScreen extends StatefulWidget {
   const SecretaryScreen({super.key});
@@ -36,7 +37,7 @@ class _SecretaryScreenState extends State<SecretaryScreen> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () {
           context.read<SecretaryBloc>().add(Logout());
-          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
         },
         backgroundColor: Colors.red,
         child: const Icon(Icons.logout, color: Colors.white),
@@ -122,7 +123,7 @@ class _SecretaryScreenState extends State<SecretaryScreen> {
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           context.read<SecretaryBloc>().add(Logout());
-                          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
                         },
                       ),
                     ],

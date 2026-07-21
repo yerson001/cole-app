@@ -5,6 +5,7 @@ import 'package:coleapp/features/director/presentation/bloc/director_bloc.dart';
 import 'package:coleapp/features/director/presentation/bloc/director_event.dart';
 import 'package:coleapp/features/director/presentation/bloc/director_state.dart';
 import 'package:coleapp/features/roles/presentation/screens/roles_page.dart';
+import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 
 class DirectorScreen extends StatefulWidget {
   const DirectorScreen({super.key});
@@ -37,7 +38,7 @@ class _DirectorScreenState extends State<DirectorScreen> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () {
           context.read<DirectorBloc>().add(Logout());
-          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
         },
         backgroundColor: Colors.red,
         child: const Icon(Icons.logout, color: Colors.white),
@@ -151,7 +152,7 @@ class _DirectorScreenState extends State<DirectorScreen> {
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           context.read<DirectorBloc>().add(Logout());
-                          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
                         },
                       ),
                     ],

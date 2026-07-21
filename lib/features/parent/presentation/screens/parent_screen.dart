@@ -5,6 +5,7 @@ import 'package:coleapp/features/parent/presentation/bloc/parent_bloc.dart';
 import 'package:coleapp/features/parent/presentation/bloc/parent_event.dart';
 import 'package:coleapp/features/parent/presentation/bloc/parent_state.dart';
 import 'package:coleapp/features/roles/presentation/screens/roles_page.dart';
+import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 
 class ParentScreen extends StatefulWidget {
   const ParentScreen({super.key});
@@ -37,7 +38,7 @@ class _ParentScreenState extends State<ParentScreen> {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () {
           context.read<ParentBloc>().add(Logout());
-          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
         },
         backgroundColor: Colors.red,
         child: const Icon(Icons.logout, color: Colors.white),
@@ -133,7 +134,7 @@ class _ParentScreenState extends State<ParentScreen> {
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           context.read<ParentBloc>().add(Logout());
-                          Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPage()), (route) => false);
                         },
                       ),
                     ],
