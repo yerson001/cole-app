@@ -5,6 +5,7 @@ import 'package:logging/logging.dart' as log;
 import 'package:coleapp/bloc_provider.dart';
 import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 import 'package:coleapp/features/home/presentation/screens/home_screen.dart';
+import 'package:coleapp/features/roles/presentation/screens/roles_page.dart';
 import 'package:coleapp/features/splash/presentation/screens/splash_screen.dart';
 import 'package:coleapp/injection.dart';
 
@@ -59,6 +60,7 @@ class ColecheckApp extends StatelessWidget {
         routes: {
           'splash': (BuildContext context) => const SplashScreen(),
           'login': (BuildContext context) => const LoginPage(),
+          'roles': (BuildContext context) => const RolesPage(),
           'home': (BuildContext context) => const HomeScreen(),
         },
       ),

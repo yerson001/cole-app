@@ -89,8 +89,14 @@ class _SplashScreenState extends State<SplashScreen>
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
         if (state is SplashSessionFound) {
-          _log.info('Sesión activa, navegando a home');
-          Navigator.pushReplacementNamed(context, 'home');
+          final roles = state.authResponse.user.roles;
+          if (roles.length > 1) {
+            _log.info('Sesión activa con múltiples roles, navegando a selector');
+            Navigator.pushReplacementNamed(context, 'roles');
+          } else {
+            _log.info('Sesión activa, navegando a home');
+            Navigator.pushReplacementNamed(context, 'home');
+          }
         } else if (state is SplashSessionNotFound) {
           _log.info('Sin sesión, navegando a login');
           Navigator.pushReplacementNamed(context, 'login');

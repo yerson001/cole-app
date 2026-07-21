@@ -15,7 +15,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       final session = await authUseCases.getusersessionUseCase.call();
       if (session != null) {
         _log.info('Sesión activa');
-        emit(SplashSessionFound());
+        emit(SplashSessionFound(session));
       } else {
         _log.info('Sin sesión');
         emit(SplashSessionNotFound());

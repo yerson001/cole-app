@@ -25,8 +25,13 @@ class LoginPage extends StatelessWidget {
             final authResponse = response.data as AuthResponse;
             _log.info('Success: token=${authResponse.token} roles=${authResponse.user.roles}');
             context.read<LoginBloc>().add(SaveSession(authResponse, state.rememberMe));
-            _log.info('Navegando a home');
-            Navigator.pushReplacementNamed(context, 'home');
+            if (authResponse.user.roles.length > 1) {
+              _log.info('Multiples roles, navegando a selector');
+              Navigator.pushNamedAndRemoveUntil(context, 'roles', (route) => false);
+            } else {
+              _log.info('Rol unico, navegando a home');
+              Navigator.pushReplacementNamed(context, 'home');
+            }
           } else if (response is ErrorResource) {
             _log.warning('Error: ${response.message}');
             ScaffoldMessenger.of(context).showSnackBar(
