@@ -84,14 +84,14 @@ class _LoginContentState extends State<LoginContent> {
                 const SizedBox(height: 40),
                 _buildLogo(),
                 const SizedBox(height: 20),
-                const SizedBox(height: 20),
                 Text(
-                  'Inicia sesión para continuar',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: c.textSecondary,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  'Bienvenido a Colecheck',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: c.textPrimary),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Inicia sesión',
+                  style: TextStyle(fontSize: 14, color: c.textSecondary),
                 ),
                 const SizedBox(height: 8),
                 const SizedBox(height: 16),
@@ -198,7 +198,18 @@ class _LoginContentState extends State<LoginContent> {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: c.inputBackground,
-                    prefixIcon: Icon(Icons.person_outline, color: c.icon, size: 20),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(width: 12),
+                          Icon(Icons.person_outline, color: c.icon, size: 20),
+                          const SizedBox(width: 12),
+                          Container(height: 20, width: 1, color: c.border),
+                        ],
+                      ),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -250,7 +261,18 @@ class _LoginContentState extends State<LoginContent> {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: c.inputBackground,
-                    prefixIcon: Icon(Icons.lock_outline, color: c.icon, size: 20),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(width: 12),
+                          Icon(Icons.lock_outline, color: c.icon, size: 20),
+                          const SizedBox(width: 12),
+                          Container(height: 20, width: 1, color: c.border),
+                        ],
+                      ),
+                    ),
                     suffixIcon: Padding(
                       padding: const EdgeInsets.only(right: 4),
                       child: IconButton(
@@ -427,18 +449,7 @@ class _LoginContentState extends State<LoginContent> {
   }
 
   Widget _buildLogo() {
-    return Column(
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('assets/images/cole.png', height: 44, fit: BoxFit.contain),
-            const SizedBox(width: 6),
-            Image.asset('assets/images/check.png', height: 44, fit: BoxFit.contain),
-          ],
-        ),
-      ],
-    );
+    return Image.asset('assets/images/check.png', height: 60, fit: BoxFit.contain);
   }
 
   Widget _buildButton() {
@@ -550,13 +561,13 @@ class _LoginContentState extends State<LoginContent> {
     return Column(
       children: [
         Text(
-          '© 2026 Colecheck App . Colecheck SAC',
-          style: TextStyle(fontSize: 12, color: c.textSecondary),
+          '© 2026 COLECHECK APP . COLECHECK SAC',
+          style: TextStyle(fontSize: 11, color: c.textDisabled, letterSpacing: 0.5),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
           'Términos de uso - Políticas de privacidad',
-          style: TextStyle(fontSize: 12, color: c.textSecondary),
+          style: TextStyle(fontSize: 11, color: c.textDisabled.withValues(alpha: 0.7)),
         ),
       ],
     );
