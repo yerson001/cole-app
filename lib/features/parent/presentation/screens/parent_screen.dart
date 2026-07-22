@@ -45,7 +45,7 @@ class ParentScreen extends StatelessWidget {
           onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
-      title: const Text('Padre', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      title: const Text('Inicio', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       centerTitle: true,
       actions: [
         IconButton(
@@ -53,14 +53,6 @@ class ParentScreen extends StatelessWidget {
             label: Text('3'),
             child: Icon(Icons.notifications_outlined),
           ),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.settings_outlined),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.person_outline),
           onPressed: () {},
         ),
       ],
@@ -85,14 +77,29 @@ class ParentScreen extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _drawerItem(Icons.dashboard_outlined, 'Dashboard', 0, context),
-                _drawerItem(Icons.chat_bubble_outline, 'Comunicados', 1, context),
-                _drawerItem(Icons.calendar_month_outlined, 'Agenda', 2, context),
-                _drawerItem(Icons.person_outline, 'Perfil', 3, context),
+                _drawerItem(Icons.home_outlined, 'Inicio', 0, context),
+                _drawerItem(Icons.person_outline, 'Mi Perfil', null, context, subtitle: 'Cambiar contraseña'),
+                _drawerItem(Icons.badge_outlined, 'Fotocheck', null, context),
+                _drawerExpansionTile(context, Icons.menu_book_outlined, 'Académico', [
+                  _drawerItem(Icons.schedule_outlined, 'Horario', null, context),
+                  _drawerItem(Icons.grade_outlined, 'Calificaciones', null, context),
+                ]),
+                _drawerExpansionTile(context, Icons.checklist_outlined, 'Asistencia', [
+                  _drawerItem(Icons.today_outlined, 'Diaria', null, context),
+                  _drawerItem(Icons.assessment_outlined, 'General', null, context),
+                  _drawerItem(Icons.badge_outlined, 'Revisar Fotocheck', null, context),
+                ]),
+                _drawerExpansionTile(context, Icons.forum_outlined, 'Comunicación', [
+                  _drawerItem(Icons.campaign_outlined, 'Comunicados', 1, context),
+                  _drawerItem(Icons.handshake_outlined, 'Reuniones', null, context),
+                  _drawerItem(Icons.calendar_month_outlined, 'Agenda', 2, context),
+                ]),
+                _drawerExpansionTile(context, Icons.attach_money_outlined, 'Tesorería', [
+                  _drawerItem(Icons.account_balance_wallet_outlined, 'Pensiones', null, context),
+                  _drawerItem(Icons.receipt_long_outlined, 'Cuotas', null, context),
+                ]),
                 const Divider(),
                 _drawerItem(Icons.settings_outlined, 'Configuración', null, context),
-                _drawerItem(Icons.help_outline, 'Ayuda', null, context),
-                _drawerItem(Icons.description_outlined, 'Términos y Políticas', null, context),
               ],
             ),
           ),
@@ -115,12 +122,13 @@ class ParentScreen extends StatelessWidget {
     );
   }
 
-  Widget _drawerItem(IconData icon, String label, int? pageIndex, BuildContext context) {
+  Widget _drawerItem(IconData icon, String label, int? pageIndex, BuildContext context, {String? subtitle}) {
     final currentIndex = context.read<ParentBloc>().state.pageIndex;
     final selected = pageIndex != null && currentIndex == pageIndex;
     return ListTile(
       leading: Icon(icon, color: selected ? Theme.of(context).colorScheme.primary : null),
       title: Text(label, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(fontSize: 11, color: context.appColors.textSecondary)) : null,
       selected: selected,
       onTap: () {
         Navigator.pop(context);
@@ -128,6 +136,16 @@ class ParentScreen extends StatelessWidget {
           context.read<ParentBloc>().add(ChangePage(pageIndex: pageIndex));
         }
       },
+    );
+  }
+
+  Widget _drawerExpansionTile(BuildContext context, IconData icon, String title, List<Widget> children) {
+    final c = context.appColors;
+    return ExpansionTile(
+      leading: Icon(icon),
+      title: Text(title, style: TextStyle(color: c.textPrimary)),
+      childrenPadding: const EdgeInsets.only(left: 32),
+      children: children,
     );
   }
 
@@ -163,9 +181,9 @@ class ParentScreen extends StatelessWidget {
         children: [
           _parentCard(context),
           const SizedBox(height: 20),
-          Text('Mis hijos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
+          Text('Accesos rápidos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
           const SizedBox(height: 12),
-          _childrenRow(context),
+          _quickAccessGrid(context),
           const SizedBox(height: 24),
           _summaryCard(context),
           const SizedBox(height: 24),
@@ -195,59 +213,45 @@ class ParentScreen extends StatelessWidget {
     );
   }
 
-  Widget _childrenRow(BuildContext context) {
+  Widget _quickAccessGrid(BuildContext context) {
     final c = context.appColors;
-    final children = [
-      {'name': 'Carlos', 'grade': '5° A', 'icon': Icons.boy},
-      {'name': 'Ana', 'grade': '3° B', 'icon': Icons.girl},
+    final items = [
+      {'icon': Icons.badge_outlined, 'label': 'Fotocheck'},
+      {'icon': Icons.schedule_outlined, 'label': 'Horario'},
+      {'icon': Icons.grade_outlined, 'label': 'Calificaciones'},
+      {'icon': Icons.checklist_outlined, 'label': 'Asistencia'},
+      {'icon': Icons.campaign_outlined, 'label': 'Comunicados'},
+      {'icon': Icons.attach_money_outlined, 'label': 'Tesorería'},
     ];
-    return SizedBox(
-      height: 120,
-      child: Row(
-        children: [
-          for (final child in children) ...[
-            Expanded(
-              child: Card(
-                color: c.surface,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {},
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(child['icon'] as IconData, size: 36, color: c.primary),
-                      const SizedBox(height: 6),
-                      Text(child['name'] as String, style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
-                      Text(child['grade'] as String, style: TextStyle(fontSize: 12, color: c.textSecondary)),
-                    ],
-                  ),
-                ),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 0.9,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: items.length,
+      itemBuilder: (_, i) => Card(
+        color: c.surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {},
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(items[i]['icon'] as IconData, size: 32, color: c.primary),
+              const SizedBox(height: 8),
+              Text(items[i]['label'] as String,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: c.textPrimary),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: Card(
-              color: c.surface,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {},
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_circle_outline, size: 36, color: c.textSecondary),
-                    const SizedBox(height: 6),
-                    Text('Agregar', style: TextStyle(fontSize: 12, color: c.textSecondary)),
-                  ],
-                ),
-              ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -267,7 +271,7 @@ class ParentScreen extends StatelessWidget {
               children: [
                 Icon(Icons.analytics_outlined, color: c.primary),
                 const SizedBox(width: 8),
-                Text('Resumen general', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.textPrimary)),
+                Text('Resumen', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.textPrimary)),
               ],
             ),
             const SizedBox(height: 16),
