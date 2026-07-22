@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logging/logging.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/core/themes/theme_cubit.dart';
@@ -10,8 +9,6 @@ import 'package:coleapp/features/auth/presentation/bloc/login_event.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_state.dart';
 import 'package:coleapp/injection.dart';
 import 'package:coleapp/shared/widgets/default_texfield.dart';
-
-final _log = Logger('LOGIN');
 
 class LoginContent extends StatefulWidget {
   const LoginContent({super.key});
@@ -36,7 +33,6 @@ class _LoginContentState extends State<LoginContent> {
   @override
   void initState() {
     super.initState();
-    _log.info('initState()');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LoginBloc>().add(LoadSavedData());
     });
@@ -178,14 +174,13 @@ class _LoginContentState extends State<LoginContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('USUARIO', style: TextStyle(fontSize: 14, color: c.textPrimary)),
+                Text('Usuario', style: TextStyle(fontSize: 14, color: c.textPrimary)),
                 const SizedBox(height: 6),
                 TextFormField(
                   key: ValueKey('user_$_formKeyCounter'),
                   initialValue: _usernameInit,
                   keyboardType: TextInputType.number,
                   onChanged: (v) {
-                    _log.info('username -> "$v"');
                     context.read<LoginBloc>().add(UsernameChanged(v));
                   },
                   validator: (v) {
@@ -236,7 +231,7 @@ class _LoginContentState extends State<LoginContent> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('CONTRASEÑA', style: TextStyle(fontSize: 14,  color: c.textPrimary)),
+                    Text('Contraseña', style: TextStyle(fontSize: 14,  color: c.textPrimary)),
                     GestureDetector(
                       onTap: () {},
                       child: Text('¿Olvidaste tu contraseña?',
@@ -251,7 +246,6 @@ class _LoginContentState extends State<LoginContent> {
                   initialValue: _passwordInit,
                   obscureText: _obscurePass,
                   onChanged: (v) {
-                    _log.info('password -> "$v"');
                     context.read<LoginBloc>().add(PasswordChanged(v));
                   },
                   validator: (v) =>
@@ -351,7 +345,6 @@ class _LoginContentState extends State<LoginContent> {
   }
 
   void _showTenantDialog() async {
-    _log.info('Abriendo diálogo de tenant');
     await showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -381,17 +374,14 @@ class _LoginContentState extends State<LoginContent> {
   Future<void> _saveTenant(String tenant) async {
     final storage = locator<AuthLocalStorage>();
     await storage.save('tenant', tenant);
-    _log.info('Tenant guardado: $tenant');
   }
 
   Future<void> _removeTenant() async {
     final storage = locator<AuthLocalStorage>();
     await storage.remove('tenant');
-    _log.info('Tenant eliminado');
   }
 
   void _showTutorial() {
-    _log.info('Mostrando tutorial coach mark');
     _tutorial = TutorialCoachMark(
       targets: [
         TargetFocus(
@@ -420,6 +410,8 @@ class _LoginContentState extends State<LoginContent> {
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                
                     ),
                   ),
                 ],
@@ -439,10 +431,9 @@ class _LoginContentState extends State<LoginContent> {
         _showTenantDialog();
       },
       onSkip: () {
-        _log.info('Tutorial saltado');
         return true;
       },
-      onFinish: () => _log.info('Tutorial completado'),
+      onFinish: () => {},
     );
     _tutorial!.show(context: context);
   }
@@ -459,7 +450,6 @@ class _LoginContentState extends State<LoginContent> {
       child: ElevatedButton(
         onPressed: () {
           if (_tenant.isEmpty) {
-            _log.warning('Intento de login sin tenant');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('Configura tu colegio primero'),
@@ -477,10 +467,8 @@ class _LoginContentState extends State<LoginContent> {
             return;
           }
           if (!_formKey.currentState!.validate()) {
-            _log.warning('Validación local falló');
             return;
           }
-          _log.info('Botón presionado -> LoginSubmit');
           context.read<LoginBloc>().add(LoginSubmit());
         },
         style: ElevatedButton.styleFrom(
