@@ -1,14 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 class TeacherState extends Equatable {
-  final int pageIndex;
-
-  const TeacherState({this.pageIndex = 0});
-
-  TeacherState copyWith({int? pageIndex}) {
-    return TeacherState(pageIndex: pageIndex ?? this.pageIndex);
-  }
+  const TeacherState();
 
   @override
-  List<Object?> get props => [pageIndex];
+  List<Object?> get props => [];
 }

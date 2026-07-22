@@ -7,13 +7,8 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
   final AuthUseCases authUseCases;
 
   ParentBloc(this.authUseCases) : super(const ParentState()) {
-    on<ChangeDrawerPage>((event, emit) {
-      emit(state.copyWith(pageIndex: event.pageIndex));
-    });
-
     on<Logout>((event, emit) async {
       await authUseCases.logoutUseCase.call();
-      emit(state.copyWith(pageIndex: 0));
     });
   }
 }

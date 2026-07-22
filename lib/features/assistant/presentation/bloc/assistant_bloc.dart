@@ -7,13 +7,8 @@ class AssistantBloc extends Bloc<AssistantEvent, AssistantState> {
   final AuthUseCases authUseCases;
 
   AssistantBloc(this.authUseCases) : super(const AssistantState()) {
-    on<ChangeDrawerPage>((event, emit) {
-      emit(state.copyWith(pageIndex: event.pageIndex));
-    });
-
     on<Logout>((event, emit) async {
       await authUseCases.logoutUseCase.call();
-      emit(state.copyWith(pageIndex: 0));
     });
   }
 }

@@ -1,14 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 class PromoterState extends Equatable {
-  final int pageIndex;
-
-  const PromoterState({this.pageIndex = 0});
-
-  PromoterState copyWith({int? pageIndex}) {
-    return PromoterState(pageIndex: pageIndex ?? this.pageIndex);
-  }
+  const PromoterState();
 
   @override
-  List<Object?> get props => [pageIndex];
+  List<Object?> get props => [];
 }

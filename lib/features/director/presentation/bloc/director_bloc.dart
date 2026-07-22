@@ -7,13 +7,8 @@ class DirectorBloc extends Bloc<DirectorEvent, DirectorState> {
   final AuthUseCases authUseCases;
 
   DirectorBloc(this.authUseCases) : super(const DirectorState()) {
-    on<ChangeDrawerPage>((event, emit) {
-      emit(state.copyWith(pageIndex: event.pageIndex));
-    });
-
     on<Logout>((event, emit) async {
       await authUseCases.logoutUseCase.call();
-      emit(state.copyWith(pageIndex: 0));
     });
   }
 }

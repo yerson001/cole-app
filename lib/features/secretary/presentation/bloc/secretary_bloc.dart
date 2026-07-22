@@ -7,13 +7,8 @@ class SecretaryBloc extends Bloc<SecretaryEvent, SecretaryState> {
   final AuthUseCases authUseCases;
 
   SecretaryBloc(this.authUseCases) : super(const SecretaryState()) {
-    on<ChangeDrawerPage>((event, emit) {
-      emit(state.copyWith(pageIndex: event.pageIndex));
-    });
-
     on<Logout>((event, emit) async {
       await authUseCases.logoutUseCase.call();
-      emit(state.copyWith(pageIndex: 0));
     });
   }
 }

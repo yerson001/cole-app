@@ -7,13 +7,8 @@ class TeacherBloc extends Bloc<TeacherEvent, TeacherState> {
   final AuthUseCases authUseCases;
 
   TeacherBloc(this.authUseCases) : super(const TeacherState()) {
-    on<ChangeDrawerPage>((event, emit) {
-      emit(state.copyWith(pageIndex: event.pageIndex));
-    });
-
     on<Logout>((event, emit) async {
       await authUseCases.logoutUseCase.call();
-      emit(state.copyWith(pageIndex: 0));
     });
   }
 }
