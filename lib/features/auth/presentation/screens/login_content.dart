@@ -223,7 +223,18 @@ class _LoginContentState extends State<LoginContent> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text('Contraseña', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Contraseña', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary)),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Text('¿Olvidaste tu contraseña?',
+                        style: TextStyle(fontSize: 13, color: c.primary, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 6),
                 TextFormField(
                   key: ValueKey('pass_$_formKeyCounter'),
@@ -276,17 +287,7 @@ class _LoginContentState extends State<LoginContent> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text('¿Olvidaste tu contraseña?',
-                      style: TextStyle(fontSize: 13, color: c.primary, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     SizedBox(
@@ -312,7 +313,7 @@ class _LoginContentState extends State<LoginContent> {
                               setState(() => _remember = newVal);
                               context.read<LoginBloc>().add(RememberMeChanged(newVal));
                             },
-                      child: Text('Recordar mi sesión',
+                      child: Text('Recordar contraseña',
                         style: TextStyle(fontSize: 14, color: c.textSecondary),
                       ),
                     ),
@@ -508,32 +509,34 @@ class _LoginContentState extends State<LoginContent> {
     final c = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
+      child: Row(
         children: [
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: Icon(Icons.business, color: c.primary, size: 20),
-              label: Text('Institución Educativa', style: TextStyle(color: c.textPrimary, fontSize: 14)),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: c.border),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          Expanded(
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () {},
+                icon: Icon(Icons.business, color: c.primary, size: 20),
+                label: Text('Institución', style: TextStyle(color: c.textPrimary, fontSize: 13)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: c.border),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: () {},
-              icon: Icon(Icons.g_mobiledata, color: const Color(0xFF4285F4), size: 24),
-              label: Text('Acceder con Google', style: TextStyle(color: c.textPrimary, fontSize: 14)),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: c.border),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () {},
+                icon: Icon(Icons.g_mobiledata, color: const Color(0xFF4285F4), size: 24),
+                label: Text('Google', style: TextStyle(color: c.textPrimary, fontSize: 13)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: c.border),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
               ),
             ),
           ),
@@ -547,48 +550,13 @@ class _LoginContentState extends State<LoginContent> {
     return Column(
       children: [
         Text(
-          '© 2026 Colecheck App',
+          '© 2026 Colecheck App . Colecheck SAC',
           style: TextStyle(fontSize: 12, color: c.textSecondary),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
-          'Colecheck SAC',
-          style: TextStyle(
-            fontSize: 12,
-            color: c.textSecondary.withValues(alpha: 0.7),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: () => _log.info('Políticas de privacidad'),
-              child: Text(
-                'Políticas de privacidad',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: c.primary,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-            Text(
-              '  ·  ',
-              style: TextStyle(fontSize: 12, color: c.textSecondary),
-            ),
-            GestureDetector(
-              onTap: () => _log.info('Términos de uso'),
-              child: Text(
-                'Términos de uso',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: c.primary,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ],
+          'Términos de uso - Políticas de privacidad',
+          style: TextStyle(fontSize: 12, color: c.textSecondary),
         ),
       ],
     );
