@@ -9,7 +9,7 @@ class DefaultTexfield extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final String? Function(String?)? validator;
   final bool isPassword;
-  final Color background;
+  final Color? background;
   final Widget? suffixIcon;
   final TextInputType keyboardType;
   final TextEditingController? controller;
@@ -22,7 +22,7 @@ class DefaultTexfield extends StatelessWidget {
     this.margin = const EdgeInsets.only(top: 20, left: 20, right: 20),
     this.validator,
     this.isPassword = false,
-    this.background = AppColors.fill,
+    this.background,
     this.initialValue,
     this.suffixIcon,
     this.keyboardType = TextInputType.text,
@@ -31,6 +31,7 @@ class DefaultTexfield extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Container(
       margin: margin,
       child: TextFormField(
@@ -40,56 +41,56 @@ class DefaultTexfield extends StatelessWidget {
         validator: validator,
         obscureText: isPassword,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+        style: TextStyle(fontSize: 14, color: c.textPrimary),
         decoration: InputDecoration(
           filled: true,
-          fillColor: background,
+          fillColor: background ?? c.fill,
           contentPadding: const EdgeInsets.symmetric(
             vertical: 12,
             horizontal: 16,
           ),
           border: OutlineInputBorder(
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: c.border),
             borderRadius: BorderRadius.circular(10),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(
-              color: AppColors.primary,
+            borderSide: BorderSide(
+              color: c.inputFocused,
               width: 2,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(
-              color: AppColors.border,
+            borderSide: BorderSide(
+              color: c.border,
               width: 1.0,
             ),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(
-              color: AppColors.error,
+            borderSide: BorderSide(
+              color: c.inputError,
               width: 1.0,
             ),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(
-              color: AppColors.error,
+            borderSide: BorderSide(
+              color: c.inputError,
               width: 2.0,
             ),
           ),
           labelText: text,
-          labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-          errorStyle: const TextStyle(color: AppColors.error),
+          labelStyle: TextStyle(color: c.inputLabel, fontSize: 14),
+          errorStyle: TextStyle(color: c.error),
           prefixIcon: Container(
             margin: const EdgeInsets.only(top: 10),
             child: Wrap(
               alignment: WrapAlignment.spaceEvenly,
               children: [
-                Icon(icon, color: AppColors.primary),
-                Container(height: 20, width: 1, color: AppColors.border),
+                Icon(icon, color: c.primary),
+                Container(height: 20, width: 1, color: c.border),
               ],
             ),
           ),

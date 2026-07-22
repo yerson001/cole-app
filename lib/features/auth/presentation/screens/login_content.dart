@@ -58,6 +58,7 @@ class _LoginContentState extends State<LoginContent> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return BlocListener<LoginBloc, LoginState>(
       listenWhen: (prev, current) =>
           prev.tenant != current.tenant ||
@@ -85,11 +86,11 @@ class _LoginContentState extends State<LoginContent> {
                 _buildLogo(),
                 const SizedBox(height: 20),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'Inicia sesión para continuar',
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: c.textSecondary,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -108,6 +109,7 @@ class _LoginContentState extends State<LoginContent> {
   }
 
   Widget _buildTopBar() {
+    final c = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -121,10 +123,10 @@ class _LoginContentState extends State<LoginContent> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                    color: c.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Icon(cubit.icon, size: 20, color: Theme.of(context).colorScheme.primary),
+                  child: Icon(cubit.icon, size: 20, color: c.primary),
                 ),
               );
             },
@@ -138,23 +140,17 @@ class _LoginContentState extends State<LoginContent> {
                   key: _tenantKey,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
+                    color: c.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(
-                    Icons.business,
-                    size: 20,
-                    color: AppColors.primary,
-                  ),
+                  child: Icon(Icons.business, size: 20, color: c.primary),
                 ),
                 const SizedBox(height: 4),
                 Container(
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _tenant.isNotEmpty
-                        ? AppColors.success
-                        : AppColors.error,
+                    color: _tenant.isNotEmpty ? c.success : c.error,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -167,6 +163,7 @@ class _LoginContentState extends State<LoginContent> {
   }
 
   Widget _buildFormSection() {
+    final c = context.appColors;
     final disabled = _tenant.isEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -214,7 +211,7 @@ class _LoginContentState extends State<LoginContent> {
                     child: IconButton(
                       icon: Icon(
                         _obscurePass ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: AppColors.textSecondary,
+                        color: c.textSecondary,
                         size: 20,
                       ),
                       onPressed: () => setState(() => _obscurePass = !_obscurePass),
@@ -233,7 +230,7 @@ class _LoginContentState extends State<LoginContent> {
                         width: 40,
                         child: Checkbox(
                           value: _remember,
-                          activeColor: AppColors.primary,
+                          activeColor: c.primary,
                           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           onChanged: disabled
                               ? null
@@ -251,9 +248,9 @@ class _LoginContentState extends State<LoginContent> {
                                 setState(() => _remember = newVal);
                                 context.read<LoginBloc>().add(RememberMeChanged(newVal));
                               },
-                        child: const Text(
+                        child: Text(
                           'Recordar contraseña',
-                          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 14, color: c.textSecondary),
                         ),
                       ),
                     ],
@@ -382,10 +379,11 @@ class _LoginContentState extends State<LoginContent> {
   }
 
   Widget _buildButton() {
+    final c = context.appColors;
     return DefauldOnboardButton(
       text: 'Iniciar sesión',
-      color: AppColors.primary,
-      textColor: Colors.white,
+      color: c.buttonPrimary,
+      textColor: c.buttonPrimaryText,
       margin: EdgeInsets.zero,
       cBorder: 0,
       onPressed: () {
@@ -418,18 +416,19 @@ class _LoginContentState extends State<LoginContent> {
   }
 
   Widget _buildFooter() {
+    final c = context.appColors;
     return Column(
       children: [
-        const Text(
+        Text(
           '© 2026 Colecheck App',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: c.textSecondary),
         ),
         const SizedBox(height: 4),
         Text(
           'Colecheck SAC',
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.textSecondary.withValues(alpha: 0.7),
+            color: c.textSecondary.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 12),
@@ -438,26 +437,26 @@ class _LoginContentState extends State<LoginContent> {
           children: [
             GestureDetector(
               onTap: () => _log.info('Políticas de privacidad'),
-              child: const Text(
+              child: Text(
                 'Políticas de privacidad',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.primary,
+                  color: c.primary,
                   decoration: TextDecoration.underline,
                 ),
               ),
             ),
-            const Text(
+            Text(
               '  ·  ',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: c.textSecondary),
             ),
             GestureDetector(
               onTap: () => _log.info('Términos de uso'),
-              child: const Text(
+              child: Text(
                 'Términos de uso',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.primary,
+                  color: c.primary,
                   decoration: TextDecoration.underline,
                 ),
               ),
@@ -501,6 +500,7 @@ class _TenantSheetState extends State<_TenantSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       child: Column(
@@ -511,12 +511,12 @@ class _TenantSheetState extends State<_TenantSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const SizedBox(width: 24),
-              const Text(
+              Text(
                 'Encuentra tu colegio',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: c.textPrimary),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 24),
+                icon: Icon(Icons.close, color: c.textSecondary, size: 24),
                 onPressed: () => Navigator.pop(context),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -524,11 +524,11 @@ class _TenantSheetState extends State<_TenantSheet> {
             ],
           ),
           const SizedBox(height: 4),
-          const Padding(
-            padding: EdgeInsets.only(left: 24),
+          Padding(
+            padding: const EdgeInsets.only(left: 24),
             child: Text(
               'Ingresa el código de la Insitución Educativa',
-              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 14, color: c.textSecondary),
             ),
           ),
           const SizedBox(height: 20),
@@ -549,16 +549,16 @@ class _TenantSheetState extends State<_TenantSheet> {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: c.buttonPrimary,
+                foregroundColor: c.buttonPrimaryText,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Guardar',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: c.buttonPrimaryText),
               ),
             ),
           ),
@@ -574,15 +574,15 @@ class _TenantSheetState extends State<_TenantSheet> {
                   Navigator.pop(context);
                 },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
+                  foregroundColor: c.error,
+                  side: BorderSide(color: c.error),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Limpiar',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: c.error),
                 ),
               ),
             ),
