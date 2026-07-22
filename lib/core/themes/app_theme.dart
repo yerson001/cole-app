@@ -26,8 +26,10 @@ class AppTheme {
       brightness: Brightness.dark,
     ),
     extensions: [AppColors.dark],
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       centerTitle: true,
+      backgroundColor: AppColors.dark.surface,
+      foregroundColor: AppColors.dark.textPrimary,
     ),
     scaffoldBackgroundColor: AppColors.dark.background,
   );
