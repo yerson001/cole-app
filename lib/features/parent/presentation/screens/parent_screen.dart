@@ -38,31 +38,29 @@ class ParentScreen extends StatelessWidget {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    final c = context.appColors;
     return AppBar(
       leading: Builder(
         builder: (ctx) => IconButton(
-          icon: Icon(Icons.menu, color: c.buttonPrimaryText),
+          icon: const Icon(Icons.menu),
           onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
-      title: Text('Padre', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: c.buttonPrimaryText)),
+      title: const Text('Padre', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       centerTitle: true,
-      backgroundColor: c.primary,
       actions: [
         IconButton(
-          icon: Badge(
-            label: const Text('3'),
-            child: Icon(Icons.notifications_outlined, color: c.buttonPrimaryText),
+          icon: const Badge(
+            label: Text('3'),
+            child: Icon(Icons.notifications_outlined),
           ),
           onPressed: () {},
         ),
         IconButton(
-          icon: Icon(Icons.settings_outlined, color: c.buttonPrimaryText),
+          icon: const Icon(Icons.settings_outlined),
           onPressed: () {},
         ),
         IconButton(
-          icon: Icon(Icons.person_outline, color: c.buttonPrimaryText),
+          icon: const Icon(Icons.person_outline),
           onPressed: () {},
         ),
       ],

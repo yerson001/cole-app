@@ -11,6 +11,7 @@ App móvil de Colecheck — gestión educativa para padres, auxiliares, profesor
 | SECRETARY (Secretaria) | Secretaria Guillermo | `00260005` | `SE00GU260005` |
 | ASSISTANT (Auxiliar) | Auxiliar Guillermo | `00260010` | `AU00GU260010` |
 | TEACHER (Profesor) | Yhon Yerson Sanchez Yucra | `66392825` | `YH66SA392825` |
+| PARENT (Padre)| padre de familira   | `00441904` | `FE00RO441904`|
 
 ### API → Mapeo de roles
 

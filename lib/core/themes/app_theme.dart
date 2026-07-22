@@ -10,10 +10,12 @@ class AppTheme {
       brightness: Brightness.light,
     ),
     extensions: [AppColors.light],
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF225BAA),
-      foregroundColor: Colors.white,
+    appBarTheme: AppBarTheme(
+      backgroundColor: AppColors.light.surface,
+      foregroundColor: AppColors.light.textPrimary,
       centerTitle: true,
+      elevation: 0,
+      scrolledUnderElevation: 1,
     ),
     scaffoldBackgroundColor: AppColors.light.background,
   );
