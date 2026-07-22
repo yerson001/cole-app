@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:coleapp/features/splash/presentation/bloc/splash_event.dart';
 import 'package:coleapp/features/splash/presentation/bloc/splash_state.dart';
@@ -86,6 +87,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
         if (state is SplashSessionFound) {
@@ -104,11 +107,11 @@ class _SplashScreenState extends State<SplashScreen>
       },
       child: Scaffold(
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.white, Color(0xFFF5F5F5)],
+              colors: [bgColor, c.surface],
             ),
           ),
           child: Center(
@@ -157,7 +160,7 @@ class _SplashScreenState extends State<SplashScreen>
                       'Control Inteligente',
                       style: TextStyle(
                         fontSize: 16,
-                        color: const Color(0xFF003366).withValues(alpha: 0.85),
+                        color: c.primary.withValues(alpha: 0.85),
                         letterSpacing: 1.2,
                       ),
                     ),
@@ -172,20 +175,20 @@ class _SplashScreenState extends State<SplashScreen>
                       'en la Gestión Educativa',
                       style: TextStyle(
                         fontSize: 14,
-                        color: const Color(0xFF003366).withValues(alpha: 0.6),
+                        color: c.primary.withValues(alpha: 0.6),
                         letterSpacing: 0.8,
                       ),
                     ),
                   ),
                 ),
                 const Spacer(flex: 1),
-                const _DotSpinner(),
+                _DotSpinner(color: c.primary),
                 const SizedBox(height: 16),
                 Text(
                   'v0.2.0',
                   style: TextStyle(
                     fontSize: 12,
-                    color: const Color(0xFF003366).withValues(alpha: 0.3),
+                    color: c.primary.withValues(alpha: 0.3),
                   ),
                 ),
                 const Spacer(flex: 1),
@@ -199,7 +202,8 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 class _DotSpinner extends StatefulWidget {
-  const _DotSpinner();
+  final Color color;
+  const _DotSpinner({required this.color});
 
   @override
   State<_DotSpinner> createState() => _DotSpinnerState();
@@ -241,7 +245,7 @@ class _DotSpinnerState extends State<_DotSpinner>
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: Opacity(
               opacity: value,
-              child: const Icon(Icons.circle, size: 10, color: Color(0xFF4CAF50)),
+              child: Icon(Icons.circle, size: 10, color: widget.color),
             ),
           );
         }),
