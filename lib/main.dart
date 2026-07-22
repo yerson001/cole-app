@@ -89,5 +89,8 @@ class ColecheckApp extends StatelessWidget {
           mainLog.info('Ruta: login');
           return const LoginPage();
         },
-
+Listo. En modo oscuro ahora:
+- Fondo (#1F1F1F) → scaffold, body
+- Top bar / inputs / tarjetas (#24292D) → AppBar, inputs, cards
+- Primary / íconos (#225BAA) → íconos, acentos, botones principales
  */
