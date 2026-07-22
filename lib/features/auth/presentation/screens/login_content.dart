@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
+import 'package:coleapp/core/themes/theme_cubit.dart';
 import 'package:coleapp/features/auth/data/datasource/local/auth_local_storage.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_event.dart';
@@ -74,7 +75,7 @@ class _LoginContentState extends State<LoginContent> {
         if (mounted) setState(() => _remember = state.rememberMe);
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -110,8 +111,24 @@ class _LoginContentState extends State<LoginContent> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, themeMode) {
+              final cubit = context.read<ThemeCubit>();
+              return GestureDetector(
+                onTap: () => cubit.cycle(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(cubit.icon, size: 20, color: Theme.of(context).colorScheme.primary),
+                ),
+              );
+            },
+          ),
           GestureDetector(
             onTap: _showTenantDialog,
             child: Column(
