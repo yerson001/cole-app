@@ -57,7 +57,7 @@ class DefaultTexfield extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
               color: c.inputFocused,
-              width: 2,
+              width: 1,
             ),
           ),
           enabledBorder: OutlineInputBorder(
@@ -71,14 +71,14 @@ class DefaultTexfield extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
               color: c.inputError,
-              width: 1.0,
+              width: 0.5,
             ),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
               color: c.inputError,
-              width: 2.0,
+              width: 0.5,
             ),
           ),
           labelText: text,
