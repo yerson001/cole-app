@@ -34,4 +34,6 @@ class SaveSession extends LoginEvent {
   SaveSession(this.authResponse, this.rememberMe);
 }
 
+class ResetLogin extends LoginEvent {}
+
 

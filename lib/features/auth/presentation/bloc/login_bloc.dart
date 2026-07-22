@@ -143,5 +143,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       );
       _log.info('Sesión guardada');
     });
+
+    on<ResetLogin>((event, emit) {
+      _log.info('ResetLogin');
+      emit(state.copyWith(response: null));
+    });
   }
 }

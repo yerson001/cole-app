@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:coleapp/features/auth/presentation/bloc/login_bloc.dart';
+import 'package:coleapp/features/auth/presentation/bloc/login_event.dart';
 import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 import 'package:coleapp/features/secretary/presentation/bloc/secretary_bloc.dart';
 import 'package:coleapp/features/secretary/presentation/bloc/secretary_event.dart';
@@ -29,6 +31,7 @@ class SecretaryScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.small(
         onPressed: () {
           context.read<SecretaryBloc>().add(Logout());
+          context.read<LoginBloc>().add(ResetLogin());
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const LoginPage()),
             (route) => false,
