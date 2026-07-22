@@ -6,12 +6,12 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF003366),
+      seedColor: const Color(0xFF225BAA),
       brightness: Brightness.light,
     ),
     extensions: [AppColors.light],
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF003366),
+      backgroundColor: Color(0xFF225BAA),
       foregroundColor: Colors.white,
       centerTitle: true,
     ),
@@ -22,7 +22,7 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF003366),
+      seedColor: const Color(0xFF225BAA),
       brightness: Brightness.dark,
     ),
     extensions: [AppColors.dark],
