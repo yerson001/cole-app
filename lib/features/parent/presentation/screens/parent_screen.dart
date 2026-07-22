@@ -49,10 +49,22 @@ class ParentScreen extends StatelessWidget {
       centerTitle: true,
       actions: [
         IconButton(
+          icon: const Icon(Icons.calendar_month_outlined),
+          onPressed: () {},
+        ),
+        IconButton(
           icon: const Badge(
             label: Text('3'),
             child: Icon(Icons.notifications_outlined),
           ),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.person_outline),
           onPressed: () {},
         ),
       ],
@@ -179,36 +191,16 @@ class ParentScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _parentCard(context),
-          const SizedBox(height: 20),
-          Text('Accesos rápidos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
-          const SizedBox(height: 12),
           _quickAccessGrid(context),
           const SizedBox(height: 24),
-          _summaryCard(context),
+          _attendanceSection(context),
           const SizedBox(height: 24),
           Text('Últimos comunicados', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
           const SizedBox(height: 12),
           _communicationList(context),
+          const SizedBox(height: 24),
+          _summaryCard(context),
         ],
-      ),
-    );
-  }
-
-  Widget _parentCard(BuildContext context) {
-    final c = context.appColors;
-    return Card(
-      color: c.surface,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: c.primaryLight.withValues(alpha: 0.2),
-          child: Icon(Icons.person, color: c.primary),
-        ),
-        title: Text('Juan Pérez', style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
-        subtitle: Text('juan.perez@email.com', style: TextStyle(color: c.textSecondary)),
-        trailing: Icon(Icons.edit_outlined, color: c.textSecondary, size: 20),
       ),
     );
   }
@@ -235,8 +227,12 @@ class ParentScreen extends StatelessWidget {
       itemCount: items.length,
       itemBuilder: (_, i) => Card(
         color: c.surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 1,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: c.border, width: 0.5),
+        ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {},
@@ -256,12 +252,108 @@ class ParentScreen extends StatelessWidget {
     );
   }
 
+  Widget _attendanceSection(BuildContext context) {
+    final c = context.appColors;
+    final students = [
+      {'name': 'Carlos', 'grade': '5° A', 'entry': '07:45', 'exit': '14:30'},
+      {'name': 'Ana', 'grade': '3° B', 'entry': '07:50', 'exit': null},
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.check_circle_outline, color: c.success, size: 22),
+            const SizedBox(width: 8),
+            Text('Asistencia hoy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 130,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: students.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (_, i) {
+              final s = students[i];
+              final exit = s['exit'];
+              final hasExit = exit != null;
+              return Card(
+                color: c.surface,
+                elevation: 1,
+                surfaceTintColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: c.border, width: 0.5),
+                ),
+                child: Container(
+                  width: 170,
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: c.successLight.withValues(alpha: 0.3),
+                            child: Icon(Icons.person, size: 18, color: c.success),
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(s['name'] as String, style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
+                              Text(s['grade'] as String, style: TextStyle(fontSize: 11, color: c.textSecondary)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Icon(Icons.login, size: 16, color: c.success),
+                          const SizedBox(width: 4),
+                          Text('Entrada:', style: TextStyle(fontSize: 11, color: c.textSecondary)),
+                          const Spacer(),
+                          Text(s['entry'] as String, style: TextStyle(fontWeight: FontWeight.w700, color: c.textPrimary)),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.logout, size: 16, color: hasExit ? c.success : c.textDisabled),
+                          const SizedBox(width: 4),
+                          Text('Salida:', style: TextStyle(fontSize: 11, color: c.textSecondary)),
+                          const Spacer(),
+                          Text(hasExit ? exit : '--:--', style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: hasExit ? c.textPrimary : c.textDisabled,
+                          )),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _summaryCard(BuildContext context) {
     final c = context.appColors;
     return Card(
       color: c.surface,
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 1,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: c.border, width: 0.5),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -308,8 +400,12 @@ class ParentScreen extends StatelessWidget {
     return Column(
       children: communications.map((com) => Card(
         color: c.surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 1,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: c.border, width: 0.5),
+        ),
         child: ListTile(
           leading: CircleAvatar(
             backgroundColor: c.primaryLight.withValues(alpha: 0.2),
