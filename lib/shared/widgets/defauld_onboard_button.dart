@@ -21,6 +21,7 @@ class DefauldOnboardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
     return Container(
       width: double.infinity,
       margin: margin,
@@ -29,7 +30,7 @@ class DefauldOnboardButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           side: cBorder > 0
               ? BorderSide(
-                  color: AppColors.border,
+                  color: c.border,
                   width: cBorder,
                 )
               : BorderSide.none,

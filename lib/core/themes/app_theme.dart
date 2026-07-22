@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 
 class AppTheme {
   static ThemeData get light => ThemeData(
@@ -8,12 +9,13 @@ class AppTheme {
       seedColor: const Color(0xFF003366),
       brightness: Brightness.light,
     ),
+    extensions: [AppColors.light],
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF003366),
       foregroundColor: Colors.white,
       centerTitle: true,
     ),
-    scaffoldBackgroundColor: const Color(0xFFFCFCFA),
+    scaffoldBackgroundColor: AppColors.light.background,
   );
 
   static ThemeData get dark => ThemeData(
@@ -23,9 +25,10 @@ class AppTheme {
       seedColor: const Color(0xFF003366),
       brightness: Brightness.dark,
     ),
+    extensions: [AppColors.dark],
     appBarTheme: const AppBarTheme(
       centerTitle: true,
     ),
-    scaffoldBackgroundColor: const Color(0xFF121212),
+    scaffoldBackgroundColor: AppColors.dark.background,
   );
 }
