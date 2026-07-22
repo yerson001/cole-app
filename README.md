@@ -4,14 +4,26 @@ App móvil de Colecheck — gestión educativa para padres, auxiliares, profesor
 
 ## Credenciales de prueba (tenant: `ie-guillermo`)
 
-| Rol | Nombre | Usuario | Contraseña |
-|-----|--------|---------|------------|
-| PRINCIPAL (Director) | Percy Huillca G | `00260004` | `PE00HU260004` |
-| PROMOTER | Percy Huillca | `00260001` | `PE00HU260001` |
-| SECRETARY (Secretaria) | Secretaria Guillermo | `00260005` | `SE00GU260005` |
-| ASSISTANT (Auxiliar) | Auxiliar Guillermo | `00260010` | `AU00GU260010` |
-| TEACHER (Profesor) | Yhon Yerson Sanchez Yucra | `66392825` | `YH66SA392825` |
-| PARENT (Padre)| padre de familira   | `00441904` | `FE00RO441904`|
+### Fórmula de contraseña
+
+```
+2 primeras letras del nombre (MAYÚS) + 2 primeros dígitos del DNI + 2 primeras letras del apellido (MAYÚS) + resto del DNI
+```
+
+Ejemplo: **Yerson Sanchez** (DNI: 77392825) → `YE` + `77` + `SA` + `392825` = `YE77SA392825`
+
+### Cuentas
+
+| Rol | Nombre | Usuario (DNI) | Contraseña |
+|-----|--------|---------------|------------|
+| ADMIN (Director) | Yerson Sanchez | `77392825` | `YE77SA392825` |
+| PROMOTER | Promotor Prueba | `12345678` | `PR12PR345678` |
+| TEACHER (Profesor) | CELESTINO MEDINA | `77777777` | `CE77ME777777` |
+| ASSISTANT (Auxiliar) | PEDRO PEREZ | `44444444` | `PE44PE444444` |
+| ASSISTANT (Auxiliar) | AUXILIAR TEST | `33333333` | `AU33TE333333` |
+| PARENT (Padre) | JEAN SALAZAR | `11111111` | `JE11SA111111` |
+| PARENT (Padre) | MARCK LIPA | `22222222` | `MA22LI222222` |
+| PARENT (Padre) | PEDRO PEREZ | `44444444` | `PE44PE444444` |
 
 ### API → Mapeo de roles
 
