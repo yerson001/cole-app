@@ -81,16 +81,15 @@ class _LoginContentState extends State<LoginContent> {
             child: Column(
               children: [
                 _buildTopBar(),
-                const SizedBox(height: 40),
                 _buildLogo(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 Text(
                   'Bienvenido a Colecheck',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: c.textPrimary),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Inicia sesión',
+                  'Inicia sesión par continuar',
                   style: TextStyle(fontSize: 14, color: c.textSecondary),
                 ),
                 const SizedBox(height: 8),
@@ -179,7 +178,7 @@ class _LoginContentState extends State<LoginContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Usuario', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary)),
+                Text('USUARIO', style: TextStyle(fontSize: 14, color: c.textPrimary)),
                 const SizedBox(height: 6),
                 TextFormField(
                   key: ValueKey('user_$_formKeyCounter'),
@@ -237,7 +236,7 @@ class _LoginContentState extends State<LoginContent> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Contraseña', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c.textPrimary)),
+                    Text('CONTRASEÑA', style: TextStyle(fontSize: 14,  color: c.textPrimary)),
                     GestureDetector(
                       onTap: () {},
                       child: Text('¿Olvidaste tu contraseña?',
