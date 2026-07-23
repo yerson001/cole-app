@@ -220,9 +220,8 @@ class ParentScreen extends StatelessWidget {
       {'icon': Icons.badge_outlined, 'label': 'Fotocheck'},
       {'icon': Icons.schedule_outlined, 'label': 'Horario'},
       {'icon': Icons.grade_outlined, 'label': 'Calificaciones'},
-      {'icon': Icons.checklist_outlined, 'label': 'Asistencia'},
-      {'icon': Icons.campaign_outlined, 'label': 'Comunicados'},
-      {'icon': Icons.attach_money_outlined, 'label': 'Tesorería'},
+      {'icon': Icons.account_balance_outlined, 'label': 'Pensiones'},
+      {'icon': Icons.payments_outlined, 'label': 'Cuotas'},
     ];
     return GridView.builder(
       shrinkWrap: true,
