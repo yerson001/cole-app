@@ -77,68 +77,69 @@ class ParentScreen extends StatelessWidget {
     final currentIdx = context.read<ParentBloc>().state.pageIndex;
     final themeCubit = context.read<ThemeCubit>();
     return Drawer(
-      width: 256,
       child: Column(
         children: [
           Container(
-            width: 256,
-            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 16, bottom: 24, left: 20, right: 20),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: c.border.withValues(alpha: 0.3))),
-            ),
-            child: Image.asset('assets/images/check.png', height: 30, fit: BoxFit.contain),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(12),
-              children: [
-                _groupHeader(context, 'PRINCIPAL'),
-                _navItem(context, Icons.home_outlined, 'Inicio', 0, currentIdx),
-                const SizedBox(height: 16),
-                _groupHeader(context, 'ASISTENCIA'),
-                _navItem(context, Icons.today_outlined, 'Asistencia diaria', null, currentIdx),
-                _navItem(context, Icons.calendar_today_outlined, 'Asistencia general', null, currentIdx),
-                _navItem(context, Icons.verified_user_outlined, 'Revisar fotocheck', null, currentIdx),
-                const SizedBox(height: 16),
-                _groupHeader(context, 'ACADÉMICO'),
-                _navItem(context, Icons.calendar_month_outlined, 'Horario', null, currentIdx),
-                _navItem(context, Icons.grade_outlined, 'Calificaciones', null, currentIdx),
-                const SizedBox(height: 16),
-                _groupHeader(context, 'COMUNICACIÓN'),
-                _navItem(context, Icons.campaign_outlined, 'Comunicados', 1, currentIdx),
-                _navItem(context, Icons.handshake_outlined, 'Reuniones', null, currentIdx),
-                _navItem(context, Icons.event_note_outlined, 'Agenda', 2, currentIdx),
-                const SizedBox(height: 16),
-                _groupHeader(context, 'TESORERÍA'),
-                _navItem(context, Icons.account_balance_outlined, 'Pensiones', null, currentIdx),
-                _navItem(context, Icons.payments_outlined, 'Cuotas', null, currentIdx),
-              ],
-            ),
-          ),
-          Container(
-            width: 256,
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: c.border.withValues(alpha: 0.3))),
+              gradient: LinearGradient(
+                colors: [c.primary, c.primaryDark],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _footerItem(context, Icons.person_outline, 'Mi perfil', () {
-                  Navigator.pop(context);
-                  context.read<ParentBloc>().add(ChangePage(pageIndex: 3));
-                }, c),
-                _footerItem(context, Icons.logout, 'Cerrar sesión', () {
-                  context.read<ParentBloc>().add(Logout());
-                  context.read<LoginBloc>().add(ResetLogin());
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                    (route) => false,
-                  );
-                }, c, isLogout: true),
-                _footerItem(context, themeCubit.icon, 'Cambiar tema', () {
-                  themeCubit.cycle();
-                  Navigator.pop(context);
-                }, c),
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, color: c.primary, size: 30),
+                ),
+                const SizedBox(height: 12),
+                const Text('MENÚ DEL PADRE', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Text('juan.perez@email.com', style: TextStyle(color: Colors.white70, fontSize: 13)),
               ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    children: [
+                      _drawerTile(context, Icons.home_outlined, 'Inicio', 0, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.campaign_outlined, 'Comunicados', 1, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.calendar_month_outlined, 'Agenda', 2, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.person_outline, 'Mi Perfil', 3, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.badge_outlined, 'Fotocheck', null, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.menu_book_outlined, 'Académico', null, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.checklist_outlined, 'Asistencia', null, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.forum_outlined, 'Comunicación', null, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.attach_money_outlined, 'Tesorería', null, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.settings_outlined, 'Configuración', null, currentIdx),
+                      const Divider(height: 1),
+                      _drawerTile(context, Icons.logout, 'Cerrar sesión', null, currentIdx, isLogout: true),
+                      const Divider(height: 1),
+                      _drawerTile(context, themeCubit.icon, 'Cambiar tema', null, currentIdx),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -146,84 +147,41 @@ class ParentScreen extends StatelessWidget {
     );
   }
 
-  Widget _groupHeader(BuildContext context, String label) {
-    final c = context.appColors;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.8,
-          color: c.textSecondary.withValues(alpha: 0.5),
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem(BuildContext context, IconData icon, String label, int? pageIndex, int currentIndex) {
+  Widget _drawerTile(BuildContext context, IconData icon, String label, int? pageIndex, int currentIndex, {bool isLogout = false}) {
     final c = context.appColors;
     final selected = pageIndex != null && currentIndex == pageIndex;
-    return Container(
-      decoration: selected
-          ? BoxDecoration(
-              border: Border(left: BorderSide(color: c.primary, width: 2)),
-              color: c.primary.withValues(alpha: 0.1),
-            )
-          : null,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-            if (pageIndex != null) {
-              context.read<ParentBloc>().add(ChangePage(pageIndex: pageIndex));
-            }
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Icon(icon, size: 18, color: selected ? c.primary : null),
-                const SizedBox(width: 12),
-                Text(label, style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: selected ? c.primary : c.textPrimary,
-                )),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _footerItem(BuildContext context, IconData icon, String label, VoidCallback onTap, AppColors c, {bool isLogout = false}) {
-    return SizedBox(
-      width: 256,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Icon(icon, size: 18, color: isLogout ? c.error.withValues(alpha: 0.8) : c.textSecondary.withValues(alpha: 0.7)),
-                const SizedBox(width: 12),
-                Text(label, style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isLogout ? FontWeight.w500 : FontWeight.normal,
-                  color: isLogout ? c.error.withValues(alpha: 0.8) : c.textSecondary.withValues(alpha: 0.7),
-                )),
-              ],
-            ),
-          ),
+    void onTap() {
+      if (isLogout) {
+        context.read<ParentBloc>().add(Logout());
+        context.read<LoginBloc>().add(ResetLogin());
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+        return;
+      }
+      if (label == 'Cambiar tema') {
+        context.read<ThemeCubit>().cycle();
+      }
+      Navigator.pop(context);
+      if (pageIndex != null) {
+        context.read<ParentBloc>().add(ChangePage(pageIndex: pageIndex));
+      }
+    }
+
+    return ListTile(
+      leading: Icon(icon, size: 22, color: isLogout ? c.error : (selected ? c.primary : null)),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: isLogout ? FontWeight.w600 : (selected ? FontWeight.w600 : FontWeight.normal),
+          color: isLogout ? c.error : (selected ? c.primary : c.textPrimary),
         ),
       ),
+      trailing: Icon(Icons.chevron_right, size: 20, color: c.textSecondary.withValues(alpha: 0.5)),
+      onTap: onTap,
     );
   }
 
