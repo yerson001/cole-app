@@ -228,29 +228,29 @@ class ParentScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
       ),
       itemCount: items.length,
       itemBuilder: (_, i) => Card(
         color: c.surface,
-        elevation: 1,
+        elevation: 0.5,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           side: BorderSide(color: c.border, width: 0.5),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           onTap: () {},
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(items[i]['icon'] as IconData, size: 24, color: c.primary),
-              const SizedBox(height: 6),
+              Icon(items[i]['icon'] as IconData, size: 18, color: c.primary),
+              const SizedBox(height: 4),
               Text(items[i]['label'] as String,
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: c.textPrimary),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: c.textPrimary),
                 textAlign: TextAlign.center,
               ),
             ],
