@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
+import 'package:coleapp/core/themes/theme_cubit.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_event.dart';
 import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
@@ -102,32 +103,68 @@ class ParentScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: SingleChildScrollView(
-                child: Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Column(
-                    children: [
-                      _drawerTile(context, Icons.home_outlined, 'Inicio', 0, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.campaign_outlined, 'Comunicados', 1, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.calendar_month_outlined, 'Agenda', 2, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.checklist_outlined, 'Asistencia', null, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.menu_book_outlined, 'Académico', null, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.attach_money_outlined, 'Tesorería', null, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.logout, 'Cerrar sesión', null, currentIdx, isLogout: true),
-                    ],
-                  ),
+                child: Column(
+                  children: [
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Column(
+                        children: [
+                          _drawerTile(context, Icons.home_outlined, 'Inicio', 0, currentIdx),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.campaign_outlined, 'Comunicados', 1, currentIdx),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.calendar_month_outlined, 'Agenda', 2, currentIdx),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.checklist_outlined, 'Asistencia', null, currentIdx),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.menu_book_outlined, 'Académico', null, currentIdx),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.attach_money_outlined, 'Tesorería', null, currentIdx),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Column(
+                        children: [
+                          _drawerTile(context, Icons.person_outline, 'Mi Perfil', null, currentIdx),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.settings_outlined, 'Configuración', null, currentIdx),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.notifications_outlined, 'Notificaciones', null, currentIdx),
+                          const Divider(height: 1),
+                          _themeTile(context),
+                          const Divider(height: 1),
+                          _drawerTile(context, Icons.logout, 'Cerrar sesión', null, currentIdx, isLogout: true),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _themeTile(BuildContext context) {
+    final c = context.appColors;
+    final themeCubit = context.watch<ThemeCubit>();
+    final isDark = themeCubit.state == ThemeMode.dark;
+    return ListTile(
+      leading: Icon(isDark ? Icons.dark_mode : Icons.light_mode, size: 22, color: c.textPrimary),
+      title: Text('Cambiar tema', style: TextStyle(fontSize: 14, color: c.textPrimary)),
+      trailing: Switch(
+        value: isDark,
+        onChanged: (_) => themeCubit.cycle(),
+        activeThumbColor: c.primary,
+      ),
+      onTap: () => themeCubit.cycle(),
     );
   }
 
