@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
+import 'package:coleapp/core/themes/theme_cubit.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_event.dart';
 import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
@@ -45,7 +46,7 @@ class ParentScreen extends StatelessWidget {
           onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
-      title: const Text('Inicio', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+    
       centerTitle: true,
       actions: [
         IconButton(
@@ -73,91 +74,156 @@ class ParentScreen extends StatelessWidget {
 
   Widget _buildDrawer(BuildContext context) {
     final c = context.appColors;
+    final currentIdx = context.read<ParentBloc>().state.pageIndex;
+    final themeCubit = context.read<ThemeCubit>();
     return Drawer(
+      width: 256,
       child: Column(
         children: [
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(color: c.primary),
-            accountName: const Text('Juan Pérez', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            accountEmail: const Text('juan.perez@email.com', style: TextStyle(fontSize: 13)),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 40, color: c.primary),
+          Container(
+            width: 256,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: c.border.withValues(alpha: 0.3))),
             ),
+            child: Image.asset('assets/images/check.png', height: 30, fit: BoxFit.contain),
           ),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.all(12),
               children: [
-                _drawerItem(Icons.home_outlined, 'Inicio', 0, context),
-                _drawerItem(Icons.person_outline, 'Mi Perfil', null, context, subtitle: 'Cambiar contraseña'),
-                _drawerItem(Icons.badge_outlined, 'Fotocheck', null, context),
-                _drawerExpansionTile(context, Icons.menu_book_outlined, 'Académico', [
-                  _drawerItem(Icons.schedule_outlined, 'Horario', null, context),
-                  _drawerItem(Icons.grade_outlined, 'Calificaciones', null, context),
-                ]),
-                _drawerExpansionTile(context, Icons.checklist_outlined, 'Asistencia', [
-                  _drawerItem(Icons.today_outlined, 'Diaria', null, context),
-                  _drawerItem(Icons.assessment_outlined, 'General', null, context),
-                  _drawerItem(Icons.badge_outlined, 'Revisar Fotocheck', null, context),
-                ]),
-                _drawerExpansionTile(context, Icons.forum_outlined, 'Comunicación', [
-                  _drawerItem(Icons.campaign_outlined, 'Comunicados', 1, context),
-                  _drawerItem(Icons.handshake_outlined, 'Reuniones', null, context),
-                  _drawerItem(Icons.calendar_month_outlined, 'Agenda', 2, context),
-                ]),
-                _drawerExpansionTile(context, Icons.attach_money_outlined, 'Tesorería', [
-                  _drawerItem(Icons.account_balance_wallet_outlined, 'Pensiones', null, context),
-                  _drawerItem(Icons.receipt_long_outlined, 'Cuotas', null, context),
-                ]),
-                const Divider(),
-                _drawerItem(Icons.settings_outlined, 'Configuración', null, context),
+                _groupHeader(context, 'PRINCIPAL'),
+                _navItem(context, Icons.home_outlined, 'Inicio', 0, currentIdx),
+                const SizedBox(height: 16),
+                _groupHeader(context, 'ASISTENCIA'),
+                _navItem(context, Icons.today_outlined, 'Asistencia diaria', null, currentIdx),
+                _navItem(context, Icons.calendar_today_outlined, 'Asistencia general', null, currentIdx),
+                _navItem(context, Icons.verified_user_outlined, 'Revisar fotocheck', null, currentIdx),
+                const SizedBox(height: 16),
+                _groupHeader(context, 'ACADÉMICO'),
+                _navItem(context, Icons.calendar_month_outlined, 'Horario', null, currentIdx),
+                _navItem(context, Icons.grade_outlined, 'Calificaciones', null, currentIdx),
+                const SizedBox(height: 16),
+                _groupHeader(context, 'COMUNICACIÓN'),
+                _navItem(context, Icons.campaign_outlined, 'Comunicados', 1, currentIdx),
+                _navItem(context, Icons.handshake_outlined, 'Reuniones', null, currentIdx),
+                _navItem(context, Icons.event_note_outlined, 'Agenda', 2, currentIdx),
+                const SizedBox(height: 16),
+                _groupHeader(context, 'TESORERÍA'),
+                _navItem(context, Icons.account_balance_outlined, 'Pensiones', null, currentIdx),
+                _navItem(context, Icons.payments_outlined, 'Cuotas', null, currentIdx),
               ],
             ),
           ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Cerrar sesión', style: TextStyle(color: Colors.red)),
-            onTap: () {
-              context.read<ParentBloc>().add(Logout());
-              context.read<LoginBloc>().add(ResetLogin());
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-                (route) => false,
-              );
-            },
+          Container(
+            width: 256,
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: c.border.withValues(alpha: 0.3))),
+            ),
+            child: Column(
+              children: [
+                _footerItem(context, Icons.person_outline, 'Mi perfil', () {
+                  Navigator.pop(context);
+                  context.read<ParentBloc>().add(ChangePage(pageIndex: 3));
+                }, c),
+                _footerItem(context, Icons.logout, 'Cerrar sesión', () {
+                  context.read<ParentBloc>().add(Logout());
+                  context.read<LoginBloc>().add(ResetLogin());
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                    (route) => false,
+                  );
+                }, c, isLogout: true),
+                _footerItem(context, themeCubit.icon, 'Cambiar tema', () {
+                  themeCubit.cycle();
+                  Navigator.pop(context);
+                }, c),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
         ],
       ),
     );
   }
 
-  Widget _drawerItem(IconData icon, String label, int? pageIndex, BuildContext context, {String? subtitle}) {
-    final currentIndex = context.read<ParentBloc>().state.pageIndex;
-    final selected = pageIndex != null && currentIndex == pageIndex;
-    return ListTile(
-      leading: Icon(icon, color: selected ? Theme.of(context).colorScheme.primary : null),
-      title: Text(label, style: TextStyle(fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
-      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(fontSize: 11, color: context.appColors.textSecondary)) : null,
-      selected: selected,
-      onTap: () {
-        Navigator.pop(context);
-        if (pageIndex != null) {
-          context.read<ParentBloc>().add(ChangePage(pageIndex: pageIndex));
-        }
-      },
+  Widget _groupHeader(BuildContext context, String label) {
+    final c = context.appColors;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
+          color: c.textSecondary.withValues(alpha: 0.5),
+        ),
+      ),
     );
   }
 
-  Widget _drawerExpansionTile(BuildContext context, IconData icon, String title, List<Widget> children) {
+  Widget _navItem(BuildContext context, IconData icon, String label, int? pageIndex, int currentIndex) {
     final c = context.appColors;
-    return ExpansionTile(
-      leading: Icon(icon),
-      title: Text(title, style: TextStyle(color: c.textPrimary)),
-      childrenPadding: const EdgeInsets.only(left: 32),
-      children: children,
+    final selected = pageIndex != null && currentIndex == pageIndex;
+    return Container(
+      decoration: selected
+          ? BoxDecoration(
+              border: Border(left: BorderSide(color: c.primary, width: 2)),
+              color: c.primary.withValues(alpha: 0.1),
+            )
+          : null,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+            if (pageIndex != null) {
+              context.read<ParentBloc>().add(ChangePage(pageIndex: pageIndex));
+            }
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: selected ? c.primary : null),
+                const SizedBox(width: 12),
+                Text(label, style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: selected ? c.primary : c.textPrimary,
+                )),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _footerItem(BuildContext context, IconData icon, String label, VoidCallback onTap, AppColors c, {bool isLogout = false}) {
+    return SizedBox(
+      width: 256,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: isLogout ? c.error.withValues(alpha: 0.8) : c.textSecondary.withValues(alpha: 0.7)),
+                const SizedBox(width: 12),
+                Text(label, style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isLogout ? FontWeight.w500 : FontWeight.normal,
+                  color: isLogout ? c.error.withValues(alpha: 0.8) : c.textSecondary.withValues(alpha: 0.7),
+                )),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
