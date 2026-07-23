@@ -49,10 +49,6 @@ class ParentScreen extends StatelessWidget {
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.calendar_month_outlined),
-          onPressed: () {},
-        ),
-        IconButton(
           icon: const Badge(
             label: Text('3'),
             child: Icon(Icons.notifications_outlined),
@@ -222,15 +218,19 @@ class ParentScreen extends StatelessWidget {
       {'icon': Icons.grade_outlined, 'label': 'Calificaciones'},
       {'icon': Icons.account_balance_outlined, 'label': 'Pensiones'},
       {'icon': Icons.payments_outlined, 'label': 'Cuotas'},
+      {'icon': Icons.handshake_outlined, 'label': 'Reuniones'},
+      {'icon': Icons.checklist_outlined, 'label': 'Asistencia'},
+      {'icon': Icons.campaign_outlined, 'label': 'Comunicados'},
+      {'icon': Icons.calendar_month_outlined, 'label': 'Agenda'},
     ];
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 0.9,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
       ),
       itemCount: items.length,
       itemBuilder: (_, i) => Card(
@@ -238,19 +238,19 @@ class ParentScreen extends StatelessWidget {
         elevation: 1,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           side: BorderSide(color: c.border, width: 0.5),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           onTap: () {},
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(items[i]['icon'] as IconData, size: 32, color: c.primary),
-              const SizedBox(height: 8),
+              Icon(items[i]['icon'] as IconData, size: 24, color: c.primary),
+              const SizedBox(height: 6),
               Text(items[i]['label'] as String,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: c.textPrimary),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: c.textPrimary),
                 textAlign: TextAlign.center,
               ),
             ],
