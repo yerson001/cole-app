@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
-import 'package:coleapp/core/themes/theme_cubit.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_event.dart';
 import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
@@ -75,7 +74,6 @@ class ParentScreen extends StatelessWidget {
   Widget _buildDrawer(BuildContext context) {
     final c = context.appColors;
     final currentIdx = context.read<ParentBloc>().state.pageIndex;
-    final themeCubit = context.read<ThemeCubit>();
     return Drawer(
       child: Column(
         children: [
@@ -119,23 +117,13 @@ class ParentScreen extends StatelessWidget {
                       const Divider(height: 1),
                       _drawerTile(context, Icons.calendar_month_outlined, 'Agenda', 2, currentIdx),
                       const Divider(height: 1),
-                      _drawerTile(context, Icons.person_outline, 'Mi Perfil', 3, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.badge_outlined, 'Fotocheck', null, currentIdx),
+                      _drawerTile(context, Icons.checklist_outlined, 'Asistencia', null, currentIdx),
                       const Divider(height: 1),
                       _drawerTile(context, Icons.menu_book_outlined, 'Académico', null, currentIdx),
                       const Divider(height: 1),
-                      _drawerTile(context, Icons.checklist_outlined, 'Asistencia', null, currentIdx),
-                      const Divider(height: 1),
-                      _drawerTile(context, Icons.forum_outlined, 'Comunicación', null, currentIdx),
-                      const Divider(height: 1),
                       _drawerTile(context, Icons.attach_money_outlined, 'Tesorería', null, currentIdx),
                       const Divider(height: 1),
-                      _drawerTile(context, Icons.settings_outlined, 'Configuración', null, currentIdx),
-                      const Divider(height: 1),
                       _drawerTile(context, Icons.logout, 'Cerrar sesión', null, currentIdx, isLogout: true),
-                      const Divider(height: 1),
-                      _drawerTile(context, themeCubit.icon, 'Cambiar tema', null, currentIdx),
                     ],
                   ),
                 ),
@@ -160,9 +148,6 @@ class ParentScreen extends StatelessWidget {
           (route) => false,
         );
         return;
-      }
-      if (label == 'Cambiar tema') {
-        context.read<ThemeCubit>().cycle();
       }
       Navigator.pop(context);
       if (pageIndex != null) {
