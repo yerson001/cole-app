@@ -466,7 +466,7 @@ class _HomeBody extends StatelessWidget {
           children: [
             const _QuickAccessGrid(),
             const SizedBox(height: 24),
-            AttendanceSection(reports: state.dayReports),
+            AttendanceSection(reports: state.dayReports, isLoading: state.isLoadingDayReport),
             const SizedBox(height: 12),
             const DateHeader(),
             const SizedBox(height: 20),

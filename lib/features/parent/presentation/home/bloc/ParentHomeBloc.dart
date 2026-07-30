@@ -88,6 +88,7 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
 
     on<GetDayReport>((event, emit) async {
       print('[DEBUG] GetDayReport: date=${event.date} branchId=${event.branchId} studentIds=${event.studentIds}');
+      emit(state.copyWith(isLoadingDayReport: true));
       final result = await parentUseCases.getDayReportUseCase.call(
         date: event.date,
         branchId: event.branchId,
@@ -112,7 +113,7 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
           }
         }
         print('[DEBUG] Total reports after filling: ${reports.length}');
-        emit(state.copyWith(dayReports: reports));
+        emit(state.copyWith(dayReports: reports, isLoadingDayReport: false));
       } else {
         print('[DEBUG] DayReport failed: ${(result as ErrorResource).message}');
         final reports = state.students.map((s) => DayReportModel(
@@ -124,7 +125,7 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
           attendances: [],
         )).toList();
         print('[DEBUG] Fallback reports: ${reports.length}');
-        emit(state.copyWith(dayReports: reports));
+        emit(state.copyWith(dayReports: reports, isLoadingDayReport: false));
       }
     });
 

@@ -4,8 +4,9 @@ import 'package:coleapp/features/parent/presentation/widgets/attendance_card.dar
 
 class AttendanceSection extends StatelessWidget {
   final List<DayReportModel> reports;
+  final bool isLoading;
 
-  const AttendanceSection({super.key, required this.reports});
+  const AttendanceSection({super.key, required this.reports, this.isLoading = false});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +22,12 @@ class AttendanceSection extends StatelessWidget {
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
             const Spacer(),
+            if (isLoading)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
             TextButton.icon(
               onPressed: () {},
               icon: const Text('Ver más', style: TextStyle(fontSize: 13)),
