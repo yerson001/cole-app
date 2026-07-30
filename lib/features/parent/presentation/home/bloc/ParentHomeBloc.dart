@@ -18,6 +18,14 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
         pageIndex: event.pageIndex,
         previousPageIndex: state.pageIndex,
       ));
+      if (event.pageIndex == 0 && state.students.isNotEmpty && state.branch != null) {
+        add(GetDayReport(
+          date: _todayDate(),
+          branchId: state.branch!.id,
+          studentIds: state.students.map((s) => s.id).toList(),
+          tenantId: state.tenant,
+        ));
+      }
     });
 
     on<GetParentUser>((event, emit) async {

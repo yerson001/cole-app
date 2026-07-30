@@ -445,25 +445,44 @@ class _HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reports = context.watch<ParentHomeBloc>().state.dayReports;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const _QuickAccessGrid(),
-          const SizedBox(height: 24),
-          AttendanceSection(reports: reports),
-          const SizedBox(height: 12),
-          const DateHeader(),
-          const SizedBox(height: 20),
-          const CommunicationsTab(),
-          const SizedBox(height: 16),
-          const SummaryCard(),
-        ],
+    final bloc = context.read<ParentHomeBloc>();
+    final state = context.watch<ParentHomeBloc>().state;
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (state.students.isNotEmpty && state.branch != null) {
+          bloc.add(GetDayReport(
+            date: _todayDate(),
+            branchId: state.branch!.id,
+            studentIds: state.students.map((s) => s.id).toList(),
+            tenantId: state.tenant,
+          ));
+        }
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _QuickAccessGrid(),
+            const SizedBox(height: 24),
+            AttendanceSection(reports: state.dayReports),
+            const SizedBox(height: 12),
+            const DateHeader(),
+            const SizedBox(height: 20),
+            const CommunicationsTab(),
+            const SizedBox(height: 16),
+            const SummaryCard(),
+          ],
+        ),
       ),
     );
   }
+}
+
+String _todayDate() {
+  final now = DateTime.now();
+  return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 }
 
 class _ComunicadosContent extends StatelessWidget {
