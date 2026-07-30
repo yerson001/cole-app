@@ -1,5 +1,6 @@
 import 'package:coleapp/features/auth/domain/usecases/auth_use_cases.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_bloc.dart';
+import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:coleapp/features/profile/presentation/screens/info/bloc/profile_info_bloc.dart';
 import 'package:coleapp/features/profile/presentation/screens/info/bloc/profile_info_event.dart';
 import 'package:coleapp/features/roles/presentation/bloc/roles_bloc.dart';
@@ -10,8 +11,8 @@ import 'package:coleapp/features/promoter/presentation/bloc/promoter_bloc.dart';
 import 'package:coleapp/features/secretary/presentation/bloc/secretary_bloc.dart';
 import 'package:coleapp/features/assistant/presentation/bloc/assistant_bloc.dart';
 import 'package:coleapp/features/teacher/presentation/bloc/teacher_bloc.dart';
-import 'package:coleapp/features/parent/presentation/bloc/parent_bloc.dart';
-import 'package:coleapp/features/parent/presentation/bloc/parent_event.dart';
+import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
+import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeEvent.dart';
 import 'package:coleapp/injection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -40,8 +41,11 @@ List<BlocProvider> blocProviders = [
   BlocProvider<TeacherBloc>(
     create: (context) => TeacherBloc(locator<AuthUseCases>()),
   ),
-  BlocProvider<ParentBloc>(
-    create: (context) => ParentBloc(locator<AuthUseCases>())..add(GetParentUser()),
+  BlocProvider<ParentHomeBloc>(
+    create: (context) => ParentHomeBloc(
+      locator<AuthUseCases>(),
+      locator<ParentUseCases>(),
+    )..add(GetParentUser())..add(GetBranch(id: 1, tenantId: 'ie-guillermo')),
   ),
   BlocProvider<ProfileInfoBloc>(
     create: (context) => ProfileInfoBloc(locator<AuthUseCases>())..add(GetUserInfo()),

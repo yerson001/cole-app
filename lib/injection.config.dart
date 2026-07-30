@@ -28,6 +28,18 @@ import 'package:coleapp/features/auth/domain/usecases/removeUser_use_case.dart'
     as _i507;
 import 'package:coleapp/features/auth/domain/usecases/saveUser_use_case.dart'
     as _i1056;
+import 'package:coleapp/features/parent/data/datasource/local/parent_local_storage.dart'
+    as _i705;
+import 'package:coleapp/features/parent/data/datasource/remote/parent_service.dart'
+    as _i94;
+import 'package:coleapp/features/parent/domain/repositories/parent_repository.dart'
+    as _i245;
+import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.dart'
+    as _i309;
+import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart'
+    as _i484;
+import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart'
+    as _i607;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -50,6 +62,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i507.RemoveuserUseCase>(() => appModule.removeuserUseCase);
     gh.factory<_i690.LogoutUseCase>(() => appModule.logoutUseCase);
     gh.factory<_i543.AuthUseCases>(() => appModule.authUseCases);
+    gh.factory<_i705.ParentLocalStorage>(() => appModule.parentLocalStorage);
+    gh.factory<_i94.ParentService>(() => appModule.parentService);
+    gh.factory<_i245.ParentRepository>(() => appModule.parentRepository);
+    gh.factory<_i484.GetBranchUseCase>(() => appModule.getBranchUseCase);
+    gh.factory<_i309.ClearBranchUseCase>(() => appModule.clearBranchUseCase);
+    gh.factory<_i607.ParentUseCases>(() => appModule.parentUseCases);
     return this;
   }
 }

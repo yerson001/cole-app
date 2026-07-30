@@ -41,6 +41,13 @@ import 'package:coleapp/features/auth/domain/usecases/login_use_case.dart';
 import 'package:coleapp/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:coleapp/features/auth/domain/usecases/removeUser_use_case.dart';
 import 'package:coleapp/features/auth/domain/usecases/saveUser_use_case.dart';
+import 'package:coleapp/features/parent/data/datasource/local/parent_local_storage.dart';
+import 'package:coleapp/features/parent/data/datasource/remote/parent_service.dart';
+import 'package:coleapp/features/parent/data/repositories/parent_repository_impl.dart';
+import 'package:coleapp/features/parent/domain/repositories/parent_repository.dart';
+import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:injectable/injectable.dart';
 
 /*
@@ -111,5 +118,33 @@ abstract class AppModule {
     getusersessionUseCase: getusersessionUseCase,
     removeuserUseCase: removeuserUseCase,
     logoutUseCase: logoutUseCase,
+  );
+
+  // ── PARENT ─────────────────────────────────────────────────
+
+  @injectable
+  ParentLocalStorage get parentLocalStorage => ParentLocalStorage();
+
+  @injectable
+  ParentService get parentService => ParentService();
+
+  @injectable
+  ParentRepository get parentRepository => ParentRepositoryImpl(
+    service: parentService,
+    storage: parentLocalStorage,
+  );
+
+  @injectable
+  GetBranchUseCase get getBranchUseCase =>
+      GetBranchUseCase(repository: parentRepository);
+
+  @injectable
+  ClearBranchUseCase get clearBranchUseCase =>
+      ClearBranchUseCase(repository: parentRepository);
+
+  @injectable
+  ParentUseCases get parentUseCases => ParentUseCases(
+    getBranchUseCase: getBranchUseCase,
+    clearBranchUseCase: clearBranchUseCase,
   );
 }
