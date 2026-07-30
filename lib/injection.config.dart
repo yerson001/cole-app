@@ -38,6 +38,10 @@ import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.da
     as _i309;
 import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart'
     as _i484;
+import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart'
+    as _i720;
+import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart'
+    as _i31;
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart'
     as _i607;
 import 'package:get_it/get_it.dart' as _i174;
@@ -66,7 +70,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i94.ParentService>(() => appModule.parentService);
     gh.factory<_i245.ParentRepository>(() => appModule.parentRepository);
     gh.factory<_i484.GetBranchUseCase>(() => appModule.getBranchUseCase);
+    gh.factory<_i31.GetStudentsUseCase>(() => appModule.getStudentsUseCase);
     gh.factory<_i309.ClearBranchUseCase>(() => appModule.clearBranchUseCase);
+    gh.factory<_i720.GetDayReportUseCase>(() => appModule.getDayReportUseCase);
     gh.factory<_i607.ParentUseCases>(() => appModule.parentUseCases);
     return this;
   }
