@@ -20,9 +20,10 @@ class AsistenciaDiariaTab extends StatelessWidget {
     final days = <DateTime>[];
     var current = from.subtract(const Duration(days: 1));
     while (days.length < 5) {
-      if (current.weekday != DateTime.saturday && current.weekday != DateTime.sunday) {
-        days.add(current);
+      if (current.weekday == DateTime.saturday || current.weekday == DateTime.sunday) {
+        break;
       }
+      days.add(current);
       current = current.subtract(const Duration(days: 1));
     }
     return days;
