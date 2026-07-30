@@ -5,6 +5,7 @@ import 'package:coleapp/features/parent/data/models/student_model.dart';
 class AsistenciaState extends Equatable {
   final DateTime selectedDate;
   final DateTime currentMonth;
+  final DateTime? selectedCalendarDay;
   final StudentModel? selectedStudent;
   final List<StudentModel> students;
   final List<DayReportModel> dailyReports;
@@ -17,6 +18,7 @@ class AsistenciaState extends Equatable {
   const AsistenciaState({
     required this.selectedDate,
     required this.currentMonth,
+    this.selectedCalendarDay,
     this.selectedStudent,
     this.students = const [],
     this.dailyReports = const [],
@@ -30,6 +32,7 @@ class AsistenciaState extends Equatable {
   AsistenciaState copyWith({
     DateTime? selectedDate,
     DateTime? currentMonth,
+    DateTime? selectedCalendarDay,
     StudentModel? selectedStudent,
     List<StudentModel>? students,
     List<DayReportModel>? dailyReports,
@@ -42,6 +45,7 @@ class AsistenciaState extends Equatable {
     return AsistenciaState(
       selectedDate: selectedDate ?? this.selectedDate,
       currentMonth: currentMonth ?? this.currentMonth,
+      selectedCalendarDay: selectedCalendarDay ?? this.selectedCalendarDay,
       selectedStudent: selectedStudent ?? this.selectedStudent,
       students: students ?? this.students,
       dailyReports: dailyReports ?? this.dailyReports,
@@ -57,6 +61,7 @@ class AsistenciaState extends Equatable {
   List<Object?> get props => [
     selectedDate,
     currentMonth,
+    selectedCalendarDay,
     selectedStudent,
     students,
     dailyReports,

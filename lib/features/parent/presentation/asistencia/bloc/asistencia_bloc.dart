@@ -48,6 +48,10 @@ class AsistenciaBloc extends Bloc<AsistenciaEvent, AsistenciaState> {
       add(LoadRangeAttendance());
     });
 
+    on<SelectCalendarDay>((event, emit) {
+      emit(state.copyWith(selectedCalendarDay: event.day));
+    });
+
     on<LoadDailyAttendance>((event, emit) async {
       if (state.selectedStudent == null || state.tenant.isEmpty) return;
       emit(state.copyWith(isLoadingDaily: true));

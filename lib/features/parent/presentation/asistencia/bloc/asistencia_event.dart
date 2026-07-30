@@ -30,6 +30,11 @@ class ChangeMonth extends AsistenciaEvent {
   ChangeMonth({required this.month});
 }
 
+class SelectCalendarDay extends AsistenciaEvent {
+  final DateTime day;
+  SelectCalendarDay({required this.day});
+}
+
 class LoadDailyAttendance extends AsistenciaEvent {}
 
 class LoadRangeAttendance extends AsistenciaEvent {}

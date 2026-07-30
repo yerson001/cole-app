@@ -4,8 +4,16 @@ import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 class AttendanceCalendar extends StatelessWidget {
   final DateTime month;
   final List<DayReportModel> reports;
+  final DateTime? selectedDay;
+  final ValueChanged<DateTime>? onDaySelected;
 
-  const AttendanceCalendar({super.key, required this.month, required this.reports});
+  const AttendanceCalendar({
+    super.key,
+    required this.month,
+    required this.reports,
+    this.selectedDay,
+    this.onDaySelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,21 +57,29 @@ class AttendanceCalendar extends StatelessWidget {
     final status = _statusForDate(dateStr);
     final bgColor = _statusColor(status);
     final isWeekend = date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
+    final isSelected = selectedDay != null &&
+        selectedDay!.year == date.year &&
+        selectedDay!.month == date.month &&
+        selectedDay!.day == date.day;
     return Center(
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: status != null ? bgColor : (isWeekend ? Colors.grey[300] : Colors.grey[200]),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          '$day',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: status != null ? Colors.white : Colors.grey[600],
+      child: GestureDetector(
+        onTap: () => onDaySelected?.call(date),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: status != null ? bgColor : (isWeekend ? Colors.grey[300] : Colors.grey[200]),
+            borderRadius: BorderRadius.circular(10),
+            border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            '$day',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: status != null ? Colors.white : Colors.grey[600],
+            ),
           ),
         ),
       ),
