@@ -19,7 +19,7 @@ class ReportStudent {
   final String code;
   final String name;
   final String lastName;
-  final String birthDate;
+  final String? birthDate;
   final String sex;
   final String? email;
   final bool status;
@@ -32,7 +32,7 @@ class ReportStudent {
     required this.code,
     required this.name,
     required this.lastName,
-    required this.birthDate,
+    this.birthDate,
     required this.sex,
     this.email,
     required this.status,
@@ -46,7 +46,7 @@ class ReportStudent {
     code: json['code'] as String,
     name: json['name'] as String,
     lastName: json['lastName'] as String,
-    birthDate: json['birthDate'] as String,
+    birthDate: json['birthDate'] as String?,
     sex: json['sex'] as String,
     email: json['email'] as String?,
     status: json['status'] as bool,
