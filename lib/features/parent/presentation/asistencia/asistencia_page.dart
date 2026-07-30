@@ -5,6 +5,8 @@ import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_event.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/asistencia_diaria_tab.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/asistencia_general_tab.dart';
+import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
+import 'package:coleapp/injection.dart';
 
 class AsistenciaPage extends StatefulWidget {
   final List<StudentModel> students;
@@ -42,7 +44,7 @@ class _AsistenciaPageState extends State<AsistenciaPage> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AsistenciaBloc>(
-      create: (context) => AsistenciaBloc(context.read())
+      create: (context) => AsistenciaBloc(locator<ParentUseCases>())
         ..add(InitializeAsistencia(
           tenant: widget.tenant,
           branchId: widget.branchId,

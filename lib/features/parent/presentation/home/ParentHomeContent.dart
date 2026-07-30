@@ -471,13 +471,14 @@ class _HomeBody extends StatelessWidget {
               reports: state.dayReports,
               isLoading: state.isLoadingDayReport,
               onVerMas: () {
-                if (state.students.isNotEmpty && state.branch != null) {
+                print('[DEBUG] Ver más tapped. students=${state.students.length}, branch=${state.branch?.id}, tenant=${state.tenant}');
+                if (state.students.isNotEmpty) {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => AsistenciaPage(
                         students: state.students,
                         tenant: state.tenant,
-                        branchId: state.branch!.id,
+                        branchId: state.branch?.id ?? 1,
                       ),
                     ),
                   );
