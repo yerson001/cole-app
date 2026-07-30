@@ -47,24 +47,26 @@ class ParentService {
     required List<int> studentIds,
     required String tenantId,
   }) async {
-    final buffer = StringBuffer(
-      '${ApiConstants.baseUrl}/attendance/day-report?date=$date&branchId=$branchId',
-    );
-    for (final id in studentIds) {
-      buffer.write('&studentId=$id');
+    final reports = <DayReportModel>[];
+    for (final studentId in studentIds) {
+      final uri = Uri.parse(
+        '${ApiConstants.baseUrl}/attendance/day-report?date=$date&branchId=$branchId&studentId=$studentId',
+      );
+      final response = await _client.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'tenant-id': tenantId,
+        },
+      );
+      if (response.statusCode == 200) {
+        final list = jsonDecode(response.body) as List;
+        reports.addAll(list.map((e) => DayReportModel.fromJson(e as Map<String, dynamic>)));
+      }
     }
-    final uri = Uri.parse(buffer.toString());
-    final response = await _client.get(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'tenant-id': tenantId,
-      },
-    );
-    if (response.statusCode == 200) {
-      final list = jsonDecode(response.body) as List;
-      return list.map((e) => DayReportModel.fromJson(e as Map<String, dynamic>)).toList();
+    if (reports.isEmpty) {
+      throw Exception('Error al obtener reporte diario');
     }
-    throw Exception('Error al obtener reporte diario: ${response.statusCode}');
+    return reports;
   }
 }
