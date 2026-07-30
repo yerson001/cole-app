@@ -41,6 +41,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     ReunionesContent(),
     AgendaContent(),
     MasContent(),
+    _ComunicadosContent(),
   ];
 
   @override
@@ -54,6 +55,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
           return pageList[state.pageIndex];
         },
       ),
+      bottomNavigationBar: _buildBottomNav(context),
     );
   }
 
@@ -65,20 +67,22 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
             builder: (context, state) {
               if (state.pageIndex == 0) {
                 return IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const Icon(Icons.menu_rounded),
                   onPressed: () => Scaffold.of(ctx).openDrawer(),
                 );
               }
               if (state.pageIndex == 1) {
                 return IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back_rounded),
                   onPressed: () => Scaffold.of(ctx).openDrawer(),
                 );
               }
               return IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () {
-                  context.read<ParentHomeBloc>().add(ChangePage(pageIndex: 0));
+                  context.read<ParentHomeBloc>().add(
+                    ChangePage(pageIndex: state.previousPageIndex),
+                  );
                 },
               );
             },
@@ -88,13 +92,68 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
       title: BlocBuilder<ParentHomeBloc, ParentHomeState>(
         builder: (context, state) {
           final titles = ['', 'Perfil', 'Fotocheck', 'Horario', 'Calificaciones',
-            'Pensiones', 'Cuotas', 'Reuniones', 'Agenda', 'Más'];
+            'Pensiones', 'Cuotas', 'Reuniones', 'Agenda', 'Más', 'Comunicados'];
           final title = state.pageIndex < titles.length ? titles[state.pageIndex] : '';
-          return Text(title);
+          return Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
         },
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.calendar_month_outlined),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.help_outline),
+          onPressed: () {},
+        ),
+      ],
       centerTitle: true,
     );
+  }
+
+  Widget _buildBottomNav(BuildContext context) {
+    return BlocBuilder<ParentHomeBloc, ParentHomeState>(
+      builder: (context, state) {
+        return BottomNavigationBar(
+          currentIndex: _bottomNavIndex(state.pageIndex),
+          onTap: (index) {
+            final pageIndex = _bottomNavToPageIndex(index);
+            context.read<ParentHomeBloc>().add(ChangePage(pageIndex: pageIndex));
+          },
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: context.appColors.primary,
+          unselectedItemColor: Colors.grey,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
+            BottomNavigationBarItem(icon: Icon(Icons.campaign_outlined), label: 'Comunicados'),
+            BottomNavigationBarItem(icon: Icon(Icons.book_rounded), label: 'Agenda'),
+            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Perfil'),
+          ],
+        );
+      },
+    );
+  }
+
+  int _bottomNavIndex(int pageIndex) {
+    if (pageIndex == 0) return 0;
+    if (pageIndex == 10) return 1;
+    if (pageIndex == 8) return 2;
+    if (pageIndex == 1) return 3;
+    return 0;
+  }
+
+  int _bottomNavToPageIndex(int navIndex) {
+    switch (navIndex) {
+      case 0: return 0;
+      case 1: return 10;
+      case 2: return 8;
+      case 3: return 1;
+      default: return 0;
+    }
   }
 
   Widget _buildDrawer(BuildContext context) {
@@ -331,11 +390,11 @@ class _QuickAccessGrid extends StatelessWidget {
                               width: 48,
                               height: 48,
                               decoration: BoxDecoration(
-                                color: ac.fill,
+                                color: ac.primary,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               alignment: Alignment.center,
-                              child: Icon(_items[row * 4 + col].icon, size: 26, color: ac.primary),
+                              child: Icon(_items[row * 4 + col].icon, size: 26, color: Colors.white),
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -369,6 +428,17 @@ class _HomeBody extends StatelessWidget {
           const _QuickAccessGrid(),
         ],
       ),
+    );
+  }
+}
+
+class _ComunicadosContent extends StatelessWidget {
+  const _ComunicadosContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('Comunicados'),
     );
   }
 }

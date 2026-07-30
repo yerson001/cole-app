@@ -4,19 +4,21 @@ import 'package:equatable/equatable.dart';
 
 class ParentHomeState extends Equatable {
   final int pageIndex;
+  final int previousPageIndex;
   final User? user;
   final BranchModel? branch;
 
-  const ParentHomeState({this.pageIndex = 0, this.user, this.branch});
+  const ParentHomeState({this.pageIndex = 0, this.previousPageIndex = 0, this.user, this.branch});
 
-  ParentHomeState copyWith({int? pageIndex, User? user, BranchModel? branch}) {
+  ParentHomeState copyWith({int? pageIndex, int? previousPageIndex, User? user, BranchModel? branch}) {
     return ParentHomeState(
       pageIndex: pageIndex ?? this.pageIndex,
+      previousPageIndex: previousPageIndex ?? this.previousPageIndex,
       user: user ?? this.user,
       branch: branch ?? this.branch,
     );
   }
 
   @override
-  List<Object?> get props => [pageIndex, user, branch];
+  List<Object?> get props => [pageIndex, previousPageIndex, user, branch];
 }

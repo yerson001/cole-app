@@ -12,7 +12,10 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
 
   ParentHomeBloc(this.authUseCases, this.parentUseCases) : super(const ParentHomeState()) {
     on<ChangePage>((event, emit) {
-      emit(state.copyWith(pageIndex: event.pageIndex));
+      emit(state.copyWith(
+        pageIndex: event.pageIndex,
+        previousPageIndex: state.pageIndex,
+      ));
     });
 
     on<GetParentUser>((event, emit) async {

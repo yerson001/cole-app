@@ -11,8 +11,8 @@ class AppTheme {
     ),
     extensions: [AppColors.light],
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.light.surface,
-      foregroundColor: AppColors.light.textPrimary,
+      backgroundColor: AppColors.light.primary,
+      foregroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
       scrolledUnderElevation: 1,
