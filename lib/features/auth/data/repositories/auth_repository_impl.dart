@@ -82,7 +82,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthResponse?> getUserSession() async {
     final data = await _storage.read('user');
     if (data != null) {
-      final authResponse = AuthResponse.fromJson(data as Map<String, dynamic>);
+      final savedTenant = await getSavedTenant();
+      final authResponse = AuthResponse.fromJson(
+        data as Map<String, dynamic>,
+        tenant: savedTenant ?? '',
+      );
       return authResponse;
     }
     return null;

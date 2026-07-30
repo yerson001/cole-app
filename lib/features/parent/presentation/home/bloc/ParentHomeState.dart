@@ -11,6 +11,7 @@ class ParentHomeState extends Equatable {
   final BranchModel? branch;
   final List<StudentModel> students;
   final List<DayReportModel> dayReports;
+  final String tenant;
 
   const ParentHomeState({
     this.pageIndex = 0,
@@ -19,6 +20,7 @@ class ParentHomeState extends Equatable {
     this.branch,
     this.students = const [],
     this.dayReports = const [],
+    this.tenant = '',
   });
 
   ParentHomeState copyWith({
@@ -28,6 +30,7 @@ class ParentHomeState extends Equatable {
     BranchModel? branch,
     List<StudentModel>? students,
     List<DayReportModel>? dayReports,
+    String? tenant,
   }) {
     return ParentHomeState(
       pageIndex: pageIndex ?? this.pageIndex,
@@ -36,9 +39,10 @@ class ParentHomeState extends Equatable {
       branch: branch ?? this.branch,
       students: students ?? this.students,
       dayReports: dayReports ?? this.dayReports,
+      tenant: tenant ?? this.tenant,
     );
   }
 
   @override
-  List<Object?> get props => [pageIndex, previousPageIndex, user, branch, students, dayReports];
+  List<Object?> get props => [pageIndex, previousPageIndex, user, branch, students, dayReports, tenant];
 }

@@ -35,6 +35,18 @@ class ParentHomeContent extends StatefulWidget {
 
 class _ParentHomeContentState extends State<ParentHomeContent> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _sessionLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_sessionLoaded) {
+        _sessionLoaded = true;
+        context.read<ParentHomeBloc>().add(GetParentUser());
+      }
+    });
+  }
 
   final List<Widget> pageList = const [
     _HomeBody(),

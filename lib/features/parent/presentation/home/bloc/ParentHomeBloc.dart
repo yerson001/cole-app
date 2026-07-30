@@ -23,11 +23,13 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
     on<GetParentUser>((event, emit) async {
       final session = await authUseCases.getusersessionUseCase.call();
       if (session != null) {
-        emit(state.copyWith(user: session.user));
-        print('[DEBUG] User loaded: ${session.user.username}, profile id: ${session.user.profile?.id}');
+        final tenant = session.tenant.isNotEmpty ? session.tenant : 'ie-guillermo';
+        emit(state.copyWith(user: session.user, tenant: tenant));
+        print('[DEBUG] User loaded: ${session.user.username}, tenant: $tenant');
         if (session.user.profile != null) {
-          print('[DEBUG] Dispatching GetStudents');
-          add(GetStudents(parentId: session.user.profile!.id, tenantId: 'ie-guillermo'));
+          print('[DEBUG] Dispatching GetStudents and GetBranch');
+          add(GetBranch(id: 1, tenantId: tenant));
+          add(GetStudents(parentId: session.user.profile!.id, tenantId: tenant));
         }
       } else {
         print('[DEBUG] No user session found');
@@ -46,7 +48,7 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
             date: _todayDate(),
             branchId: result.data.id,
             studentIds: state.students.map((s) => s.id).toList(),
-            tenantId: 'ie-guillermo',
+            tenantId: state.tenant,
           ));
         }
       }
@@ -65,7 +67,7 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
             date: _todayDate(),
             branchId: state.branch!.id,
             studentIds: result.data.map((s) => s.id).toList(),
-            tenantId: 'ie-guillermo',
+            tenantId: state.tenant,
           ));
         } else {
           print('[DEBUG] Branch not ready yet (null) or no students');

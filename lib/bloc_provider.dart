@@ -45,7 +45,7 @@ List<BlocProvider> blocProviders = [
     create: (context) => ParentHomeBloc(
       locator<AuthUseCases>(),
       locator<ParentUseCases>(),
-    )..add(GetParentUser())..add(GetBranch(id: 1, tenantId: 'ie-guillermo')),
+    ),
   ),
   BlocProvider<ProfileInfoBloc>(
     create: (context) => ProfileInfoBloc(locator<AuthUseCases>())..add(GetUserInfo()),
