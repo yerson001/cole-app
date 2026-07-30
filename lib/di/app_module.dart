@@ -47,6 +47,8 @@ import 'package:coleapp/features/parent/data/repositories/parent_repository_impl
 import 'package:coleapp/features/parent/domain/repositories/parent_repository.dart';
 import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:injectable/injectable.dart';
 
@@ -139,12 +141,22 @@ abstract class AppModule {
       GetBranchUseCase(repository: parentRepository);
 
   @injectable
+  GetStudentsUseCase get getStudentsUseCase =>
+      GetStudentsUseCase(repository: parentRepository);
+
+  @injectable
   ClearBranchUseCase get clearBranchUseCase =>
       ClearBranchUseCase(repository: parentRepository);
+
+  @injectable
+  GetDayReportUseCase get getDayReportUseCase =>
+      GetDayReportUseCase(repository: parentRepository);
 
   @injectable
   ParentUseCases get parentUseCases => ParentUseCases(
     getBranchUseCase: getBranchUseCase,
     clearBranchUseCase: clearBranchUseCase,
+    getStudentsUseCase: getStudentsUseCase,
+    getDayReportUseCase: getDayReportUseCase,
   );
 }

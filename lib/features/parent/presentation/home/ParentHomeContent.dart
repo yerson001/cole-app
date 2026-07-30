@@ -10,7 +10,9 @@ import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.da
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeEvent.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
 import 'package:coleapp/core/themes/theme_page.dart';
-import 'package:coleapp/features/profile/presentation/screens/info/profile_info_page.dart';
+import 'package:coleapp/features/profile/presentation/screens/info/bloc/profile_info_bloc.dart';
+import 'package:coleapp/features/profile/presentation/screens/info/bloc/profile_info_state.dart';
+import 'package:coleapp/features/profile/presentation/screens/info/profile_info_content.dart';
 import 'package:coleapp/features/parent/presentation/fotocheck/FotocheckContent.dart';
 import 'package:coleapp/features/parent/presentation/horario/HorarioContent.dart';
 import 'package:coleapp/features/parent/presentation/calificaciones/CalificacionesContent.dart';
@@ -19,6 +21,10 @@ import 'package:coleapp/features/parent/presentation/cuotas/CuotasContent.dart';
 import 'package:coleapp/features/parent/presentation/reuniones/ReunionesContent.dart';
 import 'package:coleapp/features/parent/presentation/agenda/AgendaContent.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
+import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
+import 'package:coleapp/features/parent/presentation/widgets/date_header.dart';
+import 'package:coleapp/features/parent/presentation/widgets/communications_tab.dart';
+import 'package:coleapp/features/parent/presentation/widgets/summary_card.dart';
 
 class ParentHomeContent extends StatefulWidget {
   const ParentHomeContent({super.key});
@@ -32,7 +38,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
 
   final List<Widget> pageList = const [
     _HomeBody(),
-    ProfileInfoPage(),
+    SizedBox.shrink(),
     FotocheckContent(),
     HorarioContent(),
     CalificacionesContent(),
@@ -52,6 +58,13 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
       drawer: _buildDrawer(context),
       body: BlocBuilder<ParentHomeBloc, ParentHomeState>(
         builder: (context, state) {
+          if (state.pageIndex == 1) {
+            return BlocBuilder<ProfileInfoBloc, ProfileInfoState>(
+              builder: (context, pState) {
+                return ProfileInfoContent(pState.user, students: state.students);
+              },
+            );
+          }
           return pageList[state.pageIndex];
         },
       ),
@@ -420,12 +433,21 @@ class _HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reports = context.watch<ParentHomeBloc>().state.dayReports;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const _QuickAccessGrid(),
+          const SizedBox(height: 24),
+          AttendanceSection(reports: reports),
+          const SizedBox(height: 12),
+          const DateHeader(),
+          const SizedBox(height: 20),
+          const CommunicationsTab(),
+          const SizedBox(height: 16),
+          const SummaryCard(),
         ],
       ),
     );
