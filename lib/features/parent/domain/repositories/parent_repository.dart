@@ -12,5 +12,12 @@ abstract class ParentRepository {
     required List<int> studentIds,
     required String tenantId,
   });
+  Future<Resource<List<DayReportModel>>> getAttendanceInRange({
+    required String startDate,
+    required String endDate,
+    required int branchId,
+    required List<int> studentIds,
+    required String tenantId,
+  });
   Future<void> clearBranch();
 }

@@ -21,6 +21,7 @@ import 'package:coleapp/features/parent/presentation/cuotas/CuotasContent.dart';
 import 'package:coleapp/features/parent/presentation/reuniones/ReunionesContent.dart';
 import 'package:coleapp/features/parent/presentation/agenda/AgendaContent.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
+import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
 import 'package:coleapp/features/parent/presentation/widgets/date_header.dart';
 import 'package:coleapp/features/parent/presentation/widgets/communications_tab.dart';
@@ -466,7 +467,23 @@ class _HomeBody extends StatelessWidget {
           children: [
             const _QuickAccessGrid(),
             const SizedBox(height: 24),
-            AttendanceSection(reports: state.dayReports, isLoading: state.isLoadingDayReport),
+            AttendanceSection(
+              reports: state.dayReports,
+              isLoading: state.isLoadingDayReport,
+              onVerMas: () {
+                if (state.students.isNotEmpty && state.branch != null) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => AsistenciaPage(
+                        students: state.students,
+                        tenant: state.tenant,
+                        branchId: state.branch!.id,
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
             const SizedBox(height: 12),
             const DateHeader(),
             const SizedBox(height: 20),

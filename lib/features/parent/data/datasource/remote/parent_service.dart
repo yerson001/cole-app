@@ -69,4 +69,31 @@ class ParentService {
     }
     return reports;
   }
+
+  Future<List<DayReportModel>> getAttendanceInRange({
+    required String startDate,
+    required String endDate,
+    required int branchId,
+    required List<int> studentIds,
+    required String tenantId,
+  }) async {
+    final reports = <DayReportModel>[];
+    for (final studentId in studentIds) {
+      final uri = Uri.parse(
+        '${ApiConstants.baseUrl}/attendance/in-range?startDate=$startDate&endDate=$endDate&search=&branchId=$branchId&studentId=$studentId',
+      );
+      final response = await _client.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'tenant-id': tenantId,
+        },
+      );
+      if (response.statusCode == 200) {
+        final list = jsonDecode(response.body) as List;
+        reports.addAll(list.map((e) => DayReportModel.fromJson(e as Map<String, dynamic>)));
+      }
+    }
+    return reports;
+  }
 }

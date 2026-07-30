@@ -71,6 +71,28 @@ class ParentRepositoryImpl implements ParentRepository {
   }
 
   @override
+  Future<Resource<List<DayReportModel>>> getAttendanceInRange({
+    required String startDate,
+    required String endDate,
+    required int branchId,
+    required List<int> studentIds,
+    required String tenantId,
+  }) async {
+    try {
+      final reports = await _service.getAttendanceInRange(
+        startDate: startDate,
+        endDate: endDate,
+        branchId: branchId,
+        studentIds: studentIds,
+        tenantId: tenantId,
+      );
+      return SuccessResource(reports);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
   Future<void> clearBranch() async {
     final branch = await _storage.getBranch();
     if (branch?.urlLogo != null) {
