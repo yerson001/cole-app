@@ -4,33 +4,33 @@ import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
-import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaBloc.dart';
-import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaEvent.dart';
-import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaState.dart';
+import 'package:coleapp/features/parent/presentation/comunicados/bloc/ComunicadosBloc.dart';
+import 'package:coleapp/features/parent/presentation/comunicados/bloc/ComunicadosEvent.dart';
+import 'package:coleapp/features/parent/presentation/comunicados/bloc/ComunicadosState.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
 import 'package:coleapp/injection.dart';
 
-class AgendaContent extends StatelessWidget {
-  const AgendaContent({super.key});
+class ComunicadosContent extends StatelessWidget {
+  const ComunicadosContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AgendaBloc>(
-      create: (_) => AgendaBloc(locator<ParentUseCases>()),
-      child: const _AgendaBody(),
+    return BlocProvider<ComunicadosBloc>(
+      create: (_) => ComunicadosBloc(locator<ParentUseCases>()),
+      child: const _ComunicadosBody(),
     );
   }
 }
 
-class _AgendaBody extends StatefulWidget {
-  const _AgendaBody();
+class _ComunicadosBody extends StatefulWidget {
+  const _ComunicadosBody();
 
   @override
-  State<_AgendaBody> createState() => _AgendaBodyState();
+  State<_ComunicadosBody> createState() => _ComunicadosBodyState();
 }
 
-class _AgendaBodyState extends State<_AgendaBody> {
+class _ComunicadosBodyState extends State<_ComunicadosBody> {
   bool _initialized = false;
 
   void _tryInitialize(ParentHomeState state) {
@@ -39,15 +39,12 @@ class _AgendaBodyState extends State<_AgendaBody> {
     if (parentId != null && tenantId.isNotEmpty && !_initialized) {
       _initialized = true;
       final now = DateTime.now();
-      final range = _dateRangeForDate(now);
-      context.read<AgendaBloc>().add(LoadAgenda(
+      final range = _dateRangeForMonth(now);
+      context.read<ComunicadosBloc>().add(LoadComunicados(
         parentId: parentId,
         tenantId: tenantId,
         startDate: range.startDate,
         endDate: range.endDate,
-      ));
-      context.read<AgendaBloc>().add(SelectStudent(
-        student: state.students.isNotEmpty ? state.students.first : null,
       ));
     }
   }
@@ -63,7 +60,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
         previous.tenant != current.tenant ||
         previous.students.length != current.students.length,
       listener: (context, state) => _tryInitialize(state),
-      child: BlocBuilder<AgendaBloc, AgendaState>(
+      child: BlocBuilder<ComunicadosBloc, ComunicadosState>(
         builder: (context, state) {
           final parentId = parentState.user?.profile?.id;
           final tenantId = parentState.tenant;
@@ -72,53 +69,41 @@ class _AgendaBodyState extends State<_AgendaBody> {
             return const Center(child: Text('No hay sesión de padre activa'));
           }
 
-          if (state.isLoading && state.items.isEmpty) {
+          if (state.isLoading && state.comunicados.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          final comunicados = state.selectedStudentId == null
+              ? state.comunicados
+              : state.comunicados.where((c) => c.student?.id == state.selectedStudentId).toList();
+
           return RefreshIndicator(
             onRefresh: () async {
-              final range = _dateRangeForDate(state.selectedDate);
-              context.read<AgendaBloc>().add(LoadAgenda(
+              final now = DateTime.now();
+              final range = _dateRangeForMonth(now);
+              context.read<ComunicadosBloc>().add(LoadComunicados(
                 parentId: parentId,
-                studentId: state.selectedStudent?.id,
                 tenantId: tenantId,
                 startDate: range.startDate,
                 endDate: range.endDate,
+                studentId: state.selectedStudentId,
               ));
             },
             child: Column(
               children: [
                 _StudentSelector(
                   students: parentState.students,
-                  selectedStudent: state.selectedStudent,
-                  tenantId: tenantId,
-                  parentId: parentId,
+                  selectedStudentId: state.selectedStudentId,
                 ),
-                _DateNavigator(
-                  selectedDate: state.selectedDate,
-                  onPrevious: () => _changeDate(context, -1),
-                  onNext: () => _changeDate(context, 1),
-                  onToday: () => _changeDate(context, 0, today: true),
-                ),
-                if (state.error != null && state.items.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      state.error!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
-                    ),
-                  ),
                 Expanded(
-                  child: _itemsForDate(state).isEmpty
+                  child: comunicados.isEmpty
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           SizedBox(height: MediaQuery.of(context).size.height * 0.15),
                           const Center(
                             child: Text(
-                              'No hay eventos para este día',
+                              'No hay comunicados',
                               style: TextStyle(color: Colors.grey),
                             ),
                           ),
@@ -127,10 +112,9 @@ class _AgendaBodyState extends State<_AgendaBody> {
                     : ListView.builder(
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.all(16),
-                        itemCount: _itemsForDate(state).length,
+                        itemCount: comunicados.length,
                         itemBuilder: (context, index) {
-                          final item = _itemsForDate(state)[index];
-                          return _AgendaItemCard(item: item);
+                          return _ComunicadoCard(item: comunicados[index]);
                         },
                       ),
                 ),
@@ -142,19 +126,9 @@ class _AgendaBodyState extends State<_AgendaBody> {
     );
   }
 
-  List<AgendaItemModel> _itemsForDate(AgendaState state) {
-    return state.itemsForSelectedDate;
-  }
-
-  void _changeDate(BuildContext context, int days, {bool today = false}) {
-    final bloc = context.read<AgendaBloc>();
-    final newDate = today ? DateTime.now() : bloc.state.selectedDate.add(Duration(days: days));
-    bloc.add(ChangeDate(date: newDate));
-  }
-
-  ({String startDate, String endDate}) _dateRangeForDate(DateTime date) {
-    final start = DateTime(date.year, date.month, date.day);
-    final end = start.add(const Duration(days: 2));
+  ({String startDate, String endDate}) _dateRangeForMonth(DateTime date) {
+    final start = DateTime(date.year, date.month, 1);
+    final end = DateTime(date.year, date.month + 1, 0);
     return (
       startDate: _formatDate(start),
       endDate: _formatDate(end),
@@ -168,15 +142,11 @@ class _AgendaBodyState extends State<_AgendaBody> {
 
 class _StudentSelector extends StatelessWidget {
   final List<StudentModel> students;
-  final StudentModel? selectedStudent;
-  final String tenantId;
-  final int parentId;
+  final int? selectedStudentId;
 
   const _StudentSelector({
     required this.students,
-    this.selectedStudent,
-    required this.tenantId,
-    required this.parentId,
+    this.selectedStudentId,
   });
 
   @override
@@ -185,85 +155,40 @@ class _StudentSelector extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: DropdownButtonFormField<StudentModel?>(
-        value: selectedStudent,
+      child: DropdownButtonFormField<int?>(
+        value: selectedStudentId,
         decoration: InputDecoration(
           labelText: 'Hijo',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ),
         items: [
-          const DropdownMenuItem<StudentModel?>(
+          const DropdownMenuItem<int?>(
             value: null,
             child: Text('Todos mis hijos'),
           ),
           ...students.map((s) => DropdownMenuItem(
-            value: s,
+            value: s.id,
             child: Text('${s.name} ${s.lastName}'),
           )),
         ],
-        onChanged: (student) {
-          context.read<AgendaBloc>().add(SelectStudent(student: student));
+        onChanged: (studentId) {
+          context.read<ComunicadosBloc>().add(SelectStudent(studentId: studentId));
         },
       ),
     );
   }
 }
 
-class _DateNavigator extends StatelessWidget {
-  final DateTime selectedDate;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-  final VoidCallback onToday;
-
-  const _DateNavigator({
-    required this.selectedDate,
-    required this.onPrevious,
-    required this.onNext,
-    required this.onToday,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final dateText = _formatDayHeader(selectedDate);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: onPrevious,
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: onToday,
-              child: Text(
-                dateText,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: onNext,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AgendaItemCard extends StatelessWidget {
+class _ComunicadoCard extends StatelessWidget {
   final AgendaItemModel item;
 
-  const _AgendaItemCard({required this.item});
+  const _ComunicadoCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
     final ac = context.appColors;
-    final (typeColor, icon, typeLabel) = _typeInfo(item.type);
-    final published = item.publishedAt != null
+    final date = item.publishedAt != null
         ? _formatDateTime(DateTime.parse(item.publishedAt!))
         : null;
 
@@ -271,12 +196,12 @@ class _AgendaItemCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: typeColor.withValues(alpha: 0.4), width: 1),
+        side: BorderSide(color: Colors.green.withValues(alpha: 0.4), width: 1),
       ),
       child: InkWell(
         onTap: () {
           if (!item.isRead) {
-            context.read<AgendaBloc>().add(MarkItemAsRead(itemId: item.id));
+            context.read<ComunicadosBloc>().add(MarkComunicadoAsRead(itemId: item.id));
           }
         },
         borderRadius: BorderRadius.circular(12),
@@ -289,10 +214,10 @@ class _AgendaItemCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.12),
+                  color: Colors.green.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: typeColor, size: 22),
+                child: Icon(Icons.campaign_outlined, color: ac.primary, size: 22),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -321,22 +246,6 @@ class _AgendaItemCard extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: typeColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        typeLabel,
-                        style: TextStyle(
-                          color: typeColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 8),
                     Text(
                       item.description,
@@ -345,10 +254,10 @@ class _AgendaItemCard extends StatelessWidget {
                         color: Colors.grey.shade700,
                         fontWeight: item.isRead ? FontWeight.normal : FontWeight.w500,
                       ),
-                      maxLines: 3,
+                      maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Icon(Icons.person_outline, size: 14, color: Colors.grey.shade600),
@@ -360,12 +269,12 @@ class _AgendaItemCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (published != null) ...[
+                        if (date != null) ...[
                           const SizedBox(width: 8),
                           Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
                           const SizedBox(width: 4),
                           Text(
-                            published,
+                            date,
                             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                           ),
                         ],
@@ -381,38 +290,14 @@ class _AgendaItemCard extends StatelessWidget {
     );
   }
 
-  (Color, IconData, String) _typeInfo(String type) {
-    switch (type) {
-      case 'ANNOUNCEMENT':
-        return (Colors.green, Icons.campaign_outlined, 'Comunicado');
-      case 'TASK':
-        return (Colors.orange, Icons.assignment_outlined, 'Tarea');
-      case 'STUDENT_OBSERVATION':
-        return (Colors.red, Icons.feedback_outlined, 'Observación');
-      default:
-        return (Colors.grey, Icons.event_note_outlined, type);
-    }
+  String _formatDateTime(DateTime date) {
+    const months = [
+      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ];
+    final month = months[date.month - 1];
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '${date.day} $month · $hour:$minute';
   }
-}
-
-String _formatDayHeader(DateTime date) {
-  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  const months = [
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-  ];
-  final dayName = days[date.weekday - 1];
-  final monthName = months[date.month - 1];
-  return '$dayName, ${date.day} de $monthName';
-}
-
-String _formatDateTime(DateTime date) {
-  const months = [
-    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-    'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
-  ];
-  final month = months[date.month - 1];
-  final hour = date.hour.toString().padLeft(2, '0');
-  final minute = date.minute.toString().padLeft(2, '0');
-  return '${date.day} $month · $hour:$minute';
 }

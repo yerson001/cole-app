@@ -34,16 +34,32 @@ import 'package:coleapp/features/parent/data/datasource/remote/parent_service.da
     as _i94;
 import 'package:coleapp/features/parent/domain/repositories/parent_repository.dart'
     as _i245;
+import 'package:coleapp/features/parent/domain/usecases/check_in_meeting_by_parent_use_case.dart'
+    as _i290;
+import 'package:coleapp/features/parent/domain/usecases/check_out_meeting_by_parent_use_case.dart'
+    as _i236;
 import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.dart'
     as _i309;
+import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_parent_use_case.dart'
+    as _i311;
+import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_student_use_case.dart'
+    as _i107;
 import 'package:coleapp/features/parent/domain/usecases/get_attendance_in_range_use_case.dart'
     as _i555;
 import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart'
     as _i484;
 import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart'
     as _i720;
+import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart'
+    as _i986;
+import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart'
+    as _i987;
+import 'package:coleapp/features/parent/domain/usecases/get_student_grades_by_student_use_case.dart'
+    as _i890;
 import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart'
     as _i31;
+import 'package:coleapp/features/parent/domain/usecases/mark_agenda_item_as_read_use_case.dart'
+    as _i962;
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart'
     as _i607;
 import 'package:get_it/get_it.dart' as _i174;
@@ -77,6 +93,30 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i720.GetDayReportUseCase>(() => appModule.getDayReportUseCase);
     gh.factory<_i555.GetAttendanceInRangeUseCase>(
       () => appModule.getAttendanceInRangeUseCase,
+    );
+    gh.factory<_i986.GetMeetingsByParentUseCase>(
+      () => appModule.getMeetingsByParentUseCase,
+    );
+    gh.factory<_i290.CheckInMeetingByParentUseCase>(
+      () => appModule.checkInMeetingByParentUseCase,
+    );
+    gh.factory<_i236.CheckOutMeetingByParentUseCase>(
+      () => appModule.checkOutMeetingByParentUseCase,
+    );
+    gh.factory<_i311.GetAgendaByParentUseCase>(
+      () => appModule.getAgendaByParentUseCase,
+    );
+    gh.factory<_i107.GetAgendaByStudentUseCase>(
+      () => appModule.getAgendaByStudentUseCase,
+    );
+    gh.factory<_i962.MarkAgendaItemAsReadUseCase>(
+      () => appModule.markAgendaItemAsReadUseCase,
+    );
+    gh.factory<_i987.GetScheduleBySectionIdUseCase>(
+      () => appModule.getScheduleBySectionIdUseCase,
+    );
+    gh.factory<_i890.GetStudentGradesByStudentUseCase>(
+      () => appModule.getStudentGradesByStudentUseCase,
     );
     gh.factory<_i607.ParentUseCases>(() => appModule.parentUseCases);
     return this;

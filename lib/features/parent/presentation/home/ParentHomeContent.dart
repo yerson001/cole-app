@@ -20,6 +20,7 @@ import 'package:coleapp/features/parent/presentation/pensiones/PensionesContent.
 import 'package:coleapp/features/parent/presentation/cuotas/CuotasContent.dart';
 import 'package:coleapp/features/parent/presentation/reuniones/ReunionesContent.dart';
 import 'package:coleapp/features/parent/presentation/agenda/AgendaContent.dart';
+import 'package:coleapp/features/parent/presentation/comunicados/ComunicadosContent.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
@@ -60,7 +61,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     ReunionesContent(),
     AgendaContent(),
     MasContent(),
-    _ComunicadosContent(),
+    ComunicadosContent(),
   ];
 
   @override
@@ -515,13 +516,4 @@ String _todayDate() {
   return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 }
 
-class _ComunicadosContent extends StatelessWidget {
-  const _ComunicadosContent();
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Comunicados'),
-    );
-  }
-}

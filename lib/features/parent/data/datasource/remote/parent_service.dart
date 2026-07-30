@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:coleapp/core/constants/api_constants.dart';
+import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
+import 'package:coleapp/features/parent/data/models/meeting_model.dart';
+import 'package:coleapp/features/parent/data/models/schedule_model.dart';
+import 'package:coleapp/features/parent/data/models/student_grade_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 
 class ParentService {
@@ -95,5 +99,142 @@ class ParentService {
       }
     }
     return reports;
+  }
+
+  Future<List<ParentMeetingModel>> getMeetingsByParent(int parentId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/parent-meeting-attendance/get-all-by-parent/$parentId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      final list = jsonDecode(response.body) as List;
+      return list.map((e) => ParentMeetingModel.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Error al obtener reuniones: ${response.statusCode}');
+  }
+
+  Future<void> checkInMeetingByParent({required int parentId, required int meetingId, required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/parent-meeting-attendance/check-in-by-parent');
+    final response = await _client.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+      body: jsonEncode({'parentId': parentId, 'meetingId': meetingId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Error al marcar ingreso: ${response.statusCode}');
+    }
+  }
+
+  Future<void> checkOutMeetingByParent({required int parentId, required int meetingId, required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/parent-meeting-attendance/check-out-by-parent');
+    final response = await _client.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+      body: jsonEncode({'parentId': parentId, 'meetingId': meetingId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Error al marcar salida: ${response.statusCode}');
+    }
+  }
+
+  Future<AgendaModel> getAgendaByParent({
+    required int parentId,
+    required String startDate,
+    required String endDate,
+    required String tenantId,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}/virtual-agenda/parent/$parentId?startDate=$startDate&endDate=$endDate',
+    );
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      return AgendaModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    }
+    throw Exception('Error al obtener agenda: ${response.statusCode}');
+  }
+
+  Future<AgendaModel> getAgendaByStudent({
+    required int studentId,
+    required String startDate,
+    required String endDate,
+    required String tenantId,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}/virtual-agenda/student/$studentId?startDate=$startDate&endDate=$endDate',
+    );
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      return AgendaModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    }
+    throw Exception('Error al obtener agenda: ${response.statusCode}');
+  }
+
+  Future<void> markAgendaItemAsRead({required String itemId, required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/virtual-agenda/items/$itemId/read');
+    final response = await _client.patch(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+      body: jsonEncode({}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Error al marcar como leído: ${response.statusCode}');
+    }
+  }
+
+  Future<List<ScheduleModel>> getScheduleBySectionId(int sectionId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/schedule/section/$sectionId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      final list = jsonDecode(response.body) as List;
+      return list.map((e) => ScheduleModel.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Error al obtener horario: ${response.statusCode}');
+  }
+
+  Future<List<StudentGradeModel>> getStudentGradesByStudent(int studentId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/student-assessment/by-student/$studentId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      final list = jsonDecode(response.body) as List;
+      return list.map((e) => StudentGradeModel.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Error al obtener calificaciones: ${response.statusCode}');
   }
 }

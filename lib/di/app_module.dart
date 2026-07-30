@@ -47,9 +47,17 @@ import 'package:coleapp/features/parent/data/repositories/parent_repository_impl
 import 'package:coleapp/features/parent/domain/repositories/parent_repository.dart';
 import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/check_in_meeting_by_parent_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/check_out_meeting_by_parent_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_parent_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_attendance_in_range_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_student_grades_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/mark_agenda_item_as_read_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:injectable/injectable.dart';
 
@@ -158,11 +166,51 @@ abstract class AppModule {
       GetAttendanceInRangeUseCase(repository: parentRepository);
 
   @injectable
+  GetMeetingsByParentUseCase get getMeetingsByParentUseCase =>
+      GetMeetingsByParentUseCase(repository: parentRepository);
+
+  @injectable
+  CheckInMeetingByParentUseCase get checkInMeetingByParentUseCase =>
+      CheckInMeetingByParentUseCase(repository: parentRepository);
+
+  @injectable
+  CheckOutMeetingByParentUseCase get checkOutMeetingByParentUseCase =>
+      CheckOutMeetingByParentUseCase(repository: parentRepository);
+
+  @injectable
+  GetAgendaByParentUseCase get getAgendaByParentUseCase =>
+      GetAgendaByParentUseCase(repository: parentRepository);
+
+  @injectable
+  GetAgendaByStudentUseCase get getAgendaByStudentUseCase =>
+      GetAgendaByStudentUseCase(repository: parentRepository);
+
+  @injectable
+  MarkAgendaItemAsReadUseCase get markAgendaItemAsReadUseCase =>
+      MarkAgendaItemAsReadUseCase(repository: parentRepository);
+
+  @injectable
+  GetScheduleBySectionIdUseCase get getScheduleBySectionIdUseCase =>
+      GetScheduleBySectionIdUseCase(repository: parentRepository);
+
+  @injectable
+  GetStudentGradesByStudentUseCase get getStudentGradesByStudentUseCase =>
+      GetStudentGradesByStudentUseCase(repository: parentRepository);
+
+  @injectable
   ParentUseCases get parentUseCases => ParentUseCases(
     getBranchUseCase: getBranchUseCase,
     clearBranchUseCase: clearBranchUseCase,
     getStudentsUseCase: getStudentsUseCase,
     getDayReportUseCase: getDayReportUseCase,
     getAttendanceInRangeUseCase: getAttendanceInRangeUseCase,
+    getMeetingsByParentUseCase: getMeetingsByParentUseCase,
+    checkInMeetingByParentUseCase: checkInMeetingByParentUseCase,
+    checkOutMeetingByParentUseCase: checkOutMeetingByParentUseCase,
+    getAgendaByParentUseCase: getAgendaByParentUseCase,
+    getAgendaByStudentUseCase: getAgendaByStudentUseCase,
+    markAgendaItemAsReadUseCase: markAgendaItemAsReadUseCase,
+    getScheduleBySectionIdUseCase: getScheduleBySectionIdUseCase,
+    getStudentGradesByStudentUseCase: getStudentGradesByStudentUseCase,
   );
 }

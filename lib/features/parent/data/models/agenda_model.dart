@@ -1,0 +1,135 @@
+class AgendaModel {
+  final int id;
+  final List<AgendaItemModel> items;
+  final String? createdAt;
+  final String? updatedAt;
+
+  AgendaModel({
+    required this.id,
+    required this.items,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory AgendaModel.fromJson(Map<String, dynamic> json) {
+    final list = json['items'] as List? ?? [];
+    return AgendaModel(
+      id: json['id'] as int,
+      items: list.map((e) => AgendaItemModel.fromJson(e as Map<String, dynamic>)).toList(),
+      createdAt: json['createdAt'] as String?,
+      updatedAt: json['updatedAt'] as String?,
+    );
+  }
+}
+
+class AgendaItemModel {
+  final String id;
+  final String type;
+  final String refId;
+  final String title;
+  final String description;
+  final String? dueDate;
+  final String? publishedAt;
+  final AgendaSenderModel sender;
+  final bool completed;
+  final String? createdAt;
+  final AgendaStudentModel? student;
+  final String? readAt;
+
+  AgendaItemModel({
+    required this.id,
+    required this.type,
+    required this.refId,
+    required this.title,
+    required this.description,
+    this.dueDate,
+    this.publishedAt,
+    required this.sender,
+    required this.completed,
+    this.createdAt,
+    this.student,
+    this.readAt,
+  });
+
+  factory AgendaItemModel.fromJson(Map<String, dynamic> json) {
+    return AgendaItemModel(
+      id: json['id'] as String,
+      type: json['type'] as String,
+      refId: json['refId'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      dueDate: json['dueDate'] as String?,
+      publishedAt: json['publishedAt'] as String?,
+      sender: AgendaSenderModel.fromJson(json['sender'] as Map<String, dynamic>),
+      completed: json['completed'] as bool? ?? false,
+      createdAt: json['createdAt'] as String?,
+      student: json['student'] != null
+          ? AgendaStudentModel.fromJson(json['student'] as Map<String, dynamic>)
+          : null,
+      readAt: json['readAt'] as String?,
+    );
+  }
+
+  bool get isRead => readAt != null && readAt!.isNotEmpty;
+
+  AgendaItemModel copyWith({String? readAt}) {
+    return AgendaItemModel(
+      id: id,
+      type: type,
+      refId: refId,
+      title: title,
+      description: description,
+      dueDate: dueDate,
+      publishedAt: publishedAt,
+      sender: sender,
+      completed: completed,
+      createdAt: createdAt,
+      student: student,
+      readAt: readAt ?? this.readAt,
+    );
+  }
+}
+
+class AgendaSenderModel {
+  final int id;
+  final String name;
+  final String lastName;
+
+  AgendaSenderModel({
+    required this.id,
+    required this.name,
+    required this.lastName,
+  });
+
+  factory AgendaSenderModel.fromJson(Map<String, dynamic> json) {
+    return AgendaSenderModel(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      lastName: json['lastName'] as String,
+    );
+  }
+
+  String get fullName => '$name $lastName';
+}
+
+class AgendaStudentModel {
+  final int id;
+  final String name;
+  final String lastName;
+
+  AgendaStudentModel({
+    required this.id,
+    required this.name,
+    required this.lastName,
+  });
+
+  factory AgendaStudentModel.fromJson(Map<String, dynamic> json) {
+    return AgendaStudentModel(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      lastName: json['lastName'] as String,
+    );
+  }
+
+  String get fullName => '$name $lastName';
+}
