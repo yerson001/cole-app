@@ -5,4 +5,6 @@ class ChangePage extends ParentEvent {
   ChangePage({required this.pageIndex});
 }
 
+class GetParentUser extends ParentEvent {}
+
 class Logout extends ParentEvent {}

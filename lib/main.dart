@@ -13,7 +13,7 @@ import 'package:coleapp/features/promoter/presentation/screens/promoter_screen.d
 import 'package:coleapp/features/secretary/presentation/screens/secretary_screen.dart';
 import 'package:coleapp/features/assistant/presentation/screens/assistant_screen.dart';
 import 'package:coleapp/features/teacher/presentation/screens/teacher_screen.dart';
-import 'package:coleapp/features/parent/presentation/screens/parent_screen.dart';
+import 'package:coleapp/features/parent/presentation/screens/parent_page.dart';
 import 'package:coleapp/injection.dart';
 
 final mainLog = log.Logger('MAIN');

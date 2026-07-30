@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:coleapp/features/auth/data/models/role.dart';
-import 'package:coleapp/features/roles/presentation/widgets/roles_item.dart';
 import 'package:coleapp/features/roles/presentation/bloc/roles_bloc.dart';
 import 'package:coleapp/features/roles/presentation/bloc/roles_state.dart';
 
@@ -15,31 +13,62 @@ class RolesPage extends StatefulWidget {
 class _RolesPageState extends State<RolesPage> {
   @override
   Widget build(BuildContext context) {
+    final c = Theme.of(context).colorScheme;
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        centerTitle: true,
+      ),
       body: BlocBuilder<RolesBloc, RolesState>(
         builder: (context, state) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                colors: [
-                  Color(0xFF003366),
-                  Color(0xFF4CAF50),
+          final roles = state.roles ?? [];
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final role in roles)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 60,
+                            backgroundColor: c.primary.withValues(alpha: 0.15),
+                            child: Icon(Icons.person, size: 56, color: c.primary),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            role.displayName,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: c.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          SizedBox(
+                            width: 200,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context, role.route, (route) => false);
+                              },
+                              icon: const Icon(Icons.login),
+                              label: const Text('Ingresar'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (roles.isEmpty)
+                    const Text('No hay roles disponibles'),
                 ],
               ),
-            ),
-            child: ListView(
-              shrinkWrap: true,
-              children: state.roles != null
-                  ? (state.roles?.map((Role role) {
-                        return RolesItem(role);
-                      }).toList())
-                      as List<Widget>
-                  : [],
             ),
           );
         },

@@ -11,6 +11,13 @@ class ParentBloc extends Bloc<ParentEvent, ParentState> {
       emit(state.copyWith(pageIndex: event.pageIndex));
     });
 
+    on<GetParentUser>((event, emit) async {
+      final session = await authUseCases.getusersessionUseCase.call();
+      if (session != null) {
+        emit(state.copyWith(user: session.user));
+      }
+    });
+
     on<Logout>((event, emit) async {
       await authUseCases.logoutUseCase.call();
     });

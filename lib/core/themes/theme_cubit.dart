@@ -36,6 +36,21 @@ class ThemeCubit extends Cubit<ThemeMode> {
     return Icons.brightness_auto;
   }
 
+  Future<void> cycleTo(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    String key;
+    if (mode == ThemeMode.system) {
+      key = 'system';
+    } else if (mode == ThemeMode.light) {
+      key = 'light';
+    } else {
+      key = 'dark';
+    }
+    await prefs.setString('theme_mode', key);
+    _log.info('saved theme_mode=$key');
+    emit(mode);
+  }
+
   Future<void> cycle() async {
     final prefs = await SharedPreferences.getInstance();
     final newMode = next;

@@ -39,6 +39,79 @@
 └────────────────────────────────────────────┘
 ```
 
+## Drawer — Patrón initflutter
+
+**Fuente:** `/home/yrsn/Dev/cole-check/initflutter/lib/src/presentation/pages/client/home/ClientHomePage.dart` (cliente) y `/home/yrsn/Dev/cole-check/initflutter/lib/src/presentation/pages/driver/home/DriverHomePage.dart` (conductor).
+
+El drawer se implementa inline en `ParentContent` siguiendo ese patrón:
+
+```
+Scaffold(
+  drawer: BlocBuilder<ParentBloc, ParentState>(
+    builder: (context, state) => Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(gradient: ...),
+            child: Text('Menú del Padre'),
+          ),
+          // SECCIÓN GENERAL
+          Padding(child: Text('GENERAL', style: ...)),
+          Card(
+            child: Column(children: [
+              ListTile(
+                selected: state.pageIndex == 0,
+                leading: Icon(Icons.home_outlined),
+                title: Text('Inicio'),
+                trailing: Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  context.read<ParentBloc>().add(ChangePage(pageIndex: 0));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                selected: state.pageIndex == 1,
+                leading: Icon(Icons.people_outline),
+                title: Text('Hijos/Estudiantes'),
+                trailing: Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  context.read<ParentBloc>().add(ChangePage(pageIndex: 1));
+                  Navigator.pop(context);
+                },
+              ),
+            ]),
+          ),
+          // SECCIÓN PREFERENCIAS
+          Padding(child: Text('PREFERENCIAS', style: ...)),
+          Card(
+            child: Column(children: [
+              ListTile(
+                leading: Icon(Icons.logout, color: Colors.red),
+                title: Text('Cerrar sesión', style: ...),
+                trailing: Icon(Icons.arrow_forward_ios),
+                onTap: () { /* logout + navigate */ },
+              ),
+            ]),
+          ),
+        ],
+      ),
+    ),
+  ),
+  body: BlocBuilder<ParentBloc, ParentState>(
+    builder: (context, state) => pageList[state.pageIndex],
+  ),
+)
+```
+
+**Reglas del drawer:**
+- `DrawerHeader` con gradiente y título del rol
+- Secciones con `Text` header (ej. "GENERAL", "PREFERENCIAS")
+- Cada sección es un `Card` > `Column` > `ListTile`s
+- Cada `ListTile` tiene `selected: state.pageIndex == N`
+- `onTap` dispatchea `ChangePage(pageIndex: N)` + `Navigator.pop(context)`
+- Logout va como último tile en "PREFERENCIAS" (NO como FAB)
+- Sin FAB flotante — el logout está en el drawer
+
 ## Widgets (presentation/widgets/)
 
 | Widget | Archivo | Descripción |
