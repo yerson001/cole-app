@@ -473,15 +473,27 @@ class _HomeBody extends StatelessWidget {
               onVerMas: () {
                 print('[DEBUG] Ver más tapped. students=${state.students.length}, branch=${state.branch?.id}, tenant=${state.tenant}');
                 if (state.students.isNotEmpty) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => AsistenciaPage(
-                        students: state.students,
-                        tenant: state.tenant,
-                        branchId: state.branch?.id ?? 1,
+                  Navigator.of(context)
+                    .push(
+                      MaterialPageRoute(
+                        builder: (_) => AsistenciaPage(
+                          students: state.students,
+                          tenant: state.tenant,
+                          branchId: state.branch?.id ?? 1,
+                        ),
                       ),
-                    ),
-                  );
+                    )
+                    .then((_) {
+                      print('[DEBUG] Back from AsistenciaPage -> reload daily attendance');
+                      if (state.students.isNotEmpty && state.branch != null) {
+                        context.read<ParentHomeBloc>().add(GetDayReport(
+                          date: _todayDate(),
+                          branchId: state.branch!.id,
+                          studentIds: state.students.map((s) => s.id).toList(),
+                          tenantId: state.tenant,
+                        ));
+                      }
+                    });
                 }
               },
             ),
