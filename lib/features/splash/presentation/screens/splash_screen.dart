@@ -21,8 +21,7 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _checkScale;
   late final Animation<double> _coleWidth;
   late final Animation<double> _coleFade;
-  late final Animation<double> _tagline1Anim;
-  late final Animation<double> _tagline2Anim;
+  late final Animation<double> _progress;
 
   @override
   void initState() {
@@ -31,48 +30,36 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 2),
     );
 
     _checkScale = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.35, curve: Curves.elasticOut),
+        curve: const Interval(0.0, 0.4, curve: Curves.elasticOut),
       ),
     );
 
     _coleWidth = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.35, 0.6, curve: Curves.easeOut),
+        curve: const Interval(0.4, 0.7, curve: Curves.easeOut),
       ),
     );
 
     _coleFade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.35, 0.6, curve: Curves.easeIn),
+        curve: const Interval(0.4, 0.7, curve: Curves.easeIn),
       ),
     );
 
-    _tagline1Anim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.6, 0.8, curve: Curves.easeIn),
-      ),
-    );
-
-    _tagline2Anim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.7, 0.85, curve: Curves.easeIn),
-      ),
-    );
+    _progress = Tween<double>(begin: 0, end: 1).animate(_controller);
 
     _controller.forward();
     _log.info('Animación iniciada');
 
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         context.read<SplashBloc>().add(CheckSplashSession());
       }
@@ -155,40 +142,31 @@ class _SplashScreenState extends State<SplashScreen>
                 AnimatedBuilder(
                   animation: _controller,
                   builder: (context, child) => Opacity(
-                    opacity: _tagline1Anim.value,
+                    opacity: _coleFade.value,
                     child: Text(
-                      'Control Inteligente',
+                      'Colecheck',
                       style: TextStyle(
-                        fontSize: 16,
-                        color: c.primary.withValues(alpha: 0.85),
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) => Opacity(
-                    opacity: _tagline2Anim.value,
-                    child: Text(
-                      'en la Gestión Educativa',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: c.primary.withValues(alpha: 0.6),
-                        letterSpacing: 0.8,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: c.primary,
+                        letterSpacing: 2,
                       ),
                     ),
                   ),
                 ),
                 const Spacer(flex: 1),
                 _DotSpinner(color: c.primary),
-                const SizedBox(height: 16),
-                Text(
-                  'v0.2.0',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: c.primary.withValues(alpha: 0.3),
+                const SizedBox(height: 24),
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 100),
+                    child: LinearProgressIndicator(
+                      value: _progress.value,
+                      backgroundColor: c.primary.withValues(alpha: 0.1),
+                      color: c.primary,
+                      minHeight: 4,
+                    ),
                   ),
                 ),
                 const Spacer(flex: 1),

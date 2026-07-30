@@ -34,10 +34,9 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalStorage _storage;
 
   AuthRepositoryImpl({
-    required AuthService authService,
+    required this._authService,
     required AuthLocalStorage storage,
-  })  : _authService = authService,
-        _storage = storage;
+  })  : _storage = storage;
 
   // ── MÉTODOS ───────────────────────────────────────────────
 

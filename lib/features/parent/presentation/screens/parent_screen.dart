@@ -8,6 +8,11 @@ import 'package:coleapp/features/auth/presentation/screens/login_page.dart';
 import 'package:coleapp/features/parent/presentation/bloc/parent_bloc.dart';
 import 'package:coleapp/features/parent/presentation/bloc/parent_event.dart';
 import 'package:coleapp/features/parent/presentation/bloc/parent_state.dart';
+import 'package:coleapp/features/parent/presentation/widgets/quick_access_grid.dart';
+import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
+import 'package:coleapp/features/parent/presentation/widgets/communications_tab.dart';
+import 'package:coleapp/features/parent/presentation/widgets/summary_card.dart';
+import 'package:coleapp/features/parent/presentation/widgets/priority_banner.dart';
 
 class ParentScreen extends StatelessWidget {
   const ParentScreen({super.key});
@@ -227,241 +232,25 @@ class ParentScreen extends StatelessWidget {
   }
 
   Widget _buildDashboard(BuildContext context) {
-    final c = context.appColors;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _quickAccessGrid(context),
+          const PriorityBanner(),
+          const SizedBox(height: 20),
+          const QuickAccessGrid(),
           const SizedBox(height: 24),
-          _attendanceSection(context),
-          const SizedBox(height: 24),
-          Text('Últimos comunicados', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
+          const AttendanceSection(childrenCount: 2),
           const SizedBox(height: 12),
-          _communicationList(context),
+          const _DateHeader(),
           const SizedBox(height: 24),
-          _summaryCard(context),
+          const CommunicationsTab(),
+          const SizedBox(height: 24),
+          const SummaryCard(),
+          const SizedBox(height: 32),
         ],
       ),
-    );
-  }
-
-  Widget _quickAccessGrid(BuildContext context) {
-    final c = context.appColors;
-    final items = [
-      {'icon': Icons.badge_outlined, 'label': 'Fotocheck'},
-      {'icon': Icons.schedule_outlined, 'label': 'Horario'},
-      {'icon': Icons.grade_outlined, 'label': 'Calificaciones'},
-      {'icon': Icons.account_balance_outlined, 'label': 'Pensiones'},
-      {'icon': Icons.payments_outlined, 'label': 'Cuotas'},
-      {'icon': Icons.handshake_outlined, 'label': 'Reuniones'},
-      {'icon': Icons.checklist_outlined, 'label': 'Asistencia'},
-      {'icon': Icons.campaign_outlined, 'label': 'Comunicados'},
-      {'icon': Icons.calendar_month_outlined, 'label': 'Agenda'},
-    ];
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1.5,
-        crossAxisSpacing: 6,
-        mainAxisSpacing: 6,
-      ),
-      itemCount: items.length,
-      itemBuilder: (_, i) => Card(
-        color: c.surface,
-        elevation: 0.5,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: c.border, width: 0.5),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {},
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(items[i]['icon'] as IconData, size: 18, color: c.primary),
-              const SizedBox(height: 4),
-              Text(items[i]['label'] as String,
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: c.textPrimary),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _attendanceSection(BuildContext context) {
-    final c = context.appColors;
-    final students = [
-      {'name': 'Carlos', 'grade': '5° A', 'entry': '07:45', 'exit': '14:30'},
-      {'name': 'Ana', 'grade': '3° B', 'entry': '07:50', 'exit': null},
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.check_circle_outline, color: c.success, size: 22),
-            const SizedBox(width: 8),
-            Text('Asistencia hoy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 130,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: students.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (_, i) {
-              final s = students[i];
-              final exit = s['exit'];
-              final hasExit = exit != null;
-              return Card(
-                color: c.surface,
-                elevation: 1,
-                surfaceTintColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: c.border, width: 0.5),
-                ),
-                child: Container(
-                  width: 170,
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundColor: c.successLight.withValues(alpha: 0.3),
-                            child: Icon(Icons.person, size: 18, color: c.success),
-                          ),
-                          const SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(s['name'] as String, style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
-                              Text(s['grade'] as String, style: TextStyle(fontSize: 11, color: c.textSecondary)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          Icon(Icons.login, size: 16, color: c.success),
-                          const SizedBox(width: 4),
-                          Text('Entrada:', style: TextStyle(fontSize: 11, color: c.textSecondary)),
-                          const Spacer(),
-                          Text(s['entry'] as String, style: TextStyle(fontWeight: FontWeight.w700, color: c.textPrimary)),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.logout, size: 16, color: hasExit ? c.success : c.textDisabled),
-                          const SizedBox(width: 4),
-                          Text('Salida:', style: TextStyle(fontSize: 11, color: c.textSecondary)),
-                          const Spacer(),
-                          Text(hasExit ? exit : '--:--', style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: hasExit ? c.textPrimary : c.textDisabled,
-                          )),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _summaryCard(BuildContext context) {
-    final c = context.appColors;
-    return Card(
-      color: c.surface,
-      elevation: 1,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: c.border, width: 0.5),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.analytics_outlined, color: c.primary),
-                const SizedBox(width: 8),
-                Text('Resumen', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: c.textPrimary)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _summaryRow(context, Icons.star_outline, 'Notas', '☆☆☆☆  16', c),
-            const SizedBox(height: 12),
-            _summaryRow(context, Icons.check_circle_outline, 'Asistencia', '██████  95%', c),
-            const SizedBox(height: 12),
-            _summaryRow(context, Icons.campaign_outlined, 'Comunicados', '3 nuevos', c),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _summaryRow(BuildContext context, IconData icon, String label, String value, AppColors c) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: c.primary),
-        const SizedBox(width: 10),
-        Text(label, style: TextStyle(color: c.textSecondary, fontSize: 14)),
-        const Spacer(),
-        Text(value, style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
-      ],
-    );
-  }
-
-  Widget _communicationList(BuildContext context) {
-    final c = context.appColors;
-    final communications = [
-      {'title': 'Reunión de padres', 'date': '15/08/2026', 'desc': 'Reunión general en el auditorio'},
-      {'title': 'Entrega de notas', 'date': '22/08/2026', 'desc': 'Segundo bimestre'},
-      {'title': 'Día del logro', 'date': '05/09/2026', 'desc': 'Presentación de estudiantes'},
-    ];
-    return Column(
-      children: communications.map((com) => Card(
-        color: c.surface,
-        elevation: 1,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: c.border, width: 0.5),
-        ),
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundColor: c.primaryLight.withValues(alpha: 0.2),
-            child: Icon(Icons.campaign, color: c.primary, size: 20),
-          ),
-          title: Text(com['title']!, style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
-          subtitle: Text('${com['date']} — ${com['desc']}', style: TextStyle(color: c.textSecondary, fontSize: 12)),
-          trailing: Icon(Icons.chevron_right, color: c.textSecondary),
-          onTap: () {},
-        ),
-      )).toList(),
     );
   }
 
@@ -474,6 +263,36 @@ class ParentScreen extends StatelessWidget {
           Icon(icon, size: 64, color: c.textDisabled),
           const SizedBox(height: 16),
           Text(label, style: TextStyle(fontSize: 20, color: c.textSecondary)),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateHeader extends StatelessWidget {
+  const _DateHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final now = DateTime.now();
+    final months = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre',
+    ];
+    final weekdays = [
+      'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado',
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        children: [
+          Icon(Icons.calendar_today, size: 14, color: c.textDisabled),
+          const SizedBox(width: 6),
+          Text(
+            '${weekdays[now.weekday % 7]}, ${now.day} de ${months[now.month - 1]} del ${now.year}',
+            style: TextStyle(fontSize: 12, color: c.textSecondary),
+          ),
         ],
       ),
     );
