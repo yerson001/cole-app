@@ -19,6 +19,7 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
         previousPageIndex: state.pageIndex,
       ));
       if (event.pageIndex == 0 && state.students.isNotEmpty && state.branch != null) {
+        print('[DEBUG] ChangePage to home -> reloading day report');
         add(GetDayReport(
           date: _todayDate(),
           branchId: state.branch!.id,
