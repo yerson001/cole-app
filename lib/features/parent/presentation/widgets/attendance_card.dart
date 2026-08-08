@@ -16,129 +16,163 @@ class AttendanceCard extends StatelessWidget {
 
   const AttendanceCard({super.key, required this.report, this.index = 0});
 
+  static const _primary = Color(0xFF225BAA);
+
+  String _initials() {
+    final s = report.student;
+    final parts = [s.name, s.lastName].where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    return parts
+        .map((p) => p[0].toUpperCase())
+        .take(2)
+        .join();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = report.student;
     final a = report.attendances.isNotEmpty ? report.attendances.first : null;
     final avatarColor = _avatarColors[index % _avatarColors.length];
+    final gradeLabel =
+        '${s.level.name.toUpperCase()} ${s.grade.name.toUpperCase()}${s.section.name.toUpperCase()}';
     return Container(
       width: 320,
-      margin: const EdgeInsets.only(right: 16),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: avatarColor.withValues(alpha: 0.1),
-                    child: Icon(Icons.school, color: avatarColor, size: 22),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: avatarColor.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: avatarColor.withValues(alpha: 0.20)),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  _initials(),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: avatarColor,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(s.name,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 2),
-                        Text(s.lastName,
-                            style: const TextStyle(fontSize: 10)),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _badge(context, a?.updatedInClass ?? false),
-                      const SizedBox(height: 4),
-                      Text('${s.level.name} ${s.grade.name}${s.section.name}',
-                          style: TextStyle(fontSize: 10, color: Colors.grey[500])),
-                    ],
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _checkColumn('INGRESO', a?.checkInTime, a?.statusCheckIn),
-                  _checkColumn('SALIDA', a?.checkOutTime, a?.statusCheckOut),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${s.name} ${s.lastName}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      gradeLabel,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _checkColumn(
+                  label: 'INGRESO',
+                  time: a?.checkInTime,
+                  place: a?.updatedInClass == true ? 'Aula' : 'Puerta Principal',
+                  highlighted: true,
+                ),
+              ),
+              Expanded(
+                child: _checkColumn(
+                  label: 'SALIDA',
+                  time: a?.checkOutTime,
+                  place: a?.checkOutTime != null ? 'Registrado' : 'Pendiente',
+                  highlighted: false,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _badge(BuildContext context, bool updatedInClass) {
+  Widget _checkColumn({
+    required String label,
+    String? time,
+    required String place,
+    required bool highlighted,
+  }) {
+    final color = highlighted ? _primary : const Color(0xFF424751);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.only(left: 10),
       decoration: BoxDecoration(
-        color: updatedInClass ? Colors.green[50] : Colors.orange[50],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        updatedInClass ? 'Aula' : 'Puerta',
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: updatedInClass ? Colors.green[700] : Colors.orange[700],
-        ),
-      ),
-    );
-  }
-
-  Widget _checkColumn(String label, String? time, String? status) {
-    final statusColor = _statusColor(status);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey[500])),
-        const SizedBox(height: 4),
-        Text(
-          time != null ? time.substring(0, 5) : '--:--',
-          style: const TextStyle(fontSize: 15),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: statusColor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            _statusLabel(status),
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: statusColor),
+        border: Border(
+          left: BorderSide(
+            color: highlighted ? _primary : const Color(0xFFE2E8F0),
+            width: 3,
           ),
         ),
-      ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              color: _primary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            time != null && time.length >= 5 ? time.substring(0, 5) : '--:--',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: color.withValues(alpha: highlighted ? 1 : 0.45),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            place,
+            style: TextStyle(
+              fontSize: 11,
+              color: color.withValues(alpha: highlighted ? 0.75 : 0.6),
+            ),
+          ),
+        ],
+      ),
     );
-  }
-
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'PRESENT': return Colors.green;
-      case 'LATE': return Colors.orange;
-      case 'ABSENT': return Colors.red;
-      default: return Colors.grey;
-    }
-  }
-
-  String _statusLabel(String? status) {
-    switch (status) {
-      case 'PRESENT': return 'PRESENTE';
-      case 'LATE': return 'TARDE';
-      case 'ABSENT': return 'FALTO';
-      default: return 'SIN MARCAR';
-    }
   }
 }

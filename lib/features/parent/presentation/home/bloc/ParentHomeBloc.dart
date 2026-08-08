@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:coleapp/core/errors/resource.dart';
 import 'package:coleapp/features/auth/domain/usecases/auth_use_cases.dart';
+import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
+import 'package:coleapp/features/parent/data/models/meeting_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeEvent.dart';
@@ -70,6 +72,8 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
       if (result is SuccessResource<List<StudentModel>>) {
         print('[DEBUG] Students loaded: ${result.data.length} students');
         emit(state.copyWith(students: result.data));
+        print('[DEBUG] Dispatching LoadHomeTabs');
+        add(LoadHomeTabs(parentId: event.parentId, tenantId: event.tenantId));
         if (state.branch != null && result.data.isNotEmpty) {
           print('[DEBUG] Branch ready, dispatching GetDayReport');
           add(GetDayReport(
@@ -132,6 +136,51 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
     on<Logout>((event, emit) async {
       await parentUseCases.clearBranchUseCase.call();
       await authUseCases.logoutUseCase.call();
+    });
+
+    on<LoadHomeTabs>((event, emit) async {
+      emit(state.copyWith(isLoadingTabs: true));
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, 1);
+      final end = DateTime(now.year, now.month + 1, 0);
+      String fmt(DateTime d) =>
+          '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+      List<AgendaItemModel> comunicados = const [];
+      List<AgendaItemModel> agendaItems = const [];
+      List<ParentMeetingModel> meetings = const [];
+
+      final agendaResult = await parentUseCases.getAgendaByParentUseCase.call(
+        parentId: event.parentId,
+        startDate: fmt(start),
+        endDate: fmt(end),
+        tenantId: event.tenantId,
+      );
+      if (agendaResult is SuccessResource<AgendaModel>) {
+        final items = agendaResult.data.items;
+        comunicados = items
+            .where((i) => i.type == 'ANNOUNCEMENT')
+            .toList()
+          ..sort((a, b) {
+            final aDate = DateTime.tryParse(a.publishedAt ?? '') ?? DateTime(0);
+            final bDate = DateTime.tryParse(b.publishedAt ?? '') ?? DateTime(0);
+            return bDate.compareTo(aDate);
+          });
+        agendaItems = items.where((i) => i.type != 'ANNOUNCEMENT').toList();
+      }
+
+      final meetingsResult = await parentUseCases.getMeetingsByParentUseCase
+          .call(event.parentId, tenantId: event.tenantId);
+      if (meetingsResult is SuccessResource<List<ParentMeetingModel>>) {
+        meetings = meetingsResult.data;
+      }
+
+      emit(state.copyWith(
+        comunicados: comunicados,
+        agendaItems: agendaItems,
+        meetings: meetings,
+        isLoadingTabs: false,
+      ));
     });
   }
 

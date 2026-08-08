@@ -24,9 +24,7 @@ import 'package:coleapp/features/parent/presentation/comunicados/ComunicadosCont
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
-import 'package:coleapp/features/parent/presentation/widgets/date_header.dart';
-import 'package:coleapp/features/parent/presentation/widgets/communications_tab.dart';
-import 'package:coleapp/features/parent/presentation/widgets/summary_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ParentHomeContent extends StatefulWidget {
   const ParentHomeContent({super.key});
@@ -86,60 +84,129 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  AppBar _buildHomeHeader() {
+    const primary = Color(0xFF225BAA);
+    const error = Color(0xFFBA1A1A);
+    final now = DateTime.now();
+    const days = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+    final shortDate = '${days[now.weekday - 1]} ${now.day}';
     return AppBar(
-      leading: Builder(
-        builder: (ctx) {
-          return BlocBuilder<ParentHomeBloc, ParentHomeState>(
-            builder: (context, state) {
-              if (state.pageIndex == 0) {
-                return IconButton(
-                  icon: const Icon(Icons.menu_rounded),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
-                );
-              }
-              if (state.pageIndex == 1) {
-                return IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
-                );
-              }
-              return IconButton(
-                icon: const Icon(Icons.arrow_back_rounded),
-                onPressed: () {
-                  context.read<ParentHomeBloc>().add(
-                    ChangePage(pageIndex: state.previousPageIndex),
+      backgroundColor: primary,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.menu_rounded, size: 28),
+        onPressed: () {},
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            shortDate,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const Text(
+            'Asistencia de hoy',
+            style: TextStyle(
+              fontSize: 12,
+              color: Color(0xCCFFFFFF),
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, size: 26),
+                onPressed: () {},
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    color: error,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: primary, width: 1.5),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final state = context.watch<ParentHomeBloc>().state;
+    if (state.pageIndex == 0) {
+      return _buildHomeHeader();
+    }
+    return AppBar(
+          leading: Builder(
+            builder: (ctx) {
+              return BlocBuilder<ParentHomeBloc, ParentHomeState>(
+                builder: (context, state) {
+                  if (state.pageIndex == 0) {
+                    return IconButton(
+                      icon: const Icon(Icons.menu_rounded),
+                      onPressed: () => Scaffold.of(ctx).openDrawer(),
+                    );
+                  }
+                  if (state.pageIndex == 1) {
+                    return IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      onPressed: () => Scaffold.of(ctx).openDrawer(),
+                    );
+                  }
+                  return IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () {
+                      context.read<ParentHomeBloc>().add(
+                        ChangePage(pageIndex: state.previousPageIndex),
+                      );
+                    },
                   );
                 },
               );
             },
-          );
-        },
-      ),
-      title: BlocBuilder<ParentHomeBloc, ParentHomeState>(
-        builder: (context, state) {
-          final titles = ['', 'Perfil', 'Fotocheck', 'Horario', 'Calificaciones',
-            'Pensiones', 'Cuotas', 'Reuniones', 'Agenda', 'Más', 'Comunicados'];
-          final title = state.pageIndex < titles.length ? titles[state.pageIndex] : '';
-          return Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
-        },
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.calendar_month_outlined),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.help_outline),
-          onPressed: () {},
-        ),
-      ],
-      centerTitle: true,
-    );
+          ),
+          title: BlocBuilder<ParentHomeBloc, ParentHomeState>(
+            builder: (context, state) {
+              final titles = ['', 'Perfil', 'Fotocheck', 'Horario', 'Calificaciones',
+                'Pensiones', 'Cuotas', 'Reuniones', 'Agenda', 'Más', 'Comunicados'];
+              final title = state.pageIndex < titles.length ? titles[state.pageIndex] : '';
+              return Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.calendar_month_outlined),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.help_outline),
+              onPressed: () {},
+            ),
+          ],
+          centerTitle: true,
+        );
   }
 
   Widget _buildBottomNav(BuildContext context) {
@@ -380,7 +447,7 @@ class _QuickAccessGrid extends StatelessWidget {
   static const _items = [
     _QuickAccessItem('Fotocheck', Icons.badge, 2),
     _QuickAccessItem('Horario', Icons.schedule, 3),
-    _QuickAccessItem('Calificaciones', Icons.grade, 4),
+    _QuickAccessItem('Notas', Icons.grade, 4),
     _QuickAccessItem('Pensiones', Icons.payments, 5),
     _QuickAccessItem('Cuotas', Icons.receipt_long, 6),
     _QuickAccessItem('Reuniones', Icons.groups, 7),
@@ -388,14 +455,23 @@ class _QuickAccessGrid extends StatelessWidget {
     _QuickAccessItem('Más', Icons.apps, 9),
   ];
 
+  static const _primary = Color(0xFF225BAA);
+  static const _surfaceLow = Color(0xFFF2F4F6);
+  static const _outlineVariant = Color(0xFFE2E8F0);
+
   @override
   Widget build(BuildContext context) {
-    final ac = context.appColors;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Text(
+          'Accesos Rápidos',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 16),
         for (var row = 0; row < 2; row++)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
                 for (var col = 0; col < 4; col++)
@@ -410,24 +486,25 @@ class _QuickAccessGrid extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 60,
-                            height: 60,
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: _surfaceLow,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _outlineVariant),
+                            ),
                             alignment: Alignment.center,
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: ac.primary,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(_items[row * 4 + col].icon, size: 26, color: Colors.white),
+                            child: Icon(
+                              _items[row * 4 + col].icon,
+                              size: 26,
+                              color: _primary,
+                              weight: 300,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           Text(
                             _items[row * 4 + col].name,
-                            style: const TextStyle(fontSize: 11),
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -449,62 +526,63 @@ class _HomeBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = context.read<ParentHomeBloc>();
     final state = context.watch<ParentHomeBloc>().state;
-    return RefreshIndicator(
-      onRefresh: () async {
-        if (state.students.isNotEmpty && state.branch != null) {
-          bloc.add(GetDayReport(
-            date: _todayDate(),
-            branchId: state.branch!.id,
-            studentIds: state.students.map((s) => s.id).toList(),
-            tenantId: state.tenant,
-          ));
-        }
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _QuickAccessGrid(),
-            const SizedBox(height: 24),
-            AttendanceSection(
-              reports: state.dayReports,
-              isLoading: state.isLoadingDayReport,
-              onVerMas: () {
-                print('[DEBUG] Ver más tapped. students=${state.students.length}, branch=${state.branch?.id}, tenant=${state.tenant}');
-                if (state.students.isNotEmpty) {
-                  Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                        builder: (_) => AsistenciaPage(
-                          students: state.students,
-                          tenant: state.tenant,
-                          branchId: state.branch?.id ?? 1,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+      ),
+      child: RefreshIndicator(
+        onRefresh: () async {
+          if (state.students.isNotEmpty && state.branch != null) {
+            bloc.add(GetDayReport(
+              date: _todayDate(),
+              branchId: state.branch!.id,
+              studentIds: state.students.map((s) => s.id).toList(),
+              tenantId: state.tenant,
+            ));
+          }
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AttendanceSection(
+                reports: state.dayReports,
+                isLoading: state.isLoadingDayReport,
+                onVerMas: () {
+                  print('[DEBUG] Ver más tapped. students=${state.students.length}, branch=${state.branch?.id}, tenant=${state.tenant}');
+                  if (state.students.isNotEmpty) {
+                    Navigator.of(context)
+                      .push(
+                        MaterialPageRoute(
+                          builder: (_) => AsistenciaPage(
+                            students: state.students,
+                            tenant: state.tenant,
+                            branchId: state.branch?.id ?? 1,
+                          ),
                         ),
-                      ),
-                    )
-                    .then((_) {
-                      print('[DEBUG] Back from AsistenciaPage -> reload daily attendance');
-                      if (state.students.isNotEmpty && state.branch != null) {
-                        context.read<ParentHomeBloc>().add(GetDayReport(
-                          date: _todayDate(),
-                          branchId: state.branch!.id,
-                          studentIds: state.students.map((s) => s.id).toList(),
-                          tenantId: state.tenant,
-                        ));
-                      }
-                    });
-                }
-              },
-            ),
-            const SizedBox(height: 12),
-            const DateHeader(),
-            const SizedBox(height: 20),
-            const CommunicationsTab(),
-            const SizedBox(height: 16),
-            const SummaryCard(),
-          ],
+                      )
+                      .then((_) {
+                        print('[DEBUG] Back from AsistenciaPage -> reload daily attendance');
+                        if (state.students.isNotEmpty && state.branch != null) {
+                          context.read<ParentHomeBloc>().add(GetDayReport(
+                            date: _todayDate(),
+                            branchId: state.branch!.id,
+                            studentIds: state.students.map((s) => s.id).toList(),
+                            tenantId: state.tenant,
+                          ));
+                        }
+                      });
+                  }
+                },
+              ),
+              const SizedBox(height: 28),
+              const _QuickAccessGrid(),
+              const SizedBox(height: 28),
+              const _HomeTabs(),
+            ],
+          ),
         ),
       ),
     );
@@ -514,6 +592,264 @@ class _HomeBody extends StatelessWidget {
 String _todayDate() {
   final now = DateTime.now();
   return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+}
+
+class _HomeTabs extends StatefulWidget {
+  const _HomeTabs();
+
+  @override
+  State<_HomeTabs> createState() => _HomeTabsState();
+}
+
+class _HomeTabsState extends State<_HomeTabs> {
+  int _selected = 0;
+
+  static const _primary = Color(0xFF225BAA);
+  static const _surfaceLow = Color(0xFFF2F4F6);
+  static const _onSurfaceVariant = Color(0xFF424751);
+  static const _outline = Color(0xFFE2E8F0);
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<ParentHomeBloc>().state;
+    final labels = const ['Comunicados', 'Reuniones', 'Agenda'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Contenido',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: _surfaceLow,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              for (var i = 0; i < labels.length; i++)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selected = i),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _selected == i ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: _selected == i
+                            ? Border.all(color: _outline)
+                            : Border.all(color: Colors.transparent),
+                        boxShadow: _selected == i
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        labels[i],
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: _selected == i ? FontWeight.w600 : FontWeight.w500,
+                          color: _selected == i ? _primary : _onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (state.isLoadingTabs && state.comunicados.isEmpty && state.meetings.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 40),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          )
+        else
+          _buildTabContent(state, _selected),
+      ],
+    );
+  }
+
+  Widget _buildTabContent(ParentHomeState state, int index) {
+    switch (index) {
+      case 1:
+        final meetings = state.meetings;
+        if (meetings.isEmpty) {
+          return _emptyState('No hay reuniones por ahora');
+        }
+        return Column(
+          children: [
+            for (final m in meetings.take(3))
+              _HomeTabCard(
+                icon: Icons.groups,
+                title: m.parentMeeting.subject,
+                time: m.parentMeeting.timeRange,
+                description: _formatMeetingDate(m.parentMeeting.date),
+              ),
+          ],
+        );
+      case 2:
+        final items = state.agendaItems;
+        if (items.isEmpty) {
+          return _emptyState('No hay eventos en agenda');
+        }
+        return Column(
+          children: [
+            for (final item in items.take(3))
+              _HomeTabCard(
+                icon: Icons.event,
+                title: item.title,
+                time: _formatShortDate(item.dueDate),
+                description: item.description,
+              ),
+          ],
+        );
+      default:
+        final items = state.comunicados;
+        if (items.isEmpty) {
+          return _emptyState('No hay comunicados por ahora');
+        }
+        return Column(
+          children: [
+            for (final item in items.take(3))
+              _HomeTabCard(
+                icon: Icons.campaign_outlined,
+                title: item.title,
+                time: _formatShortDate(item.publishedAt),
+                description: item.description,
+              ),
+          ],
+        );
+    }
+  }
+
+  Widget _emptyState(String message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Center(
+        child: Text(
+          message,
+          style: TextStyle(fontSize: 13, color: _onSurfaceVariant.withValues(alpha: 0.7)),
+        ),
+      ),
+    );
+  }
+
+  String _formatShortDate(String? iso) {
+    final date = DateTime.tryParse(iso ?? '');
+    if (date == null) return '';
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    return '${date.day} ${months[date.month - 1]}';
+  }
+
+  String _formatMeetingDate(String iso) {
+    final date = DateTime.tryParse(iso);
+    if (date == null) return '';
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const days = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+    return '${days[date.weekday - 1]} ${date.day} ${months[date.month - 1]}';
+  }
+}
+
+class _HomeTabCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String time;
+  final String description;
+
+  const _HomeTabCard({
+    required this.icon,
+    required this.title,
+    required this.time,
+    required this.description,
+  });
+
+  static const _primary = Color(0xFF225BAA);
+  static const _onSurface = Color(0xFF191C1E);
+  static const _onSurfaceVariant = Color(0xFF424751);
+  static const _outline = Color(0xFFE2E8F0);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _outline),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: _primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _primary.withValues(alpha: 0.20)),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, size: 24, color: _primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: _onSurface,
+                        ),
+                      ),
+                    ),
+                    if (time.isNotEmpty)
+                      Text(
+                        time,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _onSurfaceVariant.withValues(alpha: 0.7),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.35,
+                    color: _onSurfaceVariant.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 

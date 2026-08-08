@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
@@ -185,119 +184,106 @@ class _ComunicadoCard extends StatelessWidget {
 
   const _ComunicadoCard({required this.item});
 
+  static const _primary = Color(0xFF225BAA);
+  static const _onSurface = Color(0xFF191C1E);
+  static const _onSurfaceVariant = Color(0xFF424751);
+  static const _outline = Color(0xFFE2E8F0);
+
   @override
   Widget build(BuildContext context) {
-    final ac = context.appColors;
     final date = item.publishedAt != null
-        ? _formatDateTime(DateTime.parse(item.publishedAt!))
-        : null;
+        ? _formatShortDate(DateTime.tryParse(item.publishedAt!))
+        : '';
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.green.withValues(alpha: 0.4), width: 1),
+        border: Border.all(
+          color: item.isRead ? _outline : _primary.withValues(alpha: 0.45),
+        ),
       ),
-      child: InkWell(
-        onTap: () {
-          if (!item.isRead) {
-            context.read<ComunicadosBloc>().add(MarkComunicadoAsRead(itemId: item.id));
-          }
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.campaign_outlined, color: ac.primary, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: _primary.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _primary.withValues(alpha: 0.20)),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              item.isRead ? Icons.campaign_outlined : Icons.campaign,
+              size: 24,
+              color: _primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            style: TextStyle(
-                              fontWeight: item.isRead ? FontWeight.w500 : FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
+                    if (!item.isRead)
+                      Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: const BoxDecoration(
+                          color: _primary,
+                          shape: BoxShape.circle,
                         ),
-                        if (!item.isRead)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: ac.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
-                        fontWeight: item.isRead ? FontWeight.normal : FontWeight.w500,
                       ),
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Icon(Icons.person_outline, size: 14, color: Colors.grey.shade600),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            item.sender.fullName,
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                    Expanded(
+                      child: Text(
+                        item.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w700,
+                          color: _onSurface,
                         ),
-                        if (date != null) ...[
-                          const SizedBox(width: 8),
-                          Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
-                          const SizedBox(width: 4),
-                          Text(
-                            date,
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
+                    if (date.isNotEmpty)
+                      Text(
+                        date,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _onSurfaceVariant.withValues(alpha: 0.7),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  item.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.35,
+                    color: _onSurfaceVariant.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  String _formatDateTime(DateTime date) {
-    const months = [
-      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
-    ];
-    final month = months[date.month - 1];
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    return '${date.day} $month · $hour:$minute';
+  String _formatShortDate(DateTime? date) {
+    if (date == null) return '';
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    return '${date.day} ${months[date.month - 1]}';
   }
 }

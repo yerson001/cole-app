@@ -32,4 +32,10 @@ class GetDayReport extends ParentHomeEvent {
   });
 }
 
+class LoadHomeTabs extends ParentHomeEvent {
+  final int parentId;
+  final String tenantId;
+  LoadHomeTabs({required this.parentId, required this.tenantId});
+}
+
 class Logout extends ParentHomeEvent {}

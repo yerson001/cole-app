@@ -21,11 +21,9 @@ class AttendanceSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.calendar_today, size: 16),
-            const SizedBox(width: 6),
-            Text(
-              'Asistencia hoy (${reports.length})',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            const Text(
+              'Asistencia de Hoy',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const Spacer(),
             if (isLoading)
@@ -36,22 +34,38 @@ class AttendanceSection extends StatelessWidget {
               ),
             TextButton.icon(
               onPressed: onVerMas,
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF225BAA),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                visualDensity: VisualDensity.compact,
+              ),
               icon: const Text('Ver más', style: TextStyle(fontSize: 13)),
               label: const Icon(Icons.arrow_forward_ios, size: 12),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 165,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 4, right: 4),
-            itemCount: reports.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 4),
-            itemBuilder: (context, index) => AttendanceCard(report: reports[index], index: index),
+        const SizedBox(height: 4),
+        if (reports.isEmpty && !isLoading)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(
+                'No hay registros de asistencia hoy',
+                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+              ),
+            ),
+          )
+        else
+          SizedBox(
+            height: 165,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 4, right: 4),
+              itemCount: reports.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 4),
+              itemBuilder: (context, index) => AttendanceCard(report: reports[index], index: index),
+            ),
           ),
-        ),
       ],
     );
   }
