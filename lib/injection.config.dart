@@ -50,14 +50,22 @@ import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart
     as _i484;
 import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart'
     as _i720;
+import 'package:coleapp/features/parent/domain/usecases/get_fees_by_student_use_case.dart'
+    as _i1043;
 import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart'
     as _i986;
+import 'package:coleapp/features/parent/domain/usecases/get_monthly_payments_by_student_use_case.dart'
+    as _i746;
 import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart'
     as _i987;
+import 'package:coleapp/features/parent/domain/usecases/get_student_fees_by_student_use_case.dart'
+    as _i249;
 import 'package:coleapp/features/parent/domain/usecases/get_student_grades_by_student_use_case.dart'
     as _i890;
 import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart'
     as _i31;
+import 'package:coleapp/features/parent/domain/usecases/get_tenant_id_by_key_use_case.dart'
+    as _i450;
 import 'package:coleapp/features/parent/domain/usecases/mark_agenda_item_as_read_use_case.dart'
     as _i962;
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart'
@@ -117,6 +125,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i890.GetStudentGradesByStudentUseCase>(
       () => appModule.getStudentGradesByStudentUseCase,
+    );
+    gh.factory<_i249.GetStudentFeesByStudentUseCase>(
+      () => appModule.getStudentFeesByStudentUseCase,
+    );
+    gh.factory<_i746.GetMonthlyPaymentsByStudentUseCase>(
+      () => appModule.getMonthlyPaymentsByStudentUseCase,
+    );
+    gh.factory<_i1043.GetFeesByStudentUseCase>(
+      () => appModule.getFeesByStudentUseCase,
+    );
+    gh.factory<_i450.GetTenantIdByKeyUseCase>(
+      () => appModule.getTenantIdByKeyUseCase,
     );
     gh.factory<_i607.ParentUseCases>(() => appModule.parentUseCases);
     return this;

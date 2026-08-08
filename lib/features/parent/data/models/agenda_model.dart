@@ -1,11 +1,9 @@
 class AgendaModel {
-  final int id;
   final List<AgendaItemModel> items;
   final String? createdAt;
   final String? updatedAt;
 
   AgendaModel({
-    required this.id,
     required this.items,
     this.createdAt,
     this.updatedAt,
@@ -14,7 +12,6 @@ class AgendaModel {
   factory AgendaModel.fromJson(Map<String, dynamic> json) {
     final list = json['items'] as List? ?? [];
     return AgendaModel(
-      id: json['id'] as int,
       items: list.map((e) => AgendaItemModel.fromJson(e as Map<String, dynamic>)).toList(),
       createdAt: json['createdAt'] as String?,
       updatedAt: json['updatedAt'] as String?,
@@ -23,7 +20,7 @@ class AgendaModel {
 }
 
 class AgendaItemModel {
-  final String id;
+  final int id;
   final String type;
   final String refId;
   final String title;
@@ -35,6 +32,7 @@ class AgendaItemModel {
   final String? createdAt;
   final AgendaStudentModel? student;
   final String? readAt;
+  final bool isRead;
 
   AgendaItemModel({
     required this.id,
@@ -49,11 +47,12 @@ class AgendaItemModel {
     this.createdAt,
     this.student,
     this.readAt,
+    this.isRead = false,
   });
 
   factory AgendaItemModel.fromJson(Map<String, dynamic> json) {
     return AgendaItemModel(
-      id: json['id'] as String,
+      id: json['id'] as int,
       type: json['type'] as String,
       refId: json['refId'] as String,
       title: json['title'] as String,
@@ -67,12 +66,11 @@ class AgendaItemModel {
           ? AgendaStudentModel.fromJson(json['student'] as Map<String, dynamic>)
           : null,
       readAt: json['readAt'] as String?,
+      isRead: json['isRead'] as bool? ?? (json['readAt'] != null),
     );
   }
 
-  bool get isRead => readAt != null && readAt!.isNotEmpty;
-
-  AgendaItemModel copyWith({String? readAt}) {
+  AgendaItemModel copyWith({String? readAt, bool? isRead}) {
     return AgendaItemModel(
       id: id,
       type: type,
@@ -86,6 +84,7 @@ class AgendaItemModel {
       createdAt: createdAt,
       student: student,
       readAt: readAt ?? this.readAt,
+      isRead: isRead ?? this.isRead,
     );
   }
 }

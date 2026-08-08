@@ -4,7 +4,9 @@ import 'package:coleapp/core/constants/api_constants.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
+import 'package:coleapp/features/parent/data/models/fee_model.dart';
 import 'package:coleapp/features/parent/data/models/meeting_model.dart';
+import 'package:coleapp/features/parent/data/models/pension_model.dart';
 import 'package:coleapp/features/parent/data/models/schedule_model.dart';
 import 'package:coleapp/features/parent/data/models/student_grade_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
@@ -191,7 +193,7 @@ class ParentService {
     throw Exception('Error al obtener agenda: ${response.statusCode}');
   }
 
-  Future<void> markAgendaItemAsRead({required String itemId, required String tenantId}) async {
+  Future<void> markAgendaItemAsRead({required int itemId, required String tenantId}) async {
     final uri = Uri.parse('${ApiConstants.baseUrl}/virtual-agenda/items/$itemId/read');
     final response = await _client.patch(
       uri,
@@ -236,5 +238,75 @@ class ParentService {
       return list.map((e) => StudentGradeModel.fromJson(e as Map<String, dynamic>)).toList();
     }
     throw Exception('Error al obtener calificaciones: ${response.statusCode}');
+  }
+
+  Future<List<StudentFeeModel>> getStudentFeesByStudent(int studentId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/student-fees/student/$studentId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      final list = jsonDecode(response.body) as List;
+      return list.map((e) => StudentFeeModel.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Error al obtener pensiones: ${response.statusCode}');
+  }
+
+  Future<List<MonthlyPaymentModel>> getMonthlyPaymentsByStudent(int studentId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/monthly-payments/student/$studentId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      final list = jsonDecode(response.body) as List;
+      return list.map((e) => MonthlyPaymentModel.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Error al obtener pagos de pensiones: ${response.statusCode}');
+  }
+
+  Future<List<FeeModel>> getFeesByStudent(int studentId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/payments/student/$studentId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      final list = jsonDecode(response.body) as List;
+      return list.map((e) => FeeModel.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Error al obtener cuotas: ${response.statusCode}');
+  }
+
+  Future<int?> getTenantIdByKey(String tenantKey) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/tenants');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantKey,
+      },
+    );
+    if (response.statusCode == 200) {
+      final list = jsonDecode(response.body) as List;
+      for (final item in list) {
+        final map = item as Map<String, dynamic>;
+        if (map['tenantKey'] == tenantKey) {
+          return int.tryParse(map['id'].toString());
+        }
+      }
+      return null;
+    }
+    throw Exception('Error al obtener tenants: ${response.statusCode}');
   }
 }

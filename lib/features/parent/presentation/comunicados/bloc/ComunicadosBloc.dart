@@ -71,7 +71,7 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
       if (result is SuccessResource<void>) {
         final updated = state.comunicados.map((item) {
           if (item.id == event.itemId) {
-            return item.copyWith(readAt: DateTime.now().toIso8601String());
+            return item.copyWith(readAt: DateTime.now().toIso8601String(), isRead: true);
           }
           return item;
         }).toList();

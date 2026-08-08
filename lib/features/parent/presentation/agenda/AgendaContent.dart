@@ -39,7 +39,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
     if (parentId != null && tenantId.isNotEmpty && !_initialized) {
       _initialized = true;
       final now = DateTime.now();
-      final range = _dateRangeForDate(now);
+      final range = _initialRange(now);
       context.read<AgendaBloc>().add(LoadAgenda(
         parentId: parentId,
         tenantId: tenantId,
@@ -78,7 +78,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              final range = _dateRangeForDate(state.selectedDate);
+              final range = _initialRange(state.selectedDate);
               context.read<AgendaBloc>().add(LoadAgenda(
                 parentId: parentId,
                 studentId: state.selectedStudent?.id,
@@ -95,7 +95,13 @@ class _AgendaBodyState extends State<_AgendaBody> {
                   tenantId: tenantId,
                   parentId: parentId,
                 ),
-                _DateNavigator(
+                _ViewFilter(
+                  view: state.view,
+                  onChanged: (view) =>
+                    context.read<AgendaBloc>().add(ChangeView(view: view)),
+                ),
+                _NavigationHeader(
+                  view: state.view,
                   selectedDate: state.selectedDate,
                   onPrevious: () => _changeDate(context, -1),
                   onNext: () => _changeDate(context, 1),
@@ -111,28 +117,27 @@ class _AgendaBodyState extends State<_AgendaBody> {
                     ),
                   ),
                 Expanded(
-                  child: _itemsForDate(state).isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
+                  child: switch (state.view) {
+                    AgendaView.daily => _AgendaList(state: state),
+                    AgendaView.weekly => Column(
                         children: [
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                          const Center(
-                            child: Text(
-                              'No hay eventos para este día',
-                              style: TextStyle(color: Colors.grey),
-                            ),
+                          _WeekGrid(
+                            state: state,
+                            onDayTap: (day) => _changeDate(context, 0, date: day),
                           ),
+                          Expanded(child: _AgendaList(state: state)),
                         ],
-                      )
-                    : ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _itemsForDate(state).length,
-                        itemBuilder: (context, index) {
-                          final item = _itemsForDate(state)[index];
-                          return _AgendaItemCard(item: item);
-                        },
                       ),
+                    AgendaView.monthly => Column(
+                        children: [
+                          _MonthGrid(
+                            state: state,
+                            onDayTap: (day) => _changeDate(context, 0, date: day),
+                          ),
+                          Expanded(child: _AgendaList(state: state)),
+                        ],
+                      ),
+                  },
                 ),
               ],
             ),
@@ -142,21 +147,34 @@ class _AgendaBodyState extends State<_AgendaBody> {
     );
   }
 
-  List<AgendaItemModel> _itemsForDate(AgendaState state) {
-    return state.itemsForSelectedDate;
-  }
-
-  void _changeDate(BuildContext context, int days, {bool today = false}) {
+  void _changeDate(BuildContext context, int step, {bool today = false, DateTime? date}) {
     final bloc = context.read<AgendaBloc>();
-    final newDate = today ? DateTime.now() : bloc.state.selectedDate.add(Duration(days: days));
+    DateTime newDate;
+    if (date != null) {
+      newDate = date;
+    } else if (today) {
+      newDate = DateTime.now();
+    } else {
+      newDate = switch (bloc.state.view) {
+        AgendaView.daily => bloc.state.selectedDate.add(Duration(days: step)),
+        AgendaView.weekly => bloc.state.selectedDate.add(Duration(days: 7 * step)),
+        AgendaView.monthly =>
+          DateTime(
+            bloc.state.selectedDate.year,
+            bloc.state.selectedDate.month + step,
+            1,
+          ),
+      };
+    }
     bloc.add(ChangeDate(date: newDate));
   }
 
-  ({String startDate, String endDate}) _dateRangeForDate(DateTime date) {
-    final start = DateTime(date.year, date.month, date.day);
-    final end = start.add(const Duration(days: 2));
+  ({String startDate, String endDate}) _initialRange(DateTime date) {
+    final start = date.subtract(Duration(days: date.weekday - 1));
+    final startDay = DateTime(start.year, start.month, start.day);
+    final end = startDay.add(const Duration(days: 8));
     return (
-      startDate: _formatDate(start),
+      startDate: _formatDate(startDay),
       endDate: _formatDate(end),
     );
   }
@@ -187,6 +205,7 @@ class _StudentSelector extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: DropdownButtonFormField<StudentModel?>(
         value: selectedStudent,
+        isExpanded: true,
         decoration: InputDecoration(
           labelText: 'Hijo',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -195,11 +214,21 @@ class _StudentSelector extends StatelessWidget {
         items: [
           const DropdownMenuItem<StudentModel?>(
             value: null,
-            child: Text('Todos mis hijos'),
+            child: Text(
+              'Todos mis hijos',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 13),
+            ),
           ),
           ...students.map((s) => DropdownMenuItem(
             value: s,
-            child: Text('${s.name} ${s.lastName}'),
+            child: Text(
+              '${s.name} ${s.lastName}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13),
+            ),
           )),
         ],
         onChanged: (student) {
@@ -210,13 +239,52 @@ class _StudentSelector extends StatelessWidget {
   }
 }
 
-class _DateNavigator extends StatelessWidget {
+class _ViewFilter extends StatelessWidget {
+  final AgendaView view;
+  final ValueChanged<AgendaView> onChanged;
+
+  const _ViewFilter({required this.view, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SegmentedButton<AgendaView>(
+        segments: const [
+          ButtonSegment(
+            value: AgendaView.monthly,
+            label: Text('Mensual'),
+          ),
+          ButtonSegment(
+            value: AgendaView.weekly,
+            label: Text('Semanal'),
+          ),
+          ButtonSegment(
+            value: AgendaView.daily,
+            label: Text('Diario'),
+          ),
+        ],
+        selected: {view},
+        onSelectionChanged: (selection) => onChanged(selection.first),
+        showSelectedIcon: false,
+        style: const ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+    );
+  }
+}
+
+class _NavigationHeader extends StatelessWidget {
+  final AgendaView view;
   final DateTime selectedDate;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final VoidCallback onToday;
 
-  const _DateNavigator({
+  const _NavigationHeader({
+    required this.view,
     required this.selectedDate,
     required this.onPrevious,
     required this.onNext,
@@ -225,7 +293,11 @@ class _DateNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateText = _formatDayHeader(selectedDate);
+    final title = switch (view) {
+      AgendaView.daily => _formatDayHeader(selectedDate),
+      AgendaView.weekly => _formatWeekHeader(selectedDate),
+      AgendaView.monthly => _formatMonthHeader(selectedDate),
+    };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -238,9 +310,11 @@ class _DateNavigator extends StatelessWidget {
             child: GestureDetector(
               onTap: onToday,
               child: Text(
-                dateText,
+                title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -250,6 +324,247 @@ class _DateNavigator extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _WeekGrid extends StatelessWidget {
+  final AgendaState state;
+  final ValueChanged<DateTime> onDayTap;
+
+  const _WeekGrid({required this.state, required this.onDayTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+    const dayNames = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: List.generate(7, (i) {
+          final day = state.weekDays[i];
+          final items = state.itemsOn(day);
+          final isSelected = state.isSameDay(day, state.selectedDate);
+          final isToday = state.isSameDay(day, today);
+          return Expanded(
+            child: InkWell(
+              onTap: () => onDayTap(day),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      dayNames[i],
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : isToday
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 2,
+                      children: [
+                        for (final item in items)
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: _dotColor(item.type),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Color _dotColor(String type) {
+    switch (type) {
+      case 'ANNOUNCEMENT':
+        return Colors.green;
+      case 'TASK':
+        return Colors.orange;
+      case 'STUDENT_OBSERVATION':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+}
+
+class _MonthGrid extends StatelessWidget {
+  final AgendaState state;
+  final ValueChanged<DateTime> onDayTap;
+
+  const _MonthGrid({required this.state, required this.onDayTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+    const dayNames = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO'];
+    final days = state.monthDays;
+    final weeks = <List<DateTime>>[];
+    for (var i = 0; i < days.length; i += 7) {
+      weeks.add(days.sublist(i, i + 7));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Row(
+            children: List.generate(7, (i) => Expanded(
+              child: Text(
+                dayNames[i],
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: (i == 5 || i == 6)
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey,
+                ),
+              ),
+            )),
+          ),
+          const SizedBox(height: 4),
+          ...weeks.map((week) => Row(
+            children: List.generate(7, (i) {
+              final day = week[i];
+              final isCurrentMonth = day.month == state.selectedDate.month;
+              final isSelected = state.isSameDay(day, state.selectedDate);
+              final isToday = state.isSameDay(day, today);
+              final items = state.itemsOn(day);
+              return Expanded(
+                child: InkWell(
+                  onTap: () => onDayTap(day),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    margin: const EdgeInsets.all(1),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+                          : null,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Opacity(
+                      opacity: isCurrentMonth ? 1 : 0.35,
+                      child: Column(
+                        children: [
+                          Text(
+                            '${day.day}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isToday
+                                  ? FontWeight.bold
+                                  : FontWeight.w400,
+                              color: isToday
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Wrap(
+                            spacing: 2,
+                            children: [
+                              for (final item in items)
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: _dotColor(item.type),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Color _dotColor(String type) {
+    switch (type) {
+      case 'ANNOUNCEMENT':
+        return Colors.green;
+      case 'TASK':
+        return Colors.orange;
+      case 'STUDENT_OBSERVATION':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+}
+
+class _AgendaList extends StatelessWidget {
+  final AgendaState state;
+
+  const _AgendaList({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = state.itemsForSelectedDate;
+    if (items.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+          const Center(
+            child: Text(
+              'No hay eventos para este día',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ],
+      );
+    }
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return _AgendaItemCard(item: item);
+      },
     );
   }
 }
@@ -404,6 +719,28 @@ String _formatDayHeader(DateTime date) {
   final dayName = days[date.weekday - 1];
   final monthName = months[date.month - 1];
   return '$dayName, ${date.day} de $monthName';
+}
+
+String _formatWeekHeader(DateTime date) {
+  const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  final monday = date.subtract(Duration(days: date.weekday - 1));
+  final sunday = monday.add(const Duration(days: 6));
+  final startMonth = months[monday.month - 1];
+  final endMonth = months[sunday.month - 1];
+  final year = sunday.year;
+  if (monday.month == sunday.month) {
+    return '${monday.day} $startMonth - ${sunday.day} $endMonth $year';
+  }
+  return '${monday.day} $startMonth - ${sunday.day} $endMonth $year';
+}
+
+String _formatMonthHeader(DateTime date) {
+  const months = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ];
+  final monthName = months[date.month - 1];
+  return '$monthName ${date.year}';
 }
 
 String _formatDateTime(DateTime date) {

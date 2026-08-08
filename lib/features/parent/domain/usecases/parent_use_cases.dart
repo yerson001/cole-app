@@ -6,10 +6,14 @@ import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_parent_use
 import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_attendance_in_range_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_fees_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_monthly_payments_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_student_fees_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_student_grades_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_tenant_id_by_key_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/mark_agenda_item_as_read_use_case.dart';
 
 class ParentUseCases {
@@ -26,6 +30,10 @@ class ParentUseCases {
   final MarkAgendaItemAsReadUseCase markAgendaItemAsReadUseCase;
   final GetScheduleBySectionIdUseCase getScheduleBySectionIdUseCase;
   final GetStudentGradesByStudentUseCase getStudentGradesByStudentUseCase;
+  final GetStudentFeesByStudentUseCase getStudentFeesByStudentUseCase;
+  final GetMonthlyPaymentsByStudentUseCase getMonthlyPaymentsByStudentUseCase;
+  final GetFeesByStudentUseCase getFeesByStudentUseCase;
+  final GetTenantIdByKeyUseCase getTenantIdByKeyUseCase;
 
   ParentUseCases({
     required this.getBranchUseCase,
@@ -41,5 +49,9 @@ class ParentUseCases {
     required this.markAgendaItemAsReadUseCase,
     required this.getScheduleBySectionIdUseCase,
     required this.getStudentGradesByStudentUseCase,
+    required this.getStudentFeesByStudentUseCase,
+    required this.getMonthlyPaymentsByStudentUseCase,
+    required this.getFeesByStudentUseCase,
+    required this.getTenantIdByKeyUseCase,
   });
 }

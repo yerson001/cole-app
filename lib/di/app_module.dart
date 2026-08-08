@@ -54,8 +54,12 @@ import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_student_us
 import 'package:coleapp/features/parent/domain/usecases/get_attendance_in_range_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_fees_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_tenant_id_by_key_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_monthly_payments_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_student_fees_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_student_grades_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/mark_agenda_item_as_read_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
@@ -198,6 +202,22 @@ abstract class AppModule {
       GetStudentGradesByStudentUseCase(repository: parentRepository);
 
   @injectable
+  GetStudentFeesByStudentUseCase get getStudentFeesByStudentUseCase =>
+      GetStudentFeesByStudentUseCase(repository: parentRepository);
+
+  @injectable
+  GetMonthlyPaymentsByStudentUseCase get getMonthlyPaymentsByStudentUseCase =>
+      GetMonthlyPaymentsByStudentUseCase(repository: parentRepository);
+
+  @injectable
+  GetFeesByStudentUseCase get getFeesByStudentUseCase =>
+      GetFeesByStudentUseCase(repository: parentRepository);
+
+  @injectable
+  GetTenantIdByKeyUseCase get getTenantIdByKeyUseCase =>
+      GetTenantIdByKeyUseCase(repository: parentRepository);
+
+  @injectable
   ParentUseCases get parentUseCases => ParentUseCases(
     getBranchUseCase: getBranchUseCase,
     clearBranchUseCase: clearBranchUseCase,
@@ -212,5 +232,9 @@ abstract class AppModule {
     markAgendaItemAsReadUseCase: markAgendaItemAsReadUseCase,
     getScheduleBySectionIdUseCase: getScheduleBySectionIdUseCase,
     getStudentGradesByStudentUseCase: getStudentGradesByStudentUseCase,
+    getStudentFeesByStudentUseCase: getStudentFeesByStudentUseCase,
+    getMonthlyPaymentsByStudentUseCase: getMonthlyPaymentsByStudentUseCase,
+    getFeesByStudentUseCase: getFeesByStudentUseCase,
+    getTenantIdByKeyUseCase: getTenantIdByKeyUseCase,
   );
 }

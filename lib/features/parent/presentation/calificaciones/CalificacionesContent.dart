@@ -129,6 +129,7 @@ class _StudentSelector extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: DropdownButtonFormField<StudentModel>(
         value: selectedStudent,
+        isExpanded: true,
         decoration: InputDecoration(
           labelText: 'Hijo',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -136,7 +137,12 @@ class _StudentSelector extends StatelessWidget {
         ),
         items: students.map((s) => DropdownMenuItem(
           value: s,
-          child: Text('${s.name} ${s.lastName}'),
+          child: Text(
+            '${s.name} ${s.lastName}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13),
+          ),
         )).toList(),
         onChanged: (student) {
           if (student != null) {

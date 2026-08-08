@@ -58,7 +58,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     on<SelectStudent>((event, emit) {
       emit(state.copyWith(selectedStudent: event.student));
       if (state.parentId != null) {
-        final range = _dateRangeForDate(state.selectedDate);
+        final range = _dateRangeForDate(state.selectedDate, state.view);
         add(LoadAgenda(
           parentId: state.parentId,
           studentId: event.student?.id,
@@ -72,7 +72,21 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     on<ChangeDate>((event, emit) async {
       emit(state.copyWith(selectedDate: event.date));
       if (state.parentId != null) {
-        final range = _dateRangeForDate(event.date);
+        final range = _dateRangeForDate(event.date, state.view);
+        add(LoadAgenda(
+          parentId: state.parentId,
+          studentId: state.selectedStudent?.id,
+          tenantId: state.tenantId,
+          startDate: range.startDate,
+          endDate: range.endDate,
+        ));
+      }
+    });
+
+    on<ChangeView>((event, emit) async {
+      emit(state.copyWith(view: event.view));
+      if (state.parentId != null) {
+        final range = _dateRangeForDate(state.selectedDate, event.view);
         add(LoadAgenda(
           parentId: state.parentId,
           studentId: state.selectedStudent?.id,
@@ -92,7 +106,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
       if (result is SuccessResource<void>) {
         final updatedItems = state.items.map((item) {
           if (item.id == event.itemId) {
-            return item.copyWith(readAt: DateTime.now().toIso8601String());
+            return item.copyWith(readAt: DateTime.now().toIso8601String(), isRead: true);
           }
           return item;
         }).toList();
@@ -101,13 +115,31 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     });
   }
 
-  ({String startDate, String endDate}) _dateRangeForDate(DateTime date) {
-    final start = DateTime(date.year, date.month, date.day);
-    final end = start.add(const Duration(days: 2));
-    return (
-      startDate: _formatDate(start),
-      endDate: _formatDate(end),
-    );
+  ({String startDate, String endDate}) _dateRangeForDate(DateTime date, AgendaView view) {
+    switch (view) {
+      case AgendaView.daily:
+        final start = DateTime(date.year, date.month, date.day);
+        final end = start.add(const Duration(days: 2));
+        return (
+          startDate: _formatDate(start),
+          endDate: _formatDate(end),
+        );
+      case AgendaView.weekly:
+        final start = date.subtract(Duration(days: date.weekday - 1));
+        final startDay = DateTime(start.year, start.month, start.day);
+        final end = startDay.add(const Duration(days: 8));
+        return (
+          startDate: _formatDate(startDay),
+          endDate: _formatDate(end),
+        );
+      case AgendaView.monthly:
+        final start = DateTime(date.year, date.month, 1);
+        final end = DateTime(date.year, date.month + 1, 1);
+        return (
+          startDate: _formatDate(start),
+          endDate: _formatDate(end),
+        );
+    }
   }
 
   String _formatDate(DateTime date) {

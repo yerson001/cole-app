@@ -5,7 +5,9 @@ import 'package:coleapp/features/parent/data/datasource/remote/parent_service.da
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
+import 'package:coleapp/features/parent/data/models/fee_model.dart';
 import 'package:coleapp/features/parent/data/models/meeting_model.dart';
+import 'package:coleapp/features/parent/data/models/pension_model.dart';
 import 'package:coleapp/features/parent/data/models/schedule_model.dart';
 import 'package:coleapp/features/parent/data/models/student_grade_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
@@ -185,7 +187,7 @@ class ParentRepositoryImpl implements ParentRepository {
 
   @override
   Future<Resource<void>> markAgendaItemAsRead({
-    required String itemId,
+    required int itemId,
     required String tenantId,
   }) async {
     try {
@@ -213,6 +215,52 @@ class ParentRepositoryImpl implements ParentRepository {
     try {
       final grades = await _service.getStudentGradesByStudent(studentId, tenantId: tenantId);
       return SuccessResource(grades);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<List<StudentFeeModel>>> getStudentFeesByStudent(int studentId,
+      {required String tenantId}) async {
+    try {
+      final fees = await _service.getStudentFeesByStudent(studentId, tenantId: tenantId);
+      return SuccessResource(fees);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<List<MonthlyPaymentModel>>> getMonthlyPaymentsByStudent(int studentId,
+      {required String tenantId}) async {
+    try {
+      final payments = await _service.getMonthlyPaymentsByStudent(studentId, tenantId: tenantId);
+      return SuccessResource(payments);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<List<FeeModel>>> getFeesByStudent(int studentId,
+      {required String tenantId}) async {
+    try {
+      final fees = await _service.getFeesByStudent(studentId, tenantId: tenantId);
+      return SuccessResource(fees);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<int>> getTenantIdByKey(String tenantKey) async {
+    try {
+      final id = await _service.getTenantIdByKey(tenantKey);
+      if (id == null) {
+        return ErrorResource('Tenant no encontrado');
+      }
+      return SuccessResource(id);
     } catch (e) {
       return ErrorResource(e.toString());
     }

@@ -8,7 +8,7 @@ class MarkAgendaItemAsReadUseCase {
       : _repository = repository;
 
   Future<Resource<void>> call({
-    required String itemId,
+    required int itemId,
     required String tenantId,
   }) {
     return _repository.markAgendaItemAsRead(itemId: itemId, tenantId: tenantId);

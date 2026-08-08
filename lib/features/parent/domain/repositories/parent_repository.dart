@@ -2,7 +2,9 @@ import 'package:coleapp/core/errors/resource.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
+import 'package:coleapp/features/parent/data/models/fee_model.dart';
 import 'package:coleapp/features/parent/data/models/meeting_model.dart';
+import 'package:coleapp/features/parent/data/models/pension_model.dart';
 import 'package:coleapp/features/parent/data/models/schedule_model.dart';
 import 'package:coleapp/features/parent/data/models/student_grade_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
@@ -38,8 +40,12 @@ abstract class ParentRepository {
     required String endDate,
     required String tenantId,
   });
-  Future<Resource<void>> markAgendaItemAsRead({required String itemId, required String tenantId});
+  Future<Resource<void>> markAgendaItemAsRead({required int itemId, required String tenantId});
   Future<Resource<List<ScheduleModel>>> getScheduleBySectionId(int sectionId, {required String tenantId});
   Future<Resource<List<StudentGradeModel>>> getStudentGradesByStudent(int studentId, {required String tenantId});
+  Future<Resource<List<StudentFeeModel>>> getStudentFeesByStudent(int studentId, {required String tenantId});
+  Future<Resource<List<MonthlyPaymentModel>>> getMonthlyPaymentsByStudent(int studentId, {required String tenantId});
+  Future<Resource<List<FeeModel>>> getFeesByStudent(int studentId, {required String tenantId});
+  Future<Resource<int>> getTenantIdByKey(String tenantKey);
   Future<void> clearBranch();
 }

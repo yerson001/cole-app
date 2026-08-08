@@ -23,7 +23,7 @@ class SelectStudent extends ComunicadosEvent {
 }
 
 class MarkComunicadoAsRead extends ComunicadosEvent {
-  final String itemId;
+  final int itemId;
 
   MarkComunicadoAsRead({required this.itemId});
 }

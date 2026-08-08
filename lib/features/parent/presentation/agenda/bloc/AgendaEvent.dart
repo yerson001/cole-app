@@ -1,4 +1,5 @@
 import 'package:coleapp/features/parent/data/models/student_model.dart';
+import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaState.dart';
 
 abstract class AgendaEvent {}
 
@@ -30,8 +31,14 @@ class ChangeDate extends AgendaEvent {
   ChangeDate({required this.date});
 }
 
+class ChangeView extends AgendaEvent {
+  final AgendaView view;
+
+  ChangeView({required this.view});
+}
+
 class MarkItemAsRead extends AgendaEvent {
-  final String itemId;
+  final int itemId;
 
   MarkItemAsRead({required this.itemId});
 }
