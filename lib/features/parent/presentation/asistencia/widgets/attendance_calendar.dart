@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 
 class AttendanceCalendar extends StatelessWidget {
@@ -15,8 +16,13 @@ class AttendanceCalendar extends StatelessWidget {
     this.onDaySelected,
   });
 
+  static const _verde = Color(0xFF54DEB1);
+  static const _naranja = Color(0xFFFCB700);
+  static const _gris = Color(0xFF9E9E9E);
+
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     final firstDay = DateTime(month.year, month.month, 1);
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     final startWeekday = firstDay.weekday % 7;
@@ -25,37 +31,32 @@ class AttendanceCalendar extends StatelessWidget {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
-            Text('D', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            Text('L', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            Text('M', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            Text('M', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            Text('J', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            Text('V', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            Text('S', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          children: [
+            for (final label in const ['D', 'L', 'M', 'M', 'J', 'V', 'S'])
+              Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: ac.textSecondary)),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 7,
-          childAspectRatio: 1,
+          childAspectRatio: 1.25,
           children: [
             for (var i = 0; i < startWeekday; i++) const SizedBox.shrink(),
             for (var day = 1; day <= daysInMonth; day++)
-              _dayCell(day),
+              _dayCell(day, ac),
           ],
         ),
       ],
     );
   }
 
-  Widget _dayCell(int day) {
+  Widget _dayCell(int day, AppColors ac) {
     final date = DateTime(month.year, month.month, day);
     final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     final status = _statusForDate(dateStr);
-    final bgColor = _statusColor(status);
+    final accent = _statusColor(status, ac);
     final isWeekend = date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
     final isSelected = selectedDay != null &&
         selectedDay!.year == date.year &&
@@ -64,21 +65,34 @@ class AttendanceCalendar extends StatelessWidget {
     return Center(
       child: GestureDetector(
         onTap: () => onDaySelected?.call(date),
-        child: Container(
-          width: 36,
-          height: 36,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
-            color: status != null ? bgColor : (isWeekend ? Colors.grey[300] : Colors.grey[200]),
-            borderRadius: BorderRadius.circular(10),
-            border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
+            color: isSelected
+                ? ac.primary
+                : (status != null
+                    ? accent.withValues(alpha: 0.14)
+                    : (isWeekend ? ac.border.withValues(alpha: 0.6) : ac.fill)),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: ac.primary.withValues(alpha: 0.35),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           alignment: Alignment.center,
           child: Text(
             '$day',
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: status != null ? Colors.white : Colors.grey[600],
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              color: isSelected ? Colors.white : (status != null ? accent : ac.textSecondary),
             ),
           ),
         ),
@@ -95,12 +109,18 @@ class AttendanceCalendar extends StatelessWidget {
     return null;
   }
 
-  Color _statusColor(String? status) {
+  Color _statusColor(String? status, AppColors ac) {
     switch (status) {
-      case 'PRESENT': return Colors.green;
-      case 'LATE': return Colors.orange;
-      case 'ABSENT': return Colors.red;
-      default: return Colors.grey;
+      case 'PRESENT':
+      case 'EARLY':
+      case 'ON_TIME':
+        return _verde;
+      case 'LATE':
+        return _naranja;
+      case 'ABSENT':
+        return ac.error;
+      default:
+        return _gris;
     }
   }
 }

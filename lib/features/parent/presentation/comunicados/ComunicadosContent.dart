@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
@@ -184,13 +185,9 @@ class _ComunicadoCard extends StatelessWidget {
 
   const _ComunicadoCard({required this.item});
 
-  static const _primary = Color(0xFF225BAA);
-  static const _onSurface = Color(0xFF191C1E);
-  static const _onSurfaceVariant = Color(0xFF424751);
-  static const _outline = Color(0xFFE2E8F0);
-
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     final date = item.publishedAt != null
         ? _formatShortDate(DateTime.tryParse(item.publishedAt!))
         : '';
@@ -199,10 +196,10 @@ class _ComunicadoCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ac.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: item.isRead ? _outline : _primary.withValues(alpha: 0.45),
+          color: item.isRead ? ac.border : ac.primary.withValues(alpha: 0.45),
         ),
       ),
       child: Row(
@@ -212,15 +209,15 @@ class _ComunicadoCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: _primary.withValues(alpha: 0.10),
+              color: ac.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _primary.withValues(alpha: 0.20)),
+              border: Border.all(color: ac.primary.withValues(alpha: 0.20)),
             ),
             alignment: Alignment.center,
             child: Icon(
               item.isRead ? Icons.campaign_outlined : Icons.campaign,
               size: 24,
-              color: _primary,
+              color: ac.primary,
             ),
           ),
           const SizedBox(width: 12),
@@ -235,8 +232,8 @@ class _ComunicadoCard extends StatelessWidget {
                         width: 8,
                         height: 8,
                         margin: const EdgeInsets.only(right: 6),
-                        decoration: const BoxDecoration(
-                          color: _primary,
+                        decoration: BoxDecoration(
+                          color: ac.primary,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -248,7 +245,7 @@ class _ComunicadoCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: item.isRead ? FontWeight.w600 : FontWeight.w700,
-                          color: _onSurface,
+                          color: ac.textPrimary,
                         ),
                       ),
                     ),
@@ -257,7 +254,7 @@ class _ComunicadoCard extends StatelessWidget {
                         date,
                         style: TextStyle(
                           fontSize: 12,
-                          color: _onSurfaceVariant.withValues(alpha: 0.7),
+                          color: ac.textSecondary.withValues(alpha: 0.7),
                         ),
                       ),
                   ],
@@ -270,7 +267,7 @@ class _ComunicadoCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.35,
-                    color: _onSurfaceVariant.withValues(alpha: 0.8),
+                    color: ac.textSecondary.withValues(alpha: 0.8),
                   ),
                 ),
               ],

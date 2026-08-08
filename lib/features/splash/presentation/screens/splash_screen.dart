@@ -130,29 +130,13 @@ class _SplashScreenState extends State<SplashScreen>
                           scale: _checkScale.value,
                           child: Image.asset(
                             'assets/images/check.png',
-                            height: 60,
+                            height: 60, 
                             fit: BoxFit.contain,
                           ),
                         ),
                       ],
                     );
                   },
-                ),
-                const SizedBox(height: 24),
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) => Opacity(
-                    opacity: _coleFade.value,
-                    child: Text(
-                      'Colecheck',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: c.primary,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ),
                 ),
                 const Spacer(flex: 1),
                 _DotSpinner(color: c.primary),

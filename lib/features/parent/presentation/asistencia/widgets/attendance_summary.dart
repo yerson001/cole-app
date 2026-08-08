@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 
 class AttendanceSummary extends StatelessWidget {
@@ -6,8 +7,12 @@ class AttendanceSummary extends StatelessWidget {
 
   const AttendanceSummary({super.key, required this.reports});
 
+  static const _verde = Color(0xFF54DEB1);
+  static const _naranja = Color(0xFFFCB700);
+
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     var present = 0;
     var late = 0;
     var absent = 0;
@@ -25,30 +30,30 @@ class AttendanceSummary extends StatelessWidget {
     }
     return Row(
       children: [
-        Expanded(child: _card('Presente', present, Colors.green, Colors.green[50]!)),
+        Expanded(child: _card('Presente', present, _verde)),
         const SizedBox(width: 8),
-        Expanded(child: _card('Tarde', late, Colors.orange, Colors.orange[50]!)),
+        Expanded(child: _card('Tarde', late, _naranja)),
         const SizedBox(width: 8),
-        Expanded(child: _card('Falta', absent, Colors.red, Colors.red[50]!)),
+        Expanded(child: _card('Falta', absent, ac.error)),
       ],
     );
   }
 
-  Widget _card(String label, int count, Color textColor, Color bgColor) {
-    return Card(
-      elevation: 1,
-      color: bgColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.8))),
-            const SizedBox(height: 4),
-            Text('$count', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor)),
-          ],
-        ),
+  Widget _card(String label, int count, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.85))),
+          const SizedBox(height: 4),
+          Text('$count', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: color)),
+        ],
       ),
     );
   }

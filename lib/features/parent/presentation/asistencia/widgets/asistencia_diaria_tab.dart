@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_bloc.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_event.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_state.dart';
@@ -31,6 +32,7 @@ class AsistenciaDiariaTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     return BlocBuilder<AsistenciaBloc, AsistenciaState>(
       builder: (context, state) {
         return RefreshIndicator(
@@ -43,60 +45,69 @@ class AsistenciaDiariaTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () {
-                        context.read<AsistenciaBloc>().add(
-                          ChangeDate(date: state.selectedDate.subtract(const Duration(days: 1))),
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        _formatFullDate(state.selectedDate),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: () {
-                        context.read<AsistenciaBloc>().add(
-                          ChangeDate(date: state.selectedDate.add(const Duration(days: 1))),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
                 ChildSelector(
                   students: state.students,
                   selectedStudent: state.selectedStudent,
                   onChanged: (s) => context.read<AsistenciaBloc>().add(SelectStudent(student: s)),
                 ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton.icon(
-                    onPressed: state.isLoadingDaily ? null : () {
-                      context.read<AsistenciaBloc>().add(ReloadAll());
-                    },
-                    icon: state.isLoadingDaily
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.refresh),
-                    label: const Text('Recargar'),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: ac.fill,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: ac.border),
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: ac.card,
+                          foregroundColor: ac.primary,
+                        ),
+                        icon: const Icon(Icons.chevron_left, size: 22),
+                        onPressed: () {
+                          context.read<AsistenciaBloc>().add(
+                            ChangeDate(date: state.selectedDate.subtract(const Duration(days: 1))),
+                          );
+                        },
+                      ),
+                      Expanded(
+                        child: Text(
+                          _formatFullDate(state.selectedDate),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: ac.textPrimary),
+                        ),
+                      ),
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: ac.card,
+                          foregroundColor: ac.primary,
+                        ),
+                        icon: const Icon(Icons.chevron_right, size: 22),
+                        onPressed: () {
+                          context.read<AsistenciaBloc>().add(
+                            ChangeDate(date: state.selectedDate.add(const Duration(days: 1))),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 if (state.dailyReports.isNotEmpty)
                   DailyAttendanceCard(report: state.dailyReports.first, index: state.students.indexOf(state.selectedStudent!))
                 else
-                  const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(child: Text('Sin datos para este día')),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: ac.card,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: ac.border),
+                    ),
+                    child: Center(
+                      child: Text('Sin datos para este día', style: TextStyle(fontSize: 14, color: ac.textSecondary)),
                     ),
                   ),
                 const SizedBox(height: 24),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_card.dart';
 
-class AttendanceSection extends StatelessWidget {
+class AttendanceSection extends StatefulWidget {
   final List<DayReportModel> reports;
   final bool isLoading;
   final VoidCallback? onVerMas;
@@ -15,57 +16,108 @@ class AttendanceSection extends StatelessWidget {
   });
 
   @override
+  State<AttendanceSection> createState() => _AttendanceSectionState();
+}
+
+class _AttendanceSectionState extends State<AttendanceSection> {
+  final PageController _controller = PageController(viewportFraction: 0.99);
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
+    final reports = widget.reports;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Text(
+            Text(
               'Asistencia de Hoy',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ac.textPrimary),
             ),
             const Spacer(),
-            if (isLoading)
+            if (widget.isLoading)
               const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             TextButton.icon(
-              onPressed: onVerMas,
+              onPressed: widget.onVerMas,
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF225BAA),
+                foregroundColor: ac.primary,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 visualDensity: VisualDensity.compact,
               ),
-              icon: const Text('Ver más', style: TextStyle(fontSize: 13)),
-              label: const Icon(Icons.arrow_forward_ios, size: 12),
+              icon: Text('Ver más', style: TextStyle(fontSize: 13, color: ac.primary)),
+              label: Icon(Icons.arrow_forward_ios, size: 12, color: ac.primary),
             ),
           ],
         ),
         const SizedBox(height: 4),
-        if (reports.isEmpty && !isLoading)
+        if (reports.isEmpty && !widget.isLoading)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: Text(
                 'No hay registros de asistencia hoy',
-                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                style: TextStyle(fontSize: 13, color: ac.textSecondary),
               ),
             ),
           )
         else
           SizedBox(
-            height: 165,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(left: 4, right: 4),
+            height: 135,
+            child: PageView.builder(
+              controller: _controller,
               itemCount: reports.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 4),
-              itemBuilder: (context, index) => AttendanceCard(report: reports[index], index: index),
+              onPageChanged: (index) => setState(() => _currentPage = index),
+              itemBuilder: (context, index) {
+                return AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    final page = _controller.hasClients ? _controller.page ?? 0 : _currentPage.toDouble();
+                    final diff = (page - index).abs().clamp(0.0, 1.0);
+                    final scale = 1.0 - (0.08 * diff);
+                    return Transform.scale(
+                      scale: scale,
+                      child: child,
+                    );
+                  },
+                  child: AttendanceCard(report: reports[index], index: index),
+                );
+              },
             ),
           ),
+        if (reports.length > 1) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < reports.length; i++)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: i == _currentPage ? 20 : 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: i == _currentPage
+                        ? ac.primary
+                        : ac.border,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }

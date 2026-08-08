@@ -96,28 +96,18 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.menu_rounded, size: 28),
-        onPressed: () {},
+        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            shortDate,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
+      title: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          shortDate,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
-          const Text(
-            'Asistencia de hoy',
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xCCFFFFFF),
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ],
+        ),
       ),
       actions: [
         Padding(
@@ -438,35 +428,33 @@ class _QuickAccessItem {
   final String name;
   final IconData icon;
   final int pageIndex;
-  const _QuickAccessItem(this.name, this.icon, this.pageIndex);
+  final Color color;
+  const _QuickAccessItem(this.name, this.icon, this.pageIndex, this.color);
 }
 
 class _QuickAccessGrid extends StatelessWidget {
   const _QuickAccessGrid();
 
   static const _items = [
-    _QuickAccessItem('Fotocheck', Icons.badge, 2),
-    _QuickAccessItem('Horario', Icons.schedule, 3),
-    _QuickAccessItem('Notas', Icons.grade, 4),
-    _QuickAccessItem('Pensiones', Icons.payments, 5),
-    _QuickAccessItem('Cuotas', Icons.receipt_long, 6),
-    _QuickAccessItem('Reuniones', Icons.groups, 7),
-    _QuickAccessItem('Agenda', Icons.book, 8),
-    _QuickAccessItem('Más', Icons.apps, 9),
+    _QuickAccessItem('Fotocheck', Icons.badge, 2, Color(0xFF00C98E)),
+    _QuickAccessItem('Horario', Icons.schedule, 3, Color(0xFFFF7A55)),
+    _QuickAccessItem('Notas', Icons.grade, 4, Color(0xFFA768F1)),
+    _QuickAccessItem('Pensiones', Icons.payments, 5, Color(0xFFFF378D)),
+    _QuickAccessItem('Cuotas', Icons.receipt_long, 6, Color(0xFF5EC447)),
+    _QuickAccessItem('Reuniones', Icons.groups, 7, Color(0xFF01AFEB)),
+    _QuickAccessItem('Agenda', Icons.book, 8, Color(0xFFFF9B38)),
+    _QuickAccessItem('Más', Icons.apps, 9, Color(0xFFFE4349)),
   ];
-
-  static const _primary = Color(0xFF225BAA);
-  static const _surfaceLow = Color(0xFFF2F4F6);
-  static const _outlineVariant = Color(0xFFE2E8F0);
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Accesos Rápidos',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ac.textPrimary),
         ),
         const SizedBox(height: 16),
         for (var row = 0; row < 2; row++)
@@ -489,22 +477,24 @@ class _QuickAccessGrid extends StatelessWidget {
                             width: 56,
                             height: 56,
                             decoration: BoxDecoration(
-                              color: _surfaceLow,
+                              color: _items[row * 4 + col].color.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: _outlineVariant),
+                              border: Border.all(
+                                color: _items[row * 4 + col].color.withValues(alpha: 0.25),
+                              ),
                             ),
                             alignment: Alignment.center,
                             child: Icon(
                               _items[row * 4 + col].icon,
                               size: 26,
-                              color: _primary,
-                              weight: 300,
+                              color: _items[row * 4 + col].color,
+                              weight: 400,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _items[row * 4 + col].name,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: ac.textPrimary),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -604,28 +594,24 @@ class _HomeTabs extends StatefulWidget {
 class _HomeTabsState extends State<_HomeTabs> {
   int _selected = 0;
 
-  static const _primary = Color(0xFF225BAA);
-  static const _surfaceLow = Color(0xFFF2F4F6);
-  static const _onSurfaceVariant = Color(0xFF424751);
-  static const _outline = Color(0xFFE2E8F0);
-
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     final state = context.watch<ParentHomeBloc>().state;
     final labels = const ['Comunicados', 'Reuniones', 'Agenda'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Contenido',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ac.textPrimary),
         ),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: _surfaceLow,
+            color: ac.fill,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
@@ -638,10 +624,10 @@ class _HomeTabsState extends State<_HomeTabs> {
                       duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
-                        color: _selected == i ? Colors.white : Colors.transparent,
+                        color: _selected == i ? ac.card : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         border: _selected == i
-                            ? Border.all(color: _outline)
+                            ? Border.all(color: ac.border)
                             : Border.all(color: Colors.transparent),
                         boxShadow: _selected == i
                             ? [
@@ -659,7 +645,7 @@ class _HomeTabsState extends State<_HomeTabs> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: _selected == i ? FontWeight.w600 : FontWeight.w500,
-                          color: _selected == i ? _primary : _onSurfaceVariant,
+                          color: _selected == i ? ac.primary : ac.textSecondary,
                         ),
                       ),
                     ),
@@ -734,12 +720,13 @@ class _HomeTabsState extends State<_HomeTabs> {
   }
 
   Widget _emptyState(String message) {
+    final ac = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Center(
         child: Text(
           message,
-          style: TextStyle(fontSize: 13, color: _onSurfaceVariant.withValues(alpha: 0.7)),
+          style: TextStyle(fontSize: 13, color: ac.textSecondary.withValues(alpha: 0.7)),
         ),
       ),
     );
@@ -774,20 +761,16 @@ class _HomeTabCard extends StatelessWidget {
     required this.description,
   });
 
-  static const _primary = Color(0xFF225BAA);
-  static const _onSurface = Color(0xFF191C1E);
-  static const _onSurfaceVariant = Color(0xFF424751);
-  static const _outline = Color(0xFFE2E8F0);
-
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ac.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _outline),
+        border: Border.all(color: ac.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -796,12 +779,12 @@ class _HomeTabCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: _primary.withValues(alpha: 0.10),
+              color: ac.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _primary.withValues(alpha: 0.20)),
+              border: Border.all(color: ac.primary.withValues(alpha: 0.20)),
             ),
             alignment: Alignment.center,
-            child: Icon(icon, size: 24, color: _primary),
+            child: Icon(icon, size: 24, color: ac.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -815,10 +798,10 @@ class _HomeTabCard extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: _onSurface,
+                          color: ac.textPrimary,
                         ),
                       ),
                     ),
@@ -827,7 +810,7 @@ class _HomeTabCard extends StatelessWidget {
                         time,
                         style: TextStyle(
                           fontSize: 12,
-                          color: _onSurfaceVariant.withValues(alpha: 0.7),
+                          color: ac.textSecondary.withValues(alpha: 0.7),
                         ),
                       ),
                   ],
@@ -840,7 +823,7 @@ class _HomeTabCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.35,
-                    color: _onSurfaceVariant.withValues(alpha: 0.8),
+                    color: ac.textSecondary.withValues(alpha: 0.8),
                   ),
                 ),
               ],

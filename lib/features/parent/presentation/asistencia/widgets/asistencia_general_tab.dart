@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_bloc.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_event.dart';
@@ -27,6 +28,7 @@ class AsistenciaGeneralTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     return BlocBuilder<AsistenciaBloc, AsistenciaState>(
       builder: (context, state) {
         final selectedReport = state.selectedCalendarDay != null
@@ -47,68 +49,72 @@ class AsistenciaGeneralTab extends StatelessWidget {
                   selectedStudent: state.selectedStudent,
                   onChanged: (s) => context.read<AsistenciaBloc>().add(SelectStudent(student: s)),
                 ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ElevatedButton.icon(
-                    onPressed: state.isLoadingRange ? null : () {
-                      context.read<AsistenciaBloc>().add(ReloadAll());
-                    },
-                    icon: state.isLoadingRange
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.refresh),
-                    label: const Text('Recargar'),
-                  ),
-                ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () {
-                        context.read<AsistenciaBloc>().add(
-                          ChangeMonth(month: DateTime(state.currentMonth.year, state.currentMonth.month - 1)),
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        _monthLabel(state.currentMonth),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: ac.fill,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: ac.border),
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: ac.card,
+                          foregroundColor: ac.primary,
+                        ),
+                        icon: const Icon(Icons.chevron_left, size: 22),
+                        onPressed: () {
+                          context.read<AsistenciaBloc>().add(
+                            ChangeMonth(month: DateTime(state.currentMonth.year, state.currentMonth.month - 1)),
+                          );
+                        },
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: () {
-                        context.read<AsistenciaBloc>().add(
-                          ChangeMonth(month: DateTime(state.currentMonth.year, state.currentMonth.month + 1)),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: AttendanceCalendar(
-                      month: state.currentMonth,
-                      reports: state.rangeReports,
-                      selectedDay: state.selectedCalendarDay,
-                      onDaySelected: (day) => context.read<AsistenciaBloc>().add(SelectCalendarDay(day: day)),
-                    ),
+                      Expanded(
+                        child: Text(
+                          _monthLabel(state.currentMonth),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ac.textPrimary),
+                        ),
+                      ),
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: ac.card,
+                          foregroundColor: ac.primary,
+                        ),
+                        icon: const Icon(Icons.chevron_right, size: 22),
+                        onPressed: () {
+                          context.read<AsistenciaBloc>().add(
+                            ChangeMonth(month: DateTime(state.currentMonth.year, state.currentMonth.month + 1)),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                  decoration: BoxDecoration(
+                    color: ac.card,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: ac.border),
+                  ),
+                  child: AttendanceCalendar(
+                    month: state.currentMonth,
+                    reports: state.rangeReports,
+                    selectedDay: state.selectedCalendarDay,
+                    onDaySelected: (day) => context.read<AsistenciaBloc>().add(SelectCalendarDay(day: day)),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 AttendanceSummary(reports: state.rangeReports),
                 const SizedBox(height: 20),
                 if (state.selectedCalendarDay != null) ...[
                   Text(
                     'Detalle del ${_formatDate(state.selectedCalendarDay!)}',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ac.textPrimary),
                   ),
                   const SizedBox(height: 12),
                   if (selectedReport != null)
@@ -117,14 +123,18 @@ class AsistenciaGeneralTab extends StatelessWidget {
                       index: state.students.indexOf(state.selectedStudent!),
                     )
                   else
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Center(
-                          child: Text(
-                            'Sin registro de asistencia para este día',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: ac.card,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: ac.border),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Sin registro de asistencia para este día',
+                          style: TextStyle(fontSize: 14, color: ac.textSecondary),
                         ),
                       ),
                     ),
