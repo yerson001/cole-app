@@ -5,8 +5,8 @@ import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_event.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_state.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/child_selector.dart';
-import 'package:coleapp/features/parent/presentation/asistencia/widgets/daily_attendance_card.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/historial_reciente.dart';
+import 'package:coleapp/features/parent/presentation/widgets/attendance_card.dart';
 
 class AsistenciaDiariaTab extends StatelessWidget {
   const AsistenciaDiariaTab({super.key});
@@ -96,7 +96,7 @@ class AsistenciaDiariaTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 if (state.dailyReports.isNotEmpty)
-                  DailyAttendanceCard(report: state.dailyReports.first, index: state.students.indexOf(state.selectedStudent!))
+                  AttendanceCard(report: state.dailyReports.first, index: state.students.indexOf(state.selectedStudent!))
                 else
                   Container(
                     width: double.infinity,

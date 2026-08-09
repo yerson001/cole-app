@@ -402,15 +402,16 @@ class _QuickAccessItem {
 class _QuickAccessGrid extends StatelessWidget {
   const _QuickAccessGrid();
 
+  static const _primary = Color(0xFF225BAA);
   static const _items = [
-    _QuickAccessItem('Fotocheck', Icons.badge, 2, Color(0xFF00C98E)),
-    _QuickAccessItem('Horario', Icons.schedule, 3, Color(0xFFFF7A55)),
-    _QuickAccessItem('Notas', Icons.grade, 4, Color(0xFFA768F1)),
-    _QuickAccessItem('Pensiones', Icons.payments, 5, Color(0xFFFF378D)),
-    _QuickAccessItem('Cuotas', Icons.receipt_long, 6, Color(0xFF5EC447)),
-    _QuickAccessItem('Reuniones', Icons.groups, 7, Color(0xFF01AFEB)),
-    _QuickAccessItem('Agenda', Icons.book, 8, Color(0xFFFF9B38)),
-    _QuickAccessItem('Más', Icons.apps, 9, Color(0xFFFE4349)),
+    _QuickAccessItem('Fotocheck', Icons.badge, 2, _primary),
+    _QuickAccessItem('Horario', Icons.schedule, 3, _primary),
+    _QuickAccessItem('Notas', Icons.grade, 4, _primary),
+    _QuickAccessItem('Pensiones', Icons.payments, 5, _primary),
+    _QuickAccessItem('Cuotas', Icons.receipt_long, 6, _primary),
+    _QuickAccessItem('Reuniones', Icons.groups, 7, _primary),
+    _QuickAccessItem('Agenda', Icons.book, 8, _primary),
+    _QuickAccessItem('Más', Icons.apps, 9, _primary),
   ];
 
   @override
@@ -672,6 +673,7 @@ class _HomeTabsState extends State<_HomeTabs> {
             for (final m in meetings.take(3))
               _HomeTabCard(
                 icon: Icons.groups,
+                color: const Color(0xFF01AFEB),
                 title: m.parentMeeting.subject,
                 time: m.parentMeeting.timeRange,
                 description: _formatMeetingDate(m.parentMeeting.date),
@@ -688,6 +690,7 @@ class _HomeTabsState extends State<_HomeTabs> {
             for (final item in items.take(3))
               _HomeTabCard(
                 icon: Icons.event,
+                color: const Color(0xFFFF9B38),
                 title: item.title,
                 time: _formatShortDate(item.dueDate),
                 description: item.description,
@@ -704,6 +707,7 @@ class _HomeTabsState extends State<_HomeTabs> {
             for (final item in items.take(3))
               _HomeTabCard(
                 icon: Icons.campaign_outlined,
+                color: const Color(0xFFFE4349),
                 title: item.title,
                 time: _formatShortDate(item.publishedAt),
                 description: item.description,
@@ -744,12 +748,14 @@ class _HomeTabsState extends State<_HomeTabs> {
 
 class _HomeTabCard extends StatelessWidget {
   final IconData icon;
+  final Color color;
   final String title;
   final String time;
   final String description;
 
   const _HomeTabCard({
     required this.icon,
+    required this.color,
     required this.title,
     required this.time,
     required this.description,
@@ -769,11 +775,11 @@ class _HomeTabCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: ac.primary.withValues(alpha: 0.10),
+                  color: color.withValues(alpha: 0.10),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: Icon(icon, size: 20, color: ac.primary),
+                child: Icon(icon, size: 20, color: color),
               ),
               const SizedBox(width: 12),
               Expanded(

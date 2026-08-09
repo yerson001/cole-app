@@ -64,7 +64,7 @@ class AttendanceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ac.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ac.border),
+        border: Border.all(color: ac.border,width: 2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -105,7 +105,7 @@ class AttendanceCard extends StatelessWidget {
                       '${s.name} ${s.lastName}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ac.textPrimary),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: ac.textPrimary),
                     ),
                     const SizedBox(height: 1),
                     Text(
@@ -121,7 +121,7 @@ class AttendanceCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           Row(
             children: [
               Expanded(
@@ -140,6 +140,7 @@ class AttendanceCard extends StatelessWidget {
                   status: a?.statusCheckOut,
                   place: a?.checkOutTime != null ? 'Registrado' : 'Pendiente',
                   fixedAccent: a?.checkOutTime != null ? _salidaAzul : null,
+                  mirror: true,
                   ac: ac,
                 ),
               ),
@@ -156,6 +157,7 @@ class AttendanceCard extends StatelessWidget {
     required String place,
     String? status,
     Color? fixedAccent,
+    bool mirror = false,
     required AppColors ac,
   }) {
     final hasMark = time != null;
@@ -164,22 +166,24 @@ class AttendanceCard extends StatelessWidget {
         ? (fixedAccent ?? _statusColor(status))
         : _gris;
     return Container(
-      padding: const EdgeInsets.only(left: 10),
+      padding: mirror ? const EdgeInsets.only(right: 30) : const EdgeInsets.only(left: 30),
       decoration: BoxDecoration(
         border: Border(
-          left: BorderSide(
-            color: hasMark ? accent : ac.border,
-            width: 3,
-          ),
+          right: mirror
+              ? BorderSide(color: hasMark ? accent : ac.border, width: 3)
+              : BorderSide.none,
+          left: mirror
+              ? BorderSide.none
+              : BorderSide(color: hasMark ? accent : ac.border, width: 3),
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: mirror ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
               color: _labelGris,
@@ -206,6 +210,7 @@ class AttendanceCard extends StatelessWidget {
             ),
           const SizedBox(height: 1),
           Row(
+            mainAxisAlignment: mirror ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
               Icon(
                 _statusIcon(hasMark, status),

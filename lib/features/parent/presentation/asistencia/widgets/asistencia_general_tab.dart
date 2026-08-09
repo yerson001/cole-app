@@ -8,7 +8,7 @@ import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/attendance_calendar.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/attendance_summary.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/child_selector.dart';
-import 'package:coleapp/features/parent/presentation/asistencia/widgets/daily_attendance_card.dart';
+import 'package:coleapp/features/parent/presentation/widgets/attendance_card.dart';
 
 class AsistenciaGeneralTab extends StatelessWidget {
   const AsistenciaGeneralTab({super.key});
@@ -135,7 +135,7 @@ class AsistenciaGeneralTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   if (selectedReport != null)
-                    DailyAttendanceCard(
+                    AttendanceCard(
                       report: selectedReport,
                       index: state.students.indexOf(state.selectedStudent!),
                     )
