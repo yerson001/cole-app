@@ -51,6 +51,22 @@ class DailyAttendanceCard extends StatelessWidget {
     }
   }
 
+  Widget _nameStatusIcon(String? status, {required bool hasCheckIn}) {
+    if (!hasCheckIn || status == null) {
+      return Icon(Icons.hourglass_empty, size: 18, color: _gris);
+    }
+    switch (status) {
+      case 'PRESENT':
+      case 'EARLY':
+      case 'ON_TIME':
+        return Icon(Icons.check_circle, size: 18, color: _verde);
+      case 'LATE':
+        return Icon(Icons.schedule, size: 18, color: _naranja);
+      default:
+        return Icon(Icons.hourglass_empty, size: 18, color: _gris);
+    }
+  }
+
   String _statusLabel(String? status) {
     switch (status) {
       case 'PRESENT':
@@ -84,7 +100,12 @@ class DailyAttendanceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ac.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ac.border),
+        border: Border(
+          left: const BorderSide(color: Color(0xFF225BAA), width: 4),
+          top: BorderSide(color: ac.border),
+          right: BorderSide(color: ac.border),
+          bottom: BorderSide(color: ac.border),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -117,31 +138,41 @@ class DailyAttendanceCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${s.name} ${s.lastName}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ac.textPrimary),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      gradeLabel,
-                      style: TextStyle(
-                        fontSize: 10,
-                        letterSpacing: 0.5,
-                        color: ac.textSecondary,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          _nameStatusIcon(a?.statusCheckIn, hasCheckIn: a?.checkInTime != null),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              '${s.name} ${s.lastName}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ac.textPrimary),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 1),
+                      Text(
+                        gradeLabel,
+                        style: TextStyle(
+                          fontSize: 10,
+                          letterSpacing: 0.5,
+                          color: ac.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
               ),
               _badge(a?.updatedInClass ?? false),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
+          Divider(height: 1, thickness: 1, color: ac.border),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -153,6 +184,7 @@ class DailyAttendanceCard extends StatelessWidget {
                   ac: ac,
                 ),
               ),
+              VerticalDivider(width: 16, thickness: 1, color: ac.border),
               Expanded(
                 child: _checkColumn(
                   label: 'SALIDA',
@@ -192,7 +224,7 @@ class DailyAttendanceCard extends StatelessWidget {
   Widget _checkColumn({
     required String label,
     String? time,
-    required String place,
+    String? place,
     String? status,
     Color? fixedAccent,
     required AppColors ac,
@@ -201,49 +233,41 @@ class DailyAttendanceCard extends StatelessWidget {
     final accent = hasMark
         ? (fixedAccent ?? _statusColor(status))
         : _gris;
-    return Container(
-      padding: const EdgeInsets.only(left: 10),
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: hasMark ? accent : ac.border,
-            width: 3,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+            color: _labelGris,
           ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        const SizedBox(height: 2),
+        if (hasMark)
           Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
+            _formatTime(time),
+            style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: _labelGris,
+              color: accent,
+            ),
+          )
+        else
+          Text(
+            '--:--',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: _gris.withValues(alpha: 0.6),
             ),
           ),
-          const SizedBox(height: 2),
-          if (hasMark)
-            Text(
-              _formatTime(time),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: accent,
-              ),
-            )
-          else
-            Text(
-              '--:--',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: _gris.withValues(alpha: 0.6),
-              ),
-            ),
+        if (place != null) ...[
           const SizedBox(height: 1),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 _statusIcon(hasMark, status),
@@ -256,6 +280,7 @@ class DailyAttendanceCard extends StatelessWidget {
                   place,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -266,7 +291,7 @@ class DailyAttendanceCard extends StatelessWidget {
             ],
           ),
         ],
-      ),
+      ],
     );
   }
 

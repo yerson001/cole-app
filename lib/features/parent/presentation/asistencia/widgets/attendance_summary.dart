@@ -31,9 +31,9 @@ class AttendanceSummary extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: _card('Presente', present, _verde)),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         Expanded(child: _card('Tarde', late, _naranja)),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         Expanded(child: _card('Falta', absent, ac.error)),
       ],
     );
@@ -41,18 +41,18 @@ class AttendanceSummary extends StatelessWidget {
 
   Widget _card(String label, int count, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.85))),
-          const SizedBox(height: 4),
-          Text('$count', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: color)),
+          Text(label, style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.85))),
+          const SizedBox(height: 2),
+          Text('$count', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: color)),
         ],
       ),
     );

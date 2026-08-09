@@ -24,6 +24,7 @@ import 'package:coleapp/features/parent/presentation/comunicados/ComunicadosCont
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
+import 'package:coleapp/features/parent/presentation/widgets/curved_header.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ParentHomeContent extends StatefulWidget {
@@ -84,65 +85,31 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     );
   }
 
-  AppBar _buildHomeHeader() {
-    const primary = Color(0xFF225BAA);
-    const error = Color(0xFFBA1A1A);
+  PreferredSizeWidget _buildHomeHeader(BuildContext context) {
+    final state = context.watch<ParentHomeBloc>().state;
+    final user = state.user;
+    final greetingName = user?.person?.name ?? user?.username ?? '';
     final now = DateTime.now();
-    const days = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
-    final shortDate = '${days[now.weekday - 1]} ${now.day}';
-    return AppBar(
-      backgroundColor: primary,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.menu_rounded, size: 28),
-        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+    const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    final fullDate = '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
+    return PreferredSize(
+      preferredSize: Size.fromHeight(
+        CurvedHeader.preferredHeight(MediaQuery.of(context).padding.top, 16),
       ),
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          shortDate,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
+      child: CurvedHeader(
+        title: greetingName.isEmpty ? 'Buenos días' : 'Buenos días, $greetingName',
+        subtitle: fullDate,
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationsPressed: () {},
       ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, size: 26),
-                onPressed: () {},
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  width: 9,
-                  height: 9,
-                  decoration: BoxDecoration(
-                    color: error,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: primary, width: 1.5),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     final state = context.watch<ParentHomeBloc>().state;
     if (state.pageIndex == 0) {
-      return _buildHomeHeader();
+      return _buildHomeHeader(context);
     }
     return AppBar(
           leading: Builder(
@@ -454,9 +421,9 @@ class _QuickAccessGrid extends StatelessWidget {
       children: [
         Text(
           'Accesos Rápidos',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ac.textPrimary),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ac.textPrimary),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         for (var row = 0; row < 2; row++)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
@@ -533,7 +500,7 @@ class _HomeBody extends StatelessWidget {
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -567,9 +534,9 @@ class _HomeBody extends StatelessWidget {
                   }
                 },
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 5),
               const _QuickAccessGrid(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 5),
               const _HomeTabs(),
             ],
           ),
@@ -599,15 +566,40 @@ class _HomeTabsState extends State<_HomeTabs> {
     final ac = context.appColors;
     final state = context.watch<ParentHomeBloc>().state;
     final labels = const ['Comunicados', 'Reuniones', 'Agenda'];
+    final totalCount = state.comunicados.length + state.meetings.length + state.agendaItems.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Contenido',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ac.textPrimary),
+        Row(
+          children: [
+            Text(
+              'Contenido',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ac.textPrimary),
+            ),
+            const SizedBox(width: 6),
+            if (totalCount > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                height: 16,
+                constraints: const BoxConstraints(minWidth: 16),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: ac.error,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$totalCount',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
@@ -642,6 +634,8 @@ class _HomeTabsState extends State<_HomeTabs> {
                       child: Text(
                         labels[i],
                         textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: _selected == i ? FontWeight.w600 : FontWeight.w500,
@@ -764,73 +758,76 @@ class _HomeTabCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ac = context.appColors;
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: ac.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ac.border),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: ac.primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: ac.primary.withValues(alpha: 0.20)),
-            ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 24, color: ac.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: ac.primary.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(icon, size: 20, color: ac.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: ac.textPrimary,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: ac.textPrimary,
+                            ),
+                          ),
                         ),
+                        if (time.isNotEmpty)
+                          Text(
+                            time,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: ac.textSecondary.withValues(alpha: 0.7),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.35,
+                        color: ac.textSecondary.withValues(alpha: 0.8),
                       ),
                     ),
-                    if (time.isNotEmpty)
-                      Text(
-                        time,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: ac.textSecondary.withValues(alpha: 0.7),
-                        ),
-                      ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.35,
-                    color: ac.textSecondary.withValues(alpha: 0.8),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: ac.border,
+          indent: 52,
+        ),
+      ],
     );
   }
 }

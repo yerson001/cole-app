@@ -20,7 +20,7 @@ class AttendanceSection extends StatefulWidget {
 }
 
 class _AttendanceSectionState extends State<AttendanceSection> {
-  final PageController _controller = PageController(viewportFraction: 0.99);
+  final PageController _controller = PageController(viewportFraction: 1.0);
   int _currentPage = 0;
 
   @override
@@ -36,32 +36,6 @@ class _AttendanceSectionState extends State<AttendanceSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              'Asistencia de Hoy',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: ac.textPrimary),
-            ),
-            const Spacer(),
-            if (widget.isLoading)
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            TextButton.icon(
-              onPressed: widget.onVerMas,
-              style: TextButton.styleFrom(
-                foregroundColor: ac.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                visualDensity: VisualDensity.compact,
-              ),
-              icon: Text('Ver más', style: TextStyle(fontSize: 13, color: ac.primary)),
-              label: Icon(Icons.arrow_forward_ios, size: 12, color: ac.primary),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
         if (reports.isEmpty && !widget.isLoading)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -74,7 +48,7 @@ class _AttendanceSectionState extends State<AttendanceSection> {
           )
         else
           SizedBox(
-            height: 135,
+            height: 205,
             child: PageView.builder(
               controller: _controller,
               itemCount: reports.length,
@@ -96,28 +70,51 @@ class _AttendanceSectionState extends State<AttendanceSection> {
               },
             ),
           ),
-        if (reports.length > 1) ...[
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (var i = 0; i < reports.length; i++)
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOut,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  width: i == _currentPage ? 20 : 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: i == _currentPage
-                        ? ac.primary
-                        : ac.border,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
+        Row(
+          children: [
+            Expanded(
+              child: reports.length > 1
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var i = 0; i < reports.length; i++)
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            width: i == _currentPage ? 20 : 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: i == _currentPage
+                                  ? ac.primary
+                                  : ac.border,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            if (widget.isLoading) ...[
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 8),
             ],
-          ),
-        ],
+            TextButton.icon(
+              onPressed: widget.onVerMas,
+              style: TextButton.styleFrom(
+                foregroundColor: ac.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                visualDensity: VisualDensity.compact,
+              ),
+              icon: Text('Ver más', style: TextStyle(fontSize: 13, color: ac.primary)),
+              label: Icon(Icons.arrow_forward_ios, size: 12, color: ac.primary),
+            ),
+          ],
+        ),
       ],
     );
   }

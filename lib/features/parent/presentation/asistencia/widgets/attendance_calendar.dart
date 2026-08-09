@@ -41,7 +41,7 @@ class AttendanceCalendar extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 7,
-          childAspectRatio: 1.25,
+          childAspectRatio: 1.30,
           children: [
             for (var i = 0; i < startWeekday; i++) const SizedBox.shrink(),
             for (var day = 1; day <= daysInMonth; day++)
@@ -67,8 +67,8 @@ class AttendanceCalendar extends StatelessWidget {
         onTap: () => onDaySelected?.call(date),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          width: 32,
-          height: 32,
+          width: 28,
+          height: 28,
           decoration: BoxDecoration(
             color: isSelected
                 ? ac.primary
@@ -90,7 +90,7 @@ class AttendanceCalendar extends StatelessWidget {
           child: Text(
             '$day',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
               color: isSelected ? Colors.white : (status != null ? accent : ac.textSecondary),
             ),

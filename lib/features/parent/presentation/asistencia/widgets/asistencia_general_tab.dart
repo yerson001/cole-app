@@ -40,7 +40,7 @@ class AsistenciaGeneralTab extends StatelessWidget {
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -95,7 +95,7 @@ class AsistenciaGeneralTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
                   decoration: BoxDecoration(
                     color: ac.card,
                     borderRadius: BorderRadius.circular(12),
@@ -108,15 +108,32 @@ class AsistenciaGeneralTab extends StatelessWidget {
                     onDaySelected: (day) => context.read<AsistenciaBloc>().add(SelectCalendarDay(day: day)),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 AttendanceSummary(reports: state.rangeReports),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 if (state.selectedCalendarDay != null) ...[
-                  Text(
-                    'Detalle del ${_formatDate(state.selectedCalendarDay!)}',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ac.textPrimary),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: ac.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: ac.primary.withValues(alpha: 0.25)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.event_note, size: 18, color: ac.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Detalle del ${_formatDate(state.selectedCalendarDay!)}',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: ac.primary),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   if (selectedReport != null)
                     DailyAttendanceCard(
                       report: selectedReport,
