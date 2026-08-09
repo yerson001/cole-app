@@ -48,7 +48,7 @@ class _AttendanceSectionState extends State<AttendanceSection> {
           )
         else
           SizedBox(
-            height: 205,
+            height: 150,
             child: PageView.builder(
               controller: _controller,
               itemCount: reports.length,
