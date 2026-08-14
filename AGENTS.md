@@ -19,8 +19,22 @@
 - `lib/bloc_provider.dart` creates global Blocs with `locator<...>()`.
 - `lib/injection.config.dart` is generated — do not edit by hand.
 
+## Notifications (cross-cutting layer)
+- All FCM push code lives in `lib/notifications/` (outside `features/`).
+  - `notification_service.dart`: init, permissions, topic subscribe/unsubscribe.
+  - `local_notification_service.dart`: channel `colecheck_push`, `show()`.
+  - `background_message_handler.dart`: top-level `@pragma('vm:entry-point')`; only shows local notif for data-only messages (avoids dupes when payload has `notification`).
+  - `firebase_options.dart`: manual config for Android project `mobile-push-81f14`.
+- Android requirements:
+  - `android/app/google-services.json` (project `mobile-push-81f14`, package `com.example.coleapp`).
+  - Plugin `com.google.gms.google-services` in `android/settings.gradle.kts` and `android/app/build.gradle.kts`.
+  - Permissions `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED` in `AndroidManifest.xml`.
+  - `flutter_local_notifications` needs `isCoreLibraryDesugaringEnabled = true` + `com.android.tools:desugar_jdk_libs` dep in `android/app/build.gradle.kts`, otherwise build fails with `checkDebugAarMetadata`.
+- Backend notifies per topic: `user_{tenantId}_{parentDni}` (data + notification payload).
+- App subscribes in `ParentHomeBloc` (`GetParentUser`) using `session.tenant` + `session.user.person.documentNumber`.
+
 ## Backend / API conventions
-- Base URL is hardcoded in `lib/core/constants/api_constants.dart` (prod by default).
+- Base URL is hardcoded in `lib/core/constants/api_constants.dart`. Currently `https://demo.backend.colecheck.com` (test); prod `https://backend.colecheck.com` is commented out — switch before release.
 - Almost every request needs header `tenant-id`. For parent flows, read tenant from the saved auth session (`session.tenant`), do not hardcode `ie-guillermo`.
 - Auth is cookie-based JWT (`access_token` cookie) plus `tenant-id` header.
 
