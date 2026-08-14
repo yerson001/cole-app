@@ -21,6 +21,7 @@ import 'package:coleapp/features/parent/presentation/cuotas/CuotasContent.dart';
 import 'package:coleapp/features/parent/presentation/reuniones/ReunionesContent.dart';
 import 'package:coleapp/features/parent/presentation/agenda/AgendaContent.dart';
 import 'package:coleapp/features/parent/presentation/comunicados/ComunicadosContent.dart';
+import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
@@ -71,6 +72,10 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
       drawer: _buildDrawer(context),
       body: BlocBuilder<ParentHomeBloc, ParentHomeState>(
         builder: (context, state) {
+          final navIndex = _pageToNav(state.pageIndex);
+          if (navIndex >= 0) {
+            return _BottomNavPages(navIndex: navIndex, students: state.students);
+          }
           if (state.pageIndex == 1) {
             return BlocBuilder<ProfileInfoBloc, ProfileInfoState>(
               builder: (context, pState) {
@@ -90,6 +95,10 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     final user = state.user;
     final greetingName = user?.person?.name ?? user?.username ?? '';
     final now = DateTime.now();
+    final hour = now.hour;
+    final greeting = hour < 12
+        ? 'Buenos días'
+        : (hour < 19 ? 'Buenas tardes' : 'Buenas noches');
     const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     final fullDate = '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
@@ -98,7 +107,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
         CurvedHeader.preferredHeight(MediaQuery.of(context).padding.top, 16),
       ),
       child: CurvedHeader(
-        title: greetingName.isEmpty ? 'Buenos días' : 'Buenos días, $greetingName',
+        title: greetingName.isEmpty ? greeting : '$greeting, $greetingName',
         subtitle: fullDate,
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
         onNotificationsPressed: () {},
@@ -180,8 +189,9 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
           unselectedItemColor: Colors.grey,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
-            BottomNavigationBarItem(icon: Icon(Icons.campaign_outlined), label: 'Comunicados'),
             BottomNavigationBarItem(icon: Icon(Icons.book_rounded), label: 'Agenda'),
+            BottomNavigationBarItem(icon: Icon(Icons.campaign_outlined), label: 'Comunicados'),
+            BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Cuotas'),
             BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Perfil'),
           ],
         );
@@ -191,21 +201,36 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
 
   int _bottomNavIndex(int pageIndex) {
     if (pageIndex == 0) return 0;
-    if (pageIndex == 10) return 1;
-    if (pageIndex == 8) return 2;
-    if (pageIndex == 1) return 3;
+    if (pageIndex == 8) return 1;
+    if (pageIndex == 10) return 2;
+    if (pageIndex == 6) return 3;
+    if (pageIndex == 1) return 4;
     return 0;
   }
 
-  int _bottomNavToPageIndex(int navIndex) {
+  static int _bottomNavToPageIndex(int navIndex) {
     switch (navIndex) {
       case 0: return 0;
-      case 1: return 10;
-      case 2: return 8;
-      case 3: return 1;
+      case 1: return 8;
+      case 2: return 10;
+      case 3: return 6;
+      case 4: return 1;
       default: return 0;
     }
   }
+
+  int _pageToNav(int pageIndex) {
+    switch (pageIndex) {
+      case 0: return 0;
+      case 8: return 1;
+      case 10: return 2;
+      case 6: return 3;
+      case 1: return 4;
+      default: return -1;
+    }
+  }
+
+  static int _navToPage(int navIndex) => _bottomNavToPageIndex(navIndex);
 
   Widget _buildDrawer(BuildContext context) {
     final ac = context.appColors;
@@ -407,10 +432,6 @@ class _QuickAccessGrid extends StatelessWidget {
     _QuickAccessItem('Fotocheck', Icons.badge, 2, _primary),
     _QuickAccessItem('Horario', Icons.schedule, 3, _primary),
     _QuickAccessItem('Notas', Icons.grade, 4, _primary),
-    _QuickAccessItem('Pensiones', Icons.payments, 5, _primary),
-    _QuickAccessItem('Cuotas', Icons.receipt_long, 6, _primary),
-    _QuickAccessItem('Reuniones', Icons.groups, 7, _primary),
-    _QuickAccessItem('Agenda', Icons.book, 8, _primary),
     _QuickAccessItem('Más', Icons.apps, 9, _primary),
   ];
 
@@ -422,56 +443,118 @@ class _QuickAccessGrid extends StatelessWidget {
       children: [
         Text(
           'Accesos Rápidos',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ac.textPrimary),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ac.textPrimary),
         ),
         const SizedBox(height: 10),
-        for (var row = 0; row < 2; row++)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
-              children: [
-                for (var col = 0; col < 4; col++)
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        context.read<ParentHomeBloc>().add(
-                          ChangePage(pageIndex: _items[row * 4 + col].pageIndex),
-                        );
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: _items[row * 4 + col].color.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _items[row * 4 + col].color.withValues(alpha: 0.25),
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              _items[row * 4 + col].icon,
-                              size: 26,
-                              color: _items[row * 4 + col].color,
-                              weight: 400,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _items[row * 4 + col].name,
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: ac.textPrimary),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            for (final item in _items)
+              GestureDetector(
+                onTap: () {
+                  context.read<ParentHomeBloc>().add(
+                    ChangePage(pageIndex: item.pageIndex),
+                  );
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: item.color.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: item.color.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        item.icon,
+                        size: 26,
+                        color: item.color,
+                        weight: 400,
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ),
+                    const SizedBox(height: 8),
+                    Text(
+                      item.name,
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: ac.textPrimary),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _BottomNavPages extends StatefulWidget {
+  final int navIndex;
+  final List<StudentModel> students;
+
+  const _BottomNavPages({required this.navIndex, required this.students});
+
+  @override
+  State<_BottomNavPages> createState() => _BottomNavPagesState();
+}
+
+class _BottomNavPagesState extends State<_BottomNavPages> {
+  late final PageController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController(initialPage: widget.navIndex);
+  }
+
+  @override
+  void didUpdateWidget(covariant _BottomNavPages oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.navIndex != widget.navIndex && _controller.hasClients) {
+      final current = _controller.page?.round() ?? oldWidget.navIndex;
+      final diff = (widget.navIndex - current).abs();
+      if (diff == 1) {
+        _controller.animateToPage(
+          widget.navIndex,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+        );
+      } else {
+        _controller.jumpToPage(widget.navIndex);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView(
+      controller: _controller,
+      onPageChanged: (navIndex) {
+        final bloc = context.read<ParentHomeBloc>();
+        final pageIndex = _ParentHomeContentState._navToPage(navIndex);
+        if (bloc.state.pageIndex != pageIndex) {
+          bloc.add(ChangePage(pageIndex: pageIndex));
+        }
+      },
+      children: [
+        const _HomeBody(),
+        const AgendaContent(),
+        const ComunicadosContent(),
+        const CuotasContent(),
+        BlocBuilder<ProfileInfoBloc, ProfileInfoState>(
+          builder: (context, pState) => ProfileInfoContent(pState.user, students: widget.students),
+        ),
       ],
     );
   }

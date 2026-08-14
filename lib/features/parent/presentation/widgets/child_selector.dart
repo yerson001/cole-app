@@ -14,13 +14,17 @@ const _avatarColors = [
 class ChildSelector extends StatelessWidget {
   final List<StudentModel> students;
   final StudentModel? selectedStudent;
-  final ValueChanged<StudentModel> onChanged;
+  final ValueChanged<StudentModel?> onChanged;
+  final bool showAll;
+  final String allLabel;
 
   const ChildSelector({
     super.key,
     required this.students,
     this.selectedStudent,
     required this.onChanged,
+    this.showAll = false,
+    this.allLabel = 'Todos',
   });
 
   String _initials(StudentModel s) {
@@ -40,11 +44,68 @@ class ChildSelector extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
+          if (showAll) ...[
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: _allCircle(ac),
+            ),
+          ],
           for (var i = 0; i < students.length; i++)
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: _childCircle(students[i], i, ac),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _allCircle(AppColors ac) {
+    final selected = selectedStudent == null;
+    return GestureDetector(
+      onTap: () => onChanged(null),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: selected ? ac.primary : ac.border,
+                width: selected ? 2.5 : 1.5,
+              ),
+            ),
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: ac.primary,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.groups,
+                size: 22,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: 64,
+            child: Text(
+              allLabel,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                color: selected ? ac.primary : ac.textSecondary,
+              ),
+            ),
+          ),
         ],
       ),
     );

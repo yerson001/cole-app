@@ -45,18 +45,19 @@ class AttendanceCalendar extends StatelessWidget {
           children: [
             for (var i = 0; i < startWeekday; i++) const SizedBox.shrink(),
             for (var day = 1; day <= daysInMonth; day++)
-              _dayCell(day, ac),
+              _dayCell(day, ac, context),
           ],
         ),
       ],
     );
   }
 
-  Widget _dayCell(int day, AppColors ac) {
+  Widget _dayCell(int day, AppColors ac, BuildContext context) {
     final date = DateTime(month.year, month.month, day);
     final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     final status = _statusForDate(dateStr);
     final accent = _statusColor(status, ac);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isWeekend = date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
     final isSelected = selectedDay != null &&
         selectedDay!.year == date.year &&
@@ -73,9 +74,12 @@ class AttendanceCalendar extends StatelessWidget {
             color: isSelected
                 ? ac.primary
                 : (status != null
-                    ? accent.withValues(alpha: 0.14)
+                    ? accent.withValues(alpha: 0.35)
                     : (isWeekend ? ac.border.withValues(alpha: 0.6) : ac.fill)),
             borderRadius: BorderRadius.circular(8),
+            border: !isSelected && status != null
+                ? Border.all(color: accent.withValues(alpha: 0.55))
+                : null,
             boxShadow: isSelected
                 ? [
                     BoxShadow(
@@ -91,8 +95,10 @@ class AttendanceCalendar extends StatelessWidget {
             '$day',
             style: TextStyle(
               fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-              color: isSelected ? Colors.white : (status != null ? accent : ac.textSecondary),
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w700,
+              color: isSelected
+                  ? Colors.white
+                  : (isDark ? Colors.white : Colors.black87),
             ),
           ),
         ),

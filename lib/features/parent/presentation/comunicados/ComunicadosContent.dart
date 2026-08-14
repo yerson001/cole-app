@@ -9,6 +9,7 @@ import 'package:coleapp/features/parent/presentation/comunicados/bloc/Comunicado
 import 'package:coleapp/features/parent/presentation/comunicados/bloc/ComunicadosState.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
+import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 import 'package:coleapp/injection.dart';
 
 class ComunicadosContent extends StatelessWidget {
@@ -97,22 +98,20 @@ class _ComunicadosBodyState extends State<_ComunicadosBody> {
                 ),
                 Expanded(
                   child: comunicados.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                          const Center(
-                            child: Text(
-                              'No hay comunicados',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        ],
+                    ? _EmptyState(
+                        icon: Icons.campaign_outlined,
+                        title: 'Para ti',
+                        message: 'No hay comunicados aún.\nTe avisaremos cuando lleguen.',
                       )
-                    : ListView.builder(
+                    : ListView.separated(
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.all(16),
                         itemCount: comunicados.length,
+                        separatorBuilder: (_, __) => Divider(
+                          height: 16,
+                          thickness: 1,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
+                        ),
                         itemBuilder: (context, index) {
                           return _ComunicadoCard(item: comunicados[index]);
                         },
@@ -127,10 +126,10 @@ class _ComunicadosBodyState extends State<_ComunicadosBody> {
   }
 
   ({String startDate, String endDate}) _dateRangeForMonth(DateTime date) {
-    final start = DateTime(date.year, date.month, 1);
+    final today = DateTime(date.year, date.month, date.day);
     final end = DateTime(date.year, date.month + 1, 0);
     return (
-      startDate: _formatDate(start),
+      startDate: _formatDate(today),
       endDate: _formatDate(end),
     );
   }
@@ -153,27 +152,22 @@ class _StudentSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     if (students.isEmpty) return const SizedBox.shrink();
 
+    StudentModel? selected;
+    for (final s in students) {
+      if (s.id == selectedStudentId) {
+        selected = s;
+        break;
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: DropdownButtonFormField<int?>(
-        value: selectedStudentId,
-        decoration: InputDecoration(
-          labelText: 'Hijo',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        ),
-        items: [
-          const DropdownMenuItem<int?>(
-            value: null,
-            child: Text('Todos mis hijos'),
-          ),
-          ...students.map((s) => DropdownMenuItem(
-            value: s.id,
-            child: Text('${s.name} ${s.lastName}'),
-          )),
-        ],
-        onChanged: (studentId) {
-          context.read<ComunicadosBloc>().add(SelectStudent(studentId: studentId));
+      child: ChildSelector(
+        students: students,
+        selectedStudent: selected,
+        showAll: true,
+        onChanged: (student) {
+          context.read<ComunicadosBloc>().add(SelectStudent(studentId: student?.id));
         },
       ),
     );
@@ -282,5 +276,52 @@ class _ComunicadoCard extends StatelessWidget {
     if (date == null) return '';
     const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     return '${date.day} ${months[date.month - 1]}';
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+
+  const _EmptyState({required this.icon, required this.title, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+        Center(
+          child: Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: ac.primary.withValues(alpha: 0.10),
+              shape: BoxShape.circle,
+              border: Border.all(color: ac.primary.withValues(alpha: 0.30)),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, size: 32, color: ac.primary),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ac.textPrimary),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Center(
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, height: 1.4, color: ac.textSecondary.withValues(alpha: 0.8)),
+          ),
+        ),
+      ],
+    );
   }
 }

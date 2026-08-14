@@ -122,29 +122,32 @@ class AttendanceCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
-          Row(
-            children: [
-              Expanded(
-                child: _checkColumn(
-                  label: 'INGRESO',
-                  time: a?.checkInTime,
-                  status: a?.statusCheckIn,
-                  place: a?.updatedInClass == true ? 'Aula' : 'Puerta Principal',
-                  ac: ac,
+          IntrinsicHeight(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _checkColumn(
+                    label: 'INGRESO',
+                    time: a?.checkInTime,
+                    status: a?.statusCheckIn,
+                    place: a?.updatedInClass == true ? 'Aula' : 'Puerta Principal',
+                    ac: ac,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _checkColumn(
-                  label: 'SALIDA',
-                  time: a?.checkOutTime,
-                  status: a?.statusCheckOut,
-                  place: a?.checkOutTime != null ? 'Registrado' : 'Pendiente',
-                  fixedAccent: a?.checkOutTime != null ? _salidaAzul : null,
-                  mirror: true,
-                  ac: ac,
+                Container(width: 3, color: ac.border, margin: const EdgeInsets.symmetric(vertical: 2)),
+                Expanded(
+                  child: _checkColumn(
+                    label: 'SALIDA',
+                    time: a?.checkOutTime,
+                    status: a?.statusCheckOut,
+                    place: a?.checkOutTime != null ? 'Registrado' : 'Pendiente',
+                    fixedAccent: a?.checkOutTime != null ? _salidaAzul : null,
+                    mirror: true,
+                    ac: ac,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

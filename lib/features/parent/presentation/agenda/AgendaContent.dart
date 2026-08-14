@@ -9,6 +9,7 @@ import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaEvent.dar
 import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaState.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
+import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 import 'package:coleapp/injection.dart';
 
 class AgendaContent extends StatelessWidget {
@@ -170,9 +171,8 @@ class _AgendaBodyState extends State<_AgendaBody> {
   }
 
   ({String startDate, String endDate}) _initialRange(DateTime date) {
-    final start = date.subtract(Duration(days: date.weekday - 1));
-    final startDay = DateTime(start.year, start.month, start.day);
-    final end = startDay.add(const Duration(days: 8));
+    final startDay = DateTime(date.year, date.month, date.day);
+    final end = startDay.add(const Duration(days: 30));
     return (
       startDate: _formatDate(startDay),
       endDate: _formatDate(end),
@@ -203,34 +203,10 @@ class _StudentSelector extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: DropdownButtonFormField<StudentModel?>(
-        value: selectedStudent,
-        isExpanded: true,
-        decoration: InputDecoration(
-          labelText: 'Hijo',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        ),
-        items: [
-          const DropdownMenuItem<StudentModel?>(
-            value: null,
-            child: Text(
-              'Todos mis hijos',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 13),
-            ),
-          ),
-          ...students.map((s) => DropdownMenuItem(
-            value: s,
-            child: Text(
-              '${s.name} ${s.lastName}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13),
-            ),
-          )),
-        ],
+      child: ChildSelector(
+        students: students,
+        selectedStudent: selectedStudent,
+        showAll: true,
         onChanged: (student) {
           context.read<AgendaBloc>().add(SelectStudent(student: student));
         },

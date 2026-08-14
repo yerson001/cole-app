@@ -13,6 +13,7 @@ import 'package:coleapp/features/parent/presentation/fotocheck/bloc/FotocheckEve
 import 'package:coleapp/features/parent/presentation/fotocheck/bloc/FotocheckState.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
+import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 import 'package:coleapp/injection.dart';
 
 class FotocheckContent extends StatelessWidget {
@@ -196,23 +197,9 @@ class _FotocheckViewState extends State<_FotocheckView>
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          child: DropdownButtonFormField<StudentModel>(
-            value: student,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: 'Hijo',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            items: students.map((s) => DropdownMenuItem(
-              value: s,
-              child: Text(
-                '${s.name} ${s.lastName}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13),
-              ),
-            )).toList(),
+          child: ChildSelector(
+            students: students,
+            selectedStudent: fotocheckState.selectedStudent,
             onChanged: (s) {
               if (s != null) {
                 context.read<FotocheckBloc>().add(SelectStudent(student: s));

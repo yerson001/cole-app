@@ -149,79 +149,113 @@ class _MeetingCard extends StatelessWidget {
         ? '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}'
         : meetingInfo.date;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    meetingInfo.subject,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+      decoration: BoxDecoration(
+        color: ac.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ac.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    statusLabel,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                alignment: Alignment.center,
+                child: Icon(Icons.event, size: 20, color: statusColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      meetingInfo.subject,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: ac.textPrimary,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _InfoRow(icon: Icons.calendar_today_outlined, text: dateText),
-            const SizedBox(height: 6),
-            _InfoRow(icon: Icons.access_time, text: meetingInfo.timeRange),
-            const SizedBox(height: 6),
-            _InfoRow(
-              icon: Icons.timer_outlined,
-              text: 'Tolerancia: ${meetingInfo.toleranceTime} min',
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (meeting.status == 'ABSENT')
-                  FilledButton.icon(
-                    onPressed: () => context.read<ReunionesBloc>().add(
-                      CheckInMeeting(meetingId: meetingInfo.id),
-                    ),
-                    icon: const Icon(Icons.login, size: 18),
-                    label: const Text('Marcar ingreso'),
-                  )
-                else if (meeting.status == 'PRESENT')
-                  OutlinedButton.icon(
-                    onPressed: () => context.read<ReunionesBloc>().add(
-                      CheckOutMeeting(meetingId: meetingInfo.id),
-                    ),
-                    icon: const Icon(Icons.logout, size: 18),
-                    label: const Text('Marcar salida'),
-                  )
-                else
-                  Text(
-                    'Estado: $statusLabel',
-                    style: TextStyle(color: ac.primary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Divider(height: 1, thickness: 1, color: ac.border),
+          const SizedBox(height: 12),
+          _InfoRow(icon: Icons.calendar_today_outlined, text: dateText),
+          const SizedBox(height: 8),
+          _InfoRow(icon: Icons.access_time, text: meetingInfo.timeRange),
+          const SizedBox(height: 8),
+          _InfoRow(
+            icon: Icons.timer_outlined,
+            text: 'Tolerancia: ${meetingInfo.toleranceTime} min',
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (meeting.status == 'ABSENT')
+                FilledButton.icon(
+                  onPressed: () => context.read<ReunionesBloc>().add(
+                    CheckInMeeting(meetingId: meetingInfo.id),
                   ),
-              ],
-            ),
-          ],
-        ),
+                  icon: const Icon(Icons.login, size: 18),
+                  label: const Text('Marcar ingreso'),
+                )
+              else if (meeting.status == 'PRESENT')
+                OutlinedButton.icon(
+                  onPressed: () => context.read<ReunionesBloc>().add(
+                    CheckOutMeeting(meetingId: meetingInfo.id),
+                  ),
+                  icon: const Icon(Icons.logout, size: 18),
+                  label: const Text('Marcar salida'),
+                )
+              else
+                Text(
+                  'Estado: $statusLabel',
+                  style: TextStyle(color: ac.primary, fontWeight: FontWeight.w600),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -229,13 +263,13 @@ class _MeetingCard extends StatelessWidget {
   (Color, String) _statusInfo(String status) {
     switch (status) {
       case 'PRESENT':
-        return (Colors.green, 'Asistió');
+        return (const Color(0xFF54DEB1), 'Asistió');
       case 'ABSENT':
-        return (Colors.red, 'Pendiente');
+        return (const Color(0xFFFE4349), 'Pendiente');
       case 'LATE':
-        return (Colors.orange, 'Tarde');
+        return (const Color(0xFFFCB700), 'Tarde');
       default:
-        return (Colors.grey, status);
+        return (const Color(0xFF9E9E9E), status);
     }
   }
 }
@@ -248,13 +282,14 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey),
+        Icon(icon, size: 16, color: ac.textSecondary),
         const SizedBox(width: 8),
         Text(
           text,
-          style: const TextStyle(fontSize: 14, color: Colors.black87),
+          style: TextStyle(fontSize: 14, color: ac.textPrimary),
         ),
       ],
     );

@@ -7,8 +7,7 @@ import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_state.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/attendance_calendar.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/attendance_summary.dart';
-import 'package:coleapp/features/parent/presentation/asistencia/widgets/child_selector.dart';
-import 'package:coleapp/features/parent/presentation/widgets/attendance_card.dart';
+import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 
 class AsistenciaGeneralTab extends StatelessWidget {
   const AsistenciaGeneralTab({super.key});
@@ -47,7 +46,11 @@ class AsistenciaGeneralTab extends StatelessWidget {
                 ChildSelector(
                   students: state.students,
                   selectedStudent: state.selectedStudent,
-                  onChanged: (s) => context.read<AsistenciaBloc>().add(SelectStudent(student: s)),
+                  onChanged: (s) {
+                    if (s != null) {
+                      context.read<AsistenciaBloc>().add(SelectStudent(student: s));
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
                 Container(
@@ -61,8 +64,8 @@ class AsistenciaGeneralTab extends StatelessWidget {
                     children: [
                       IconButton(
                         style: IconButton.styleFrom(
-                          backgroundColor: ac.card,
-                          foregroundColor: ac.primary,
+                          backgroundColor: ac.primary,
+                          foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.chevron_left, size: 22),
                         onPressed: () {
@@ -80,8 +83,8 @@ class AsistenciaGeneralTab extends StatelessWidget {
                       ),
                       IconButton(
                         style: IconButton.styleFrom(
-                          backgroundColor: ac.card,
-                          foregroundColor: ac.primary,
+                          backgroundColor: ac.primary,
+                          foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.chevron_right, size: 22),
                         onPressed: () {
@@ -135,10 +138,7 @@ class AsistenciaGeneralTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   if (selectedReport != null)
-                    AttendanceCard(
-                      report: selectedReport,
-                      index: state.students.indexOf(state.selectedStudent!),
-                    )
+                    _DayDetailCard(report: selectedReport)
                   else
                     Container(
                       width: double.infinity,
@@ -168,5 +168,106 @@ class AsistenciaGeneralTab extends StatelessWidget {
     final days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     final months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     return '${days[date.weekday - 1]} ${date.day} de ${months[date.month - 1]}';
+  }
+}
+
+class _DayDetailCard extends StatelessWidget {
+  final DayReportModel report;
+
+  const _DayDetailCard({required this.report});
+
+  static const _verde = Color(0xFF54DEB1);
+  static const _naranja = Color(0xFFFCB700);
+
+  String _initials() {
+    final s = report.student;
+    final parts = [s.name, s.lastName].where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    return parts.map((p) => p[0].toUpperCase()).take(2).join();
+  }
+
+  (String, Color) _statusOf() {
+    final a = report.attendances.isNotEmpty ? report.attendances.first : null;
+    switch (a?.statusCheckIn) {
+      case 'PRESENT':
+      case 'EARLY':
+      case 'ON_TIME':
+        return ('Presente', _verde);
+      case 'LATE':
+        return ('Tarde', _naranja);
+      case 'ABSENT':
+        return ('Falta', const Color(0xFFFE4349));
+      default:
+        return ('Sin registro', const Color(0xFF9E9E9E));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    final (label, color) = _statusOf();
+    final s = report.student;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: ac.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ac.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              _initials(),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${s.name} ${s.lastName}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: ac.textPrimary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle, size: 16, color: color),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

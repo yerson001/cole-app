@@ -4,7 +4,7 @@ import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_bloc.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_event.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_state.dart';
-import 'package:coleapp/features/parent/presentation/asistencia/widgets/child_selector.dart';
+import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/historial_reciente.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_card.dart';
 
@@ -48,7 +48,11 @@ class AsistenciaDiariaTab extends StatelessWidget {
                 ChildSelector(
                   students: state.students,
                   selectedStudent: state.selectedStudent,
-                  onChanged: (s) => context.read<AsistenciaBloc>().add(SelectStudent(student: s)),
+                  onChanged: (s) {
+                    if (s != null) {
+                      context.read<AsistenciaBloc>().add(SelectStudent(student: s));
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
                 Container(
@@ -62,8 +66,8 @@ class AsistenciaDiariaTab extends StatelessWidget {
                     children: [
                       IconButton(
                         style: IconButton.styleFrom(
-                          backgroundColor: ac.card,
-                          foregroundColor: ac.primary,
+                          backgroundColor: ac.primary,
+                          foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.chevron_left, size: 22),
                         onPressed: () {
@@ -81,8 +85,8 @@ class AsistenciaDiariaTab extends StatelessWidget {
                       ),
                       IconButton(
                         style: IconButton.styleFrom(
-                          backgroundColor: ac.card,
-                          foregroundColor: ac.primary,
+                          backgroundColor: ac.primary,
+                          foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.chevron_right, size: 22),
                         onPressed: () {

@@ -9,6 +9,7 @@ import 'package:coleapp/features/parent/presentation/horario/bloc/HorarioEvent.d
 import 'package:coleapp/features/parent/presentation/horario/bloc/HorarioState.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
+import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 import 'package:coleapp/injection.dart';
 
 class HorarioContent extends StatelessWidget {
@@ -128,23 +129,9 @@ class _StudentSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: DropdownButtonFormField<StudentModel>(
-        value: selectedStudent,
-        isExpanded: true,
-        decoration: InputDecoration(
-          labelText: 'Hijo',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        ),
-        items: students.map((s) => DropdownMenuItem(
-          value: s,
-          child: Text(
-            '${s.name} ${s.lastName}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13),
-          ),
-        )).toList(),
+      child: ChildSelector(
+        students: students,
+        selectedStudent: selectedStudent,
         onChanged: (student) {
           if (student != null) {
             context.read<HorarioBloc>().add(SelectStudent(student: student));
