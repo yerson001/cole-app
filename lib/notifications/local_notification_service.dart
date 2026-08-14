@@ -21,7 +21,24 @@ class LocalNotificationService {
     const initSettings = InitializationSettings(android: androidInit);
     await _plugin.initialize(settings: initSettings);
 
+    await _createChannel();
+
     _initialized = true;
+  }
+
+  Future<void> _createChannel() async {
+    const channel = AndroidNotificationChannel(
+      'colecheck_push',
+      'ColeCheck Avisos',
+      description: 'Asistencia, comunicados y agenda',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+    );
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
   }
 
   Future<void> requestPermissions() async {

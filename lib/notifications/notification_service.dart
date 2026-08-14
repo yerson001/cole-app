@@ -29,14 +29,15 @@ class NotificationService {
     debugPrint('[FCM] Device token: $token');
 
     FirebaseMessaging.onMessage.listen((message) {
-      final data = message.data;
-      if (data.isNotEmpty) {
-        LocalNotificationService.instance.show(
-          id: data['id'] ?? message.messageId ?? 'push',
-          title: data['title'] ?? 'ColeCheck',
-          body: data['body'] ?? 'Nuevo aviso',
-        );
-      }
+      final title =
+          message.notification?.title ?? message.data['title'] ?? 'ColeCheck';
+      final body =
+          message.notification?.body ?? message.data['body'] ?? 'Nuevo aviso';
+      LocalNotificationService.instance.show(
+        id: message.messageId ?? 'push',
+        title: title,
+        body: body,
+      );
     });
 
     _messaging.onTokenRefresh.listen((newToken) {
