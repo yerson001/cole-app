@@ -9,6 +9,7 @@ import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeEvent.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
+import 'package:coleapp/notifications/notification_service.dart';
 
 class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
   final AuthUseCases authUseCases;
@@ -37,6 +38,11 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
         final tenant = session.tenant.isNotEmpty ? session.tenant : 'ie-guillermo';
         emit(state.copyWith(user: session.user, tenant: tenant));
         print('[DEBUG] User loaded: ${session.user.username}, tenant: $tenant');
+        final documentNumber = session.user.person?.documentNumber;
+        if (documentNumber != null && documentNumber.isNotEmpty) {
+          await NotificationService.instance
+              .subscribeToParentTopic(tenant: tenant, documentNumber: documentNumber);
+        }
         if (session.user.profile != null) {
           print('[DEBUG] Dispatching GetStudents and GetBranch');
           add(GetBranch(id: 1, tenantId: tenant));

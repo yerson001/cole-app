@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +15,9 @@ import 'package:coleapp/features/secretary/presentation/screens/secretary_screen
 import 'package:coleapp/features/assistant/presentation/screens/assistant_screen.dart';
 import 'package:coleapp/features/teacher/presentation/screens/teacher_screen.dart';
 import 'package:coleapp/features/parent/presentation/home/ParentHomePage.dart';
+import 'package:coleapp/firebase_options.dart';
 import 'package:coleapp/injection.dart';
+import 'package:coleapp/notifications/notification_service.dart';
 
 final mainLog = log.Logger('MAIN');
 
@@ -23,6 +26,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   mainLog.info('Iniciando app...');
   await configureDependencies();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await NotificationService.instance.init();
+
   mainLog.info('Dependencias registradas en GetIt');
   runApp(const ColecheckApp());
 }

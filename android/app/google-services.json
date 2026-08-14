@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795329561861",
+    "project_id": "mobile-push-81f14",
+    "storage_bucket": "mobile-push-81f14.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795329561861:android:a40f8f763cf2affdc8236c",
+        "android_client_info": {
+          "package_name": "com.example.coleapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlhzDOtRoof0C_CG8mg4LRHReNvKAie6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
