@@ -22,10 +22,10 @@ import 'package:coleapp/features/parent/presentation/reuniones/ReunionesContent.
 import 'package:coleapp/features/parent/presentation/agenda/AgendaContent.dart';
 import 'package:coleapp/features/parent/presentation/comunicados/ComunicadosContent.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
+import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
-import 'package:coleapp/features/parent/presentation/widgets/curved_header.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ParentHomeContent extends StatefulWidget {
@@ -102,15 +102,58 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     final fullDate = '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
+    final ac = context.appColors;
     return PreferredSize(
-      preferredSize: Size.fromHeight(
-        CurvedHeader.preferredHeight(MediaQuery.of(context).padding.top, 16),
-      ),
-      child: CurvedHeader(
-        title: greetingName.isEmpty ? greeting : '$greeting, $greetingName',
-        subtitle: fullDate,
-        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        onNotificationsPressed: () {},
+      preferredSize: Size.fromHeight(kToolbarHeight + MediaQuery.of(context).padding.top),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      greetingName.isEmpty ? greeting : '$greeting, $greetingName',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w500,
+                        color: ac.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      fullDate,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: ac.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.notifications_outlined, size: 19, color: ac.textDisabled),
+                  const SizedBox(width: 14),
+                  IconButton(
+                    icon: Icon(Icons.menu, size: 19, color: ac.textSecondary),
+                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -188,11 +231,11 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
           selectedItemColor: context.appColors.primary,
           unselectedItemColor: Colors.grey,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Inicio'),
-            BottomNavigationBarItem(icon: Icon(Icons.book_rounded), label: 'Agenda'),
-            BottomNavigationBarItem(icon: Icon(Icons.campaign_outlined), label: 'Comunicados'),
-            BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Cuotas'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Perfil'),
+            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'INICIO'),
+            BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), label: 'AGENDA'),
+            BottomNavigationBarItem(icon: Icon(Icons.campaign_outlined), label: 'AVISOS'),
+            BottomNavigationBarItem(icon: Icon(Icons.receipt_long_outlined), label: 'CUOTAS'),
+            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'PERFIL'),
           ],
         );
       },
@@ -416,23 +459,185 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
   }
 }
 
+class _StudentCard extends StatelessWidget {
+  final ReportStudent student;
+  final int total;
+  final int currentIndex;
+
+  const _StudentCard({
+    required this.student,
+    required this.total,
+    required this.currentIndex,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    final avatarColor = _avatarColors[currentIndex % _avatarColors.length];
+    final initials = [
+      student.name,
+      student.lastName,
+    ].where((p) => p.isNotEmpty).map((p) => p[0].toUpperCase()).take(2).join();
+
+    String capitalize(String value) {
+      if (value.isEmpty) return value;
+      return value[0].toUpperCase() + value.substring(1).toLowerCase();
+    }
+
+    final gradeLabel = '${capitalize(student.level.name)} · '
+        '${capitalize(student.grade.name)} ${capitalize(student.section.name)}';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: ac.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: ac.border, width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(color: avatarColor, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: Text(
+              initials,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${student.name} ${student.lastName}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ac.textPrimary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  gradeLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12.5, color: ac.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          if (total > 1)
+            Row(
+              children: [
+                for (var i = 0; i < total; i++)
+                  Container(
+                    width: 5,
+                    height: 5,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: i == currentIndex ? ac.primary : ac.border,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodayLabel extends StatelessWidget {
+  final int current;
+  final int total;
+
+  const _TodayLabel({required this.current, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'HOY',
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            color: ac.textDisabled,
+            letterSpacing: 0.8,
+          ),
+        ),
+        Text(
+          total > 0 ? '$current de $total' : '',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: ac.primary),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusLegend extends StatelessWidget {
+  const _StatusLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    Widget item(IconData icon, Color color, String label) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(fontSize: 11, color: ac.textDisabled)),
+        ],
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 10, 6, 0),
+      child: Row(
+        children: [
+          item(Icons.check_circle, ac.success, 'A tiempo'),
+          const SizedBox(width: 14),
+          item(Icons.access_time, ac.warning, 'Tarde'),
+          const SizedBox(width: 14),
+          item(Icons.close, ac.error, 'Falta'),
+        ],
+      ),
+    );
+  }
+}
+
+const _avatarColors = [
+  Color(0xFF225BAA),
+  Color(0xFF2E7D32),
+  Color(0xFFE65100),
+  Color(0xFF6A1B9A),
+  Color(0xFFC62828),
+  Color(0xFF00838F),
+];
+
 class _QuickAccessItem {
   final String name;
   final IconData icon;
   final int pageIndex;
-  final Color color;
-  const _QuickAccessItem(this.name, this.icon, this.pageIndex, this.color);
+  const _QuickAccessItem(this.name, this.icon, this.pageIndex);
 }
 
 class _QuickAccessGrid extends StatelessWidget {
   const _QuickAccessGrid();
 
-  static const _primary = Color(0xFF225BAA);
   static const _items = [
-    _QuickAccessItem('Fotocheck', Icons.badge, 2, _primary),
-    _QuickAccessItem('Horario', Icons.schedule, 3, _primary),
-    _QuickAccessItem('Notas', Icons.grade, 4, _primary),
-    _QuickAccessItem('Más', Icons.apps, 9, _primary),
+    _QuickAccessItem('Fotocheck', Icons.badge_outlined, 2),
+    _QuickAccessItem('Horario', Icons.access_time, 3),
+    _QuickAccessItem('Notas', Icons.notes, 4),
+    _QuickAccessItem('Más', Icons.more_horiz, 9),
   ];
 
   @override
@@ -442,12 +647,17 @@ class _QuickAccessGrid extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Accesos Rápidos',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ac.textPrimary),
+          'ACCESOS RAPIDOS',
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            color: ac.textDisabled,
+            letterSpacing: 0.8,
+          ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             for (final item in _items)
               GestureDetector(
@@ -459,28 +669,11 @@ class _QuickAccessGrid extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        color: item.color.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: item.color.withValues(alpha: 0.25),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        item.icon,
-                        size: 26,
-                        color: item.color,
-                        weight: 400,
-                      ),
-                    ),
+                    Icon(item.icon, size: 23, color: ac.textPrimary),
                     const SizedBox(height: 8),
                     Text(
                       item.name,
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: ac.textPrimary),
+                      style: TextStyle(fontSize: 11, color: ac.textSecondary),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -560,13 +753,24 @@ class _BottomNavPagesState extends State<_BottomNavPages> {
   }
 }
 
-class _HomeBody extends StatelessWidget {
+class _HomeBody extends StatefulWidget {
   const _HomeBody();
+
+  @override
+  State<_HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<_HomeBody> {
+  int _currentReport = 0;
 
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<ParentHomeBloc>();
     final state = context.watch<ParentHomeBloc>().state;
+    final reports = state.dayReports;
+    final currentStudent = reports.isNotEmpty
+        ? reports[_currentReport.clamp(0, reports.length - 1)].student
+        : null;
     return Theme(
       data: Theme.of(context).copyWith(
         textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
@@ -584,13 +788,27 @@ class _HomeBody extends StatelessWidget {
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(5),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (reports.isNotEmpty && currentStudent != null) ...[
+                _StudentCard(
+                  student: currentStudent,
+                  total: reports.length,
+                  currentIndex: _currentReport,
+                ),
+              ],
+              const SizedBox(height: 14),
+              _TodayLabel(
+                current: reports.isEmpty ? 0 : _currentReport + 1,
+                total: reports.length,
+              ),
+              const SizedBox(height: 8),
               AttendanceSection(
-                reports: state.dayReports,
+                reports: reports,
                 isLoading: state.isLoadingDayReport,
+                onPageChanged: (index) => setState(() => _currentReport = index),
                 onVerMas: () {
                   print('[DEBUG] Ver más tapped. students=${state.students.length}, branch=${state.branch?.id}, tenant=${state.tenant}');
                   if (state.students.isNotEmpty) {
@@ -618,6 +836,7 @@ class _HomeBody extends StatelessWidget {
                   }
                 },
               ),
+              if (reports.isNotEmpty) const _StatusLegend(),
               const SizedBox(height: 5),
               const _QuickAccessGrid(),
               const SizedBox(height: 5),
@@ -685,49 +904,16 @@ class _HomeTabsState extends State<_HomeTabs> {
         ),
         const SizedBox(height: 10),
         Container(
-          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: ac.fill,
-            borderRadius: BorderRadius.circular(10),
+            border: Border(bottom: BorderSide(color: ac.border, width: 1)),
           ),
           child: Row(
             children: [
               for (var i = 0; i < labels.length; i++)
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _selected = i),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _selected == i ? ac.card : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                        border: _selected == i
-                            ? Border.all(color: ac.border)
-                            : Border.all(color: Colors.transparent),
-                        boxShadow: _selected == i
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Text(
-                        labels[i],
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: _selected == i ? FontWeight.w600 : FontWeight.w500,
-                          color: _selected == i ? ac.primary : ac.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
+                _HomeTabItem(
+                  text: labels[i],
+                  active: _selected == i,
+                  onTap: () => setState(() => _selected = i),
                 ),
             ],
           ),
@@ -803,11 +989,22 @@ class _HomeTabsState extends State<_HomeTabs> {
   Widget _emptyState(String message) {
     final ac = context.appColors;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
+      padding: const EdgeInsets.fromLTRB(0, 34, 0, 26),
       child: Center(
-        child: Text(
-          message,
-          style: TextStyle(fontSize: 13, color: ac.textSecondary.withValues(alpha: 0.7)),
+        child: Column(
+          children: [
+            Icon(Icons.sentiment_satisfied_alt, size: 26, color: ac.textDisabled),
+            const SizedBox(height: 10),
+            Text(
+              'Todo tranquilo por aqui',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: ac.textPrimary),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              message,
+              style: TextStyle(fontSize: 12.5, color: ac.textDisabled),
+            ),
+          ],
         ),
       ),
     );
@@ -826,6 +1023,48 @@ class _HomeTabsState extends State<_HomeTabs> {
     const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     const days = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
     return '${days[date.weekday - 1]} ${date.day} ${months[date.month - 1]}';
+  }
+}
+
+class _HomeTabItem extends StatelessWidget {
+  final String text;
+  final bool active;
+  final VoidCallback onTap;
+
+  const _HomeTabItem({
+    required this.text,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.only(bottom: 9),
+          alignment: Alignment.center,
+          decoration: active
+              ? BoxDecoration(
+                  border: Border(bottom: BorderSide(color: ac.primary, width: 2)),
+                )
+              : null,
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: active ? ac.primary : ac.textDisabled,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

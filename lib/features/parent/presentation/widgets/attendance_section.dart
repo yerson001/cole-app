@@ -7,12 +7,14 @@ class AttendanceSection extends StatefulWidget {
   final List<DayReportModel> reports;
   final bool isLoading;
   final VoidCallback? onVerMas;
+  final ValueChanged<int>? onPageChanged;
 
   const AttendanceSection({
     super.key,
     required this.reports,
     this.isLoading = false,
     this.onVerMas,
+    this.onPageChanged,
   });
 
   @override
@@ -52,7 +54,10 @@ class _AttendanceSectionState extends State<AttendanceSection> {
             child: PageView.builder(
               controller: _controller,
               itemCount: reports.length,
-              onPageChanged: (index) => setState(() => _currentPage = index),
+              onPageChanged: (index) {
+                setState(() => _currentPage = index);
+                widget.onPageChanged?.call(index);
+              },
               itemBuilder: (context, index) {
                 return AnimatedBuilder(
                   animation: _controller,
@@ -65,7 +70,7 @@ class _AttendanceSectionState extends State<AttendanceSection> {
                       child: child,
                     );
                   },
-                  child: AttendanceCard(report: reports[index], index: index),
+                  child: AttendanceCard(report: reports[index]),
                 );
               },
             ),
@@ -103,15 +108,16 @@ class _AttendanceSectionState extends State<AttendanceSection> {
               ),
               const SizedBox(width: 8),
             ],
-            TextButton.icon(
-              onPressed: widget.onVerMas,
-              style: TextButton.styleFrom(
-                foregroundColor: ac.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                visualDensity: VisualDensity.compact,
+            GestureDetector(
+              onTap: widget.onVerMas,
+              child: Text(
+                'Ver asistencia de la semana →',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                  color: ac.primary,
+                ),
               ),
-              icon: Text('Ver más', style: TextStyle(fontSize: 13, color: ac.primary)),
-              label: Icon(Icons.arrow_forward_ios, size: 12, color: ac.primary),
             ),
           ],
         ),

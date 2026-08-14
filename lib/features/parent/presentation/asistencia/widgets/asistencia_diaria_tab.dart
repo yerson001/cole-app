@@ -100,7 +100,7 @@ class AsistenciaDiariaTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 if (state.dailyReports.isNotEmpty)
-                  AttendanceCard(report: state.dailyReports.first, index: state.students.indexOf(state.selectedStudent!))
+                  AttendanceCard(report: state.dailyReports.first)
                 else
                   Container(
                     width: double.infinity,
