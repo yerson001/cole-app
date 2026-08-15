@@ -66,6 +66,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
       listener: (context, state) => _tryInitialize(state),
       child: BlocBuilder<AgendaBloc, AgendaState>(
         builder: (context, state) {
+          final ac = context.appColors;
           final parentId = parentState.user?.profile?.id;
           final tenantId = parentState.tenant;
 
@@ -119,13 +120,19 @@ class _AgendaBodyState extends State<_AgendaBody> {
                   ),
                 Expanded(
                   child: switch (state.view) {
-                    AgendaView.daily => _AgendaList(state: state),
+                    AgendaView.daily => Column(
+                        children: [
+                          Divider(height: 1, thickness: 1, color: ac.border),
+                          Expanded(child: _AgendaList(state: state)),
+                        ],
+                      ),
                     AgendaView.weekly => Column(
                         children: [
                           _WeekGrid(
                             state: state,
                             onDayTap: (day) => _changeDate(context, 0, date: day),
                           ),
+                          Divider(height: 20, thickness: 1, color: ac.border),
                           Expanded(child: _AgendaList(state: state)),
                         ],
                       ),
@@ -135,6 +142,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
                             state: state,
                             onDayTap: (day) => _changeDate(context, 0, date: day),
                           ),
+                          Divider(height: 20, thickness: 1, color: ac.border),
                           Expanded(child: _AgendaList(state: state)),
                         ],
                       ),
@@ -207,6 +215,7 @@ class _StudentSelector extends StatelessWidget {
         students: students,
         selectedStudent: selectedStudent,
         showAll: true,
+        clean: true,
         onChanged: (student) {
           context.read<AgendaBloc>().add(SelectStudent(student: student));
         },
@@ -223,29 +232,68 @@ class _ViewFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
+    const labels = {
+      AgendaView.monthly: 'Mensual',
+      AgendaView.weekly: 'Semanal',
+      AgendaView.daily: 'Diario',
+    };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SegmentedButton<AgendaView>(
-        segments: const [
-          ButtonSegment(
-            value: AgendaView.monthly,
-            label: Text('Mensual'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: ac.fill,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(3),
+        child: Row(
+          children: [
+            for (final entry in labels.entries)
+              Expanded(
+                child: _ViewOption(
+                  label: entry.value,
+                  isSelected: view == entry.key,
+                  onTap: () => onChanged(entry.key),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewOption extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ViewOption({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? ac.card : Colors.transparent,
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              color: isSelected ? ac.textPrimary : ac.primary,
+            ),
           ),
-          ButtonSegment(
-            value: AgendaView.weekly,
-            label: Text('Semanal'),
-          ),
-          ButtonSegment(
-            value: AgendaView.daily,
-            label: Text('Diario'),
-          ),
-        ],
-        selected: {view},
-        onSelectionChanged: (selection) => onChanged(selection.first),
-        showSelectedIcon: false,
-        style: const ButtonStyle(
-          visualDensity: VisualDensity.compact,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
       ),
     );
@@ -312,6 +360,7 @@ class _WeekGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     final today = DateTime.now();
     const dayNames = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
     return Padding(
@@ -323,43 +372,43 @@ class _WeekGrid extends StatelessWidget {
           final isSelected = state.isSameDay(day, state.selectedDate);
           final isToday = state.isSameDay(day, today);
           return Expanded(
-            child: InkWell(
+            child: GestureDetector(
               onTap: () => onDayTap(day),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: isSelected ? Theme.of(context).colorScheme.primary : null,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      dayNames[i],
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Colors.grey,
+              child: Column(
+                children: [
+                  Text(
+                    dayNames[i],
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: isSelected ? ac.primary : ac.textDisabled,
+                      fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected ? ac.primary : Colors.transparent,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : (isToday ? ac.primary : ac.textPrimary),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${day.day}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : isToday
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Wrap(
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 8,
+                    child: Wrap(
                       spacing: 2,
                       children: [
                         for (final item in items)
@@ -373,8 +422,8 @@ class _WeekGrid extends StatelessWidget {
                           ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -405,6 +454,7 @@ class _MonthGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     final today = DateTime.now();
     const dayNames = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO'];
     final days = state.monthDays;
@@ -426,8 +476,8 @@ class _MonthGrid extends StatelessWidget {
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: (i == 5 || i == 6)
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey,
+                      ? ac.primary
+                      : ac.textDisabled,
                 ),
               ),
             )),
@@ -449,7 +499,7 @@ class _MonthGrid extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+                          ? ac.primary.withValues(alpha: 0.15)
                           : null,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -465,8 +515,8 @@ class _MonthGrid extends StatelessWidget {
                                   ? FontWeight.bold
                                   : FontWeight.w400,
                               color: isToday
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.black87,
+                                  ? ac.primary
+                                  : ac.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -518,16 +568,40 @@ class _AgendaList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     final items = state.itemsForSelectedDate;
     if (items.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-          const Center(
-            child: Text(
-              'No hay eventos para este día',
-              style: TextStyle(color: Colors.grey),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: Column(
+                children: [
+                  Icon(Icons.calendar_today, size: 28, color: ac.textDisabled),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Sin eventos este día',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: ac.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Reuniones, actividades y fechas importantes aparecerán aquí.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: ac.textSecondary,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

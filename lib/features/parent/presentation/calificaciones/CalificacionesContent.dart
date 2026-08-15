@@ -57,6 +57,7 @@ class _CalificacionesBodyState extends State<_CalificacionesBody> {
       listener: (context, state) => _tryInitialize(state),
       child: BlocBuilder<CalificacionesBloc, CalificacionesState>(
         builder: (context, state) {
+          final ac = context.appColors;
           final tenantId = parentState.tenant;
 
           if (parentState.students.isEmpty) {
@@ -87,11 +88,20 @@ class _CalificacionesBodyState extends State<_CalificacionesBody> {
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                          const Center(
-                            child: Text(
-                              'No hay calificaciones registradas',
-                              style: TextStyle(color: Colors.grey),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                              child: Column(
+                                children: [
+                                  Icon(Icons.notes, size: 28, color: ac.textDisabled),
+                                  const SizedBox(height: 14),
+                                  Text(
+                                    'No hay calificaciones registradas',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ac.textPrimary),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -131,6 +141,7 @@ class _StudentSelector extends StatelessWidget {
       child: ChildSelector(
         students: students,
         selectedStudent: selectedStudent,
+        clean: true,
         onChanged: (student) {
           if (student != null) {
             context.read<CalificacionesBloc>().add(SelectStudent(student: student));

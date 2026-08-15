@@ -48,6 +48,7 @@ class AsistenciaDiariaTab extends StatelessWidget {
                 ChildSelector(
                   students: state.students,
                   selectedStudent: state.selectedStudent,
+                  clean: true,
                   onChanged: (s) {
                     if (s != null) {
                       context.read<AsistenciaBloc>().add(SelectStudent(student: s));
@@ -110,8 +111,12 @@ class AsistenciaDiariaTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: ac.border),
                     ),
-                    child: Center(
-                      child: Text('Sin datos para este día', style: TextStyle(fontSize: 14, color: ac.textSecondary)),
+                    child: Column(
+                      children: [
+                        Icon(Icons.event_available_outlined, size: 26, color: ac.textDisabled),
+                        const SizedBox(height: 10),
+                        Text('Sin datos para este día', style: TextStyle(fontSize: 14, color: ac.textSecondary)),
+                      ],
                     ),
                   ),
                 const SizedBox(height: 24),

@@ -6,6 +6,7 @@ import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_
 import 'package:coleapp/features/parent/presentation/asistencia/bloc/asistencia_event.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/asistencia_diaria_tab.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/widgets/asistencia_general_tab.dart';
+import 'package:coleapp/features/parent/presentation/widgets/pill_segmented.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:coleapp/injection.dart';
 
@@ -58,12 +59,36 @@ class _AsistenciaPageState extends State<AsistenciaPage> with SingleTickerProvid
         appBar: AppBar(
           title: const Text('Asistencia'),
           centerTitle: true,
+          backgroundColor: context.appColors.surface,
+          foregroundColor: context.appColors.textPrimary,
+          elevation: 0,
+          scrolledUnderElevation: 0,
         ),
         body: Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: _SegmentedTabs(controller: _tabController, labels: _tabLabels),
+              child: AnimatedBuilder(
+                animation: _tabController,
+                builder: (context, _) {
+                  return PillSegmented<int>(
+                    selected: _tabController.index,
+                    onChanged: (i) => _tabController.animateTo(i),
+                    segments: const [
+                      PillSegment(
+                        value: 0,
+                        label: 'Diaria',
+                        icon: Icons.today_outlined,
+                      ),
+                      PillSegment(
+                        value: 1,
+                        label: 'General',
+                        icon: Icons.calendar_month_outlined,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
             Expanded(
               child: TabBarView(
@@ -77,69 +102,6 @@ class _AsistenciaPageState extends State<AsistenciaPage> with SingleTickerProvid
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SegmentedTabs extends StatelessWidget {
-  final TabController controller;
-  final List<String> labels;
-
-  const _SegmentedTabs({required this.controller, required this.labels});
-
-  @override
-  Widget build(BuildContext context) {
-    final ac = context.appColors;
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, _) {
-        return Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: ac.fill,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              for (var i = 0; i < labels.length; i++)
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.animateTo(i),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: controller.index == i ? ac.card : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: controller.index == i ? ac.border : Colors.transparent,
-                        ),
-                        boxShadow: controller.index == i
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Text(
-                        labels[i],
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: controller.index == i ? FontWeight.w600 : FontWeight.w500,
-                          color: controller.index == i ? ac.primary : ac.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

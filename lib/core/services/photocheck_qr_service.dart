@@ -39,6 +39,7 @@ class PhotocheckQrService {
   static String buildRawData({
     required int studentId,
     required String prefix,
+    required String studentName,
     required String level,
     required String degree,
     required String section,
@@ -46,13 +47,14 @@ class PhotocheckQrService {
     final levelChar = level.isEmpty ? '' : level.substring(0, 1).toUpperCase();
     final degreeChar = degree.isEmpty ? '' : degree.substring(0, 1).toUpperCase();
     final sectionChar = section.isEmpty ? '' : section.substring(0, 1).toUpperCase();
-    return '$studentId#$prefix#$levelChar#$degreeChar#$sectionChar';
+    return '$studentId#$prefix#$studentName#$levelChar#$degreeChar#$sectionChar';
   }
 
   static String encryptData({
     required int tenantId,
     required int branchId,
     required int studentId,
+    required String studentName,
     required String level,
     required String degree,
     required String section,
@@ -66,6 +68,7 @@ class PhotocheckQrService {
     final raw = buildRawData(
       studentId: studentId,
       prefix: prefix,
+      studentName: studentName,
       level: level,
       degree: degree,
       section: section,

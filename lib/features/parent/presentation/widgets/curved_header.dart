@@ -24,8 +24,10 @@ class CurvedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerColor = isDark ? const Color(0xFF191C1F) : _primary;
     return PhysicalShape(
-      color: _primary,
+      color: headerColor,
       elevation: 4,
       shadowColor: Colors.black.withValues(alpha: 0.35),
       clipper: _CurvedClipper(arc: arc),
@@ -92,7 +94,7 @@ class CurvedHeader extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: _error,
                           shape: BoxShape.circle,
-                          border: Border.all(color: _primary, width: 1.5),
+                          border: Border.all(color: headerColor, width: 1.5),
                         ),
                       ),
                     ),

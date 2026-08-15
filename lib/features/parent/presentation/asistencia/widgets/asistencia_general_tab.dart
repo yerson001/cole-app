@@ -46,6 +46,7 @@ class AsistenciaGeneralTab extends StatelessWidget {
                 ChildSelector(
                   students: state.students,
                   selectedStudent: state.selectedStudent,
+                  clean: true,
                   onChanged: (s) {
                     if (s != null) {
                       context.read<AsistenciaBloc>().add(SelectStudent(student: s));

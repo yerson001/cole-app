@@ -69,6 +69,7 @@ class FotocheckBloc extends Bloc<FotocheckEvent, FotocheckState> {
       tenantId: tenantId,
       branchId: branchId,
       studentId: student.id,
+      studentName: student.fullName,
       level: student.level.name,
       degree: student.grade.name,
       section: student.section.name,

@@ -57,6 +57,7 @@ class _HorarioBodyState extends State<_HorarioBody> {
       listener: (context, state) => _tryInitialize(state),
       child: BlocBuilder<HorarioBloc, HorarioState>(
         builder: (context, state) {
+          final ac = context.appColors;
           final tenantId = parentState.tenant;
 
           if (parentState.students.isEmpty) {
@@ -87,11 +88,20 @@ class _HorarioBodyState extends State<_HorarioBody> {
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                          const Center(
-                            child: Text(
-                              'No hay horario disponible',
-                              style: TextStyle(color: Colors.grey),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.12),
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                              child: Column(
+                                children: [
+                                  Icon(Icons.schedule, size: 28, color: ac.textDisabled),
+                                  const SizedBox(height: 14),
+                                  Text(
+                                    'No hay horario disponible',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ac.textPrimary),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -132,6 +142,7 @@ class _StudentSelector extends StatelessWidget {
       child: ChildSelector(
         students: students,
         selectedStudent: selectedStudent,
+        clean: true,
         onChanged: (student) {
           if (student != null) {
             context.read<HorarioBloc>().add(SelectStudent(student: student));

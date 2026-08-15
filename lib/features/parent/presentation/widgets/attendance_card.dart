@@ -7,18 +7,17 @@ class AttendanceCard extends StatelessWidget {
 
   const AttendanceCard({super.key, required this.report});
 
-  static const _verde = Color(0xFF0F6E56);
   static const _naranja = Color(0xFFB0790F);
   static const _salidaAzul = Color(0xFF00B9FE);
   static const _gris = Color(0xFF9E9E9E);
   static const _labelGris = Color(0xFF757575);
 
-  Color _statusColor(String? status) {
+  Color _statusColor(AppColors ac, String? status) {
     switch (status) {
       case 'PRESENT':
       case 'EARLY':
       case 'ON_TIME':
-        return _verde;
+        return ac.success;
       case 'LATE':
         return _naranja;
       default:
@@ -54,7 +53,7 @@ class AttendanceCard extends StatelessWidget {
                               : Icons.check_circle)
                           : Icons.access_time,
                       color: a?.checkInTime != null
-                          ? _statusColor(a!.statusCheckIn)
+                          ? _statusColor(ac, a!.statusCheckIn)
                           : _labelGris,
                     ),
                     const SizedBox(height: 6),
@@ -68,7 +67,7 @@ class AttendanceCard extends StatelessWidget {
                       icon: a?.statusCheckIn == 'LATE'
                           ? Icons.schedule
                           : Icons.check_circle,
-                      color: a?.checkInTime != null ? ac.primary : _labelGris,
+                      color: a?.checkInTime != null ? ac.success : _labelGris,
                     ),
                     const SizedBox(height: 1),
                     Text(
@@ -96,11 +95,11 @@ class AttendanceCard extends StatelessWidget {
                       icon: a?.checkOutTime != null
                           ? Icons.check_circle
                           : Icons.access_time,
-                      color: a?.checkOutTime != null ? _salidaAzul : _labelGris,
+                      color: ac.textPrimary,
                     ),
                     const SizedBox(height: 6),
                     if (a?.checkOutTime != null)
-                      _bigTime(a!.checkOutTime!, ac: ac, color: _salidaAzul)
+                      _bigTime(a!.checkOutTime!, ac: ac, color: ac.textPrimary)
                     else
                       Text(
                         '--:--',

@@ -166,6 +166,7 @@ class _StudentSelector extends StatelessWidget {
         students: students,
         selectedStudent: selected,
         showAll: true,
+        clean: true,
         onChanged: (student) {
           context.read<ComunicadosBloc>().add(SelectStudent(studentId: student?.id));
         },
@@ -294,31 +295,24 @@ class _EmptyState extends StatelessWidget {
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.12),
         Center(
-          child: Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: ac.primary.withValues(alpha: 0.10),
-              shape: BoxShape.circle,
-              border: Border.all(color: ac.primary.withValues(alpha: 0.30)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: Column(
+              children: [
+                Icon(icon, size: 28, color: ac.textDisabled),
+                const SizedBox(height: 14),
+                Text(
+                  title,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ac.textPrimary),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12.5, height: 1.5, color: ac.textSecondary),
+                ),
+              ],
             ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 32, color: ac.primary),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Center(
-          child: Text(
-            title,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: ac.textPrimary),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Center(
-          child: Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, height: 1.4, color: ac.textSecondary.withValues(alpha: 0.8)),
           ),
         ),
       ],

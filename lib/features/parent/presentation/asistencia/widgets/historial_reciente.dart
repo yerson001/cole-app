@@ -28,76 +28,77 @@ class HistorialReciente extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ac.textPrimary),
           ),
         ),
-        ...days.map((day) {
+        ...days.asMap().entries.map((entry) {
+          final index = entry.key;
+          final day = entry.value;
           final report = _findReport(day);
           final a = report?.attendances.firstOrNull;
           final hasMark = a?.checkInTime != null;
           final status = hasMark ? (a?.statusCheckIn ?? 'PRESENT') : 'UNMARKED';
           final statusColor = _statusColor(status, ac);
-          return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: ac.card,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: ac.border),
-            ),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 42,
-                  child: Column(
-                    children: [
-                      Text(_monthNames[day.month - 1], style: TextStyle(fontSize: 11, color: ac.textSecondary)),
-                      Text('${day.day}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: ac.textPrimary)),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(_dayNames[day.weekday - 1],
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ac.textPrimary)),
-                      Row(
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 42,
+                      child: Column(
                         children: [
-                          Text(
-                            'Ingreso: ',
-                            style: TextStyle(fontSize: 12, color: ac.textSecondary),
-                          ),
-                          if (hasMark)
-                            Text(
-                              _formatTime(a!.checkInTime!),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: statusColor,
-                              ),
-                            )
-                          else
-                            Text(
-                              '--:--',
-                              style: TextStyle(fontSize: 12, color: ac.textSecondary),
-                            ),
+                          Text(_monthNames[day.month - 1], style: TextStyle(fontSize: 11, color: ac.textSecondary)),
+                          Text('${day.day}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: ac.textPrimary)),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_dayNames[day.weekday - 1],
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: ac.textPrimary)),
+                          Row(
+                            children: [
+                              Text(
+                                'Ingreso: ',
+                                style: TextStyle(fontSize: 12, color: ac.textSecondary),
+                              ),
+                              if (hasMark)
+                                Text(
+                                  _formatTime(a!.checkInTime!),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: statusColor,
+                                  ),
+                                )
+                              else
+                                Text(
+                                  '--:--',
+                                  style: TextStyle(fontSize: 12, color: ac.textSecondary),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _statusLabel(status),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: statusColor),
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _statusLabel(status),
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: statusColor),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              if (index < days.length - 1) Divider(height: 1, thickness: 1, color: ac.border),
+            ],
           );
         }),
       ],

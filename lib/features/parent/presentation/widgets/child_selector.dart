@@ -17,6 +17,7 @@ class ChildSelector extends StatelessWidget {
   final ValueChanged<StudentModel?> onChanged;
   final bool showAll;
   final String allLabel;
+  final bool clean;
 
   const ChildSelector({
     super.key,
@@ -25,6 +26,7 @@ class ChildSelector extends StatelessWidget {
     required this.onChanged,
     this.showAll = false,
     this.allLabel = 'Todos',
+    this.clean = false,
   });
 
   String _initials(StudentModel s) {
@@ -62,35 +64,55 @@ class ChildSelector extends StatelessWidget {
 
   Widget _allCircle(AppColors ac) {
     final selected = selectedStudent == null;
+    final labelColor = clean ? (selected ? ac.primary : ac.textSecondary) : (selected ? ac.primary : ac.textSecondary);
     return GestureDetector(
       onTap: () => onChanged(null),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selected ? ac.primary : ac.border,
-                width: selected ? 2.5 : 1.5,
-              ),
-            ),
-            child: Container(
+          if (clean)
+            Container(
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: ac.primary,
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? ac.primary : ac.border,
+                  width: selected ? 2 : 1.2,
+                ),
               ),
               alignment: Alignment.center,
-              child: const Icon(
+              child: Icon(
                 Icons.groups,
                 size: 22,
-                color: Colors.white,
+                color: selected ? ac.primary : ac.textSecondary,
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? ac.primary : ac.border,
+                  width: selected ? 2.5 : 1.5,
+                ),
+              ),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: ac.primary,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.groups,
+                  size: 22,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 4),
           SizedBox(
             width: 64,
@@ -98,11 +120,11 @@ class ChildSelector extends StatelessWidget {
               allLabel,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
+              textAlign: clean ? TextAlign.start : TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? ac.primary : ac.textSecondary,
+                color: labelColor,
               ),
             ),
           ),
@@ -113,38 +135,61 @@ class ChildSelector extends StatelessWidget {
 
   Widget _childCircle(StudentModel s, int index, AppColors ac) {
     final selected = selectedStudent?.id == s.id;
+    final labelColor = clean ? (selected ? ac.primary : ac.textSecondary) : (selected ? ac.primary : ac.textSecondary);
     return GestureDetector(
       onTap: () => onChanged(s),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: selected ? ac.primary : ac.border,
-                width: selected ? 2.5 : 1.5,
-              ),
-            ),
-            child: Container(
+          if (clean)
+            Container(
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: _avatarColors[index % _avatarColors.length],
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? ac.primary : ac.border,
+                  width: selected ? 2 : 1.2,
+                ),
               ),
               alignment: Alignment.center,
               child: Text(
                 _initials(s),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: selected ? ac.primary : ac.textSecondary,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
               ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? ac.primary : ac.border,
+                  width: selected ? 2.5 : 1.5,
+                ),
+              ),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: _avatarColors[index % _avatarColors.length],
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  _initials(s),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ),
-          ),
           const SizedBox(height: 4),
           SizedBox(
             width: 64,
@@ -152,11 +197,11 @@ class ChildSelector extends StatelessWidget {
               s.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
+              textAlign: clean ? TextAlign.start : TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? ac.primary : ac.textSecondary,
+                color: labelColor,
               ),
             ),
           ),

@@ -26,6 +26,7 @@ import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
+import 'package:coleapp/features/parent/presentation/widgets/curved_header.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ParentHomeContent extends StatefulWidget {
@@ -102,58 +103,15 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     final fullDate = '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
-    final ac = context.appColors;
     return PreferredSize(
-      preferredSize: Size.fromHeight(kToolbarHeight + MediaQuery.of(context).padding.top),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      greetingName.isEmpty ? greeting : '$greeting, $greetingName',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w500,
-                        color: ac.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      fullDate,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: ac.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  Icon(Icons.notifications_outlined, size: 19, color: ac.textDisabled),
-                  const SizedBox(width: 14),
-                  IconButton(
-                    icon: Icon(Icons.menu, size: 19, color: ac.textSecondary),
-                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      preferredSize: Size.fromHeight(
+        CurvedHeader.preferredHeight(MediaQuery.of(context).padding.top, 16),
+      ),
+      child: CurvedHeader(
+        title: greetingName.isEmpty ? greeting : '$greeting, $greetingName',
+        subtitle: fullDate,
+        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNotificationsPressed: () {},
       ),
     );
   }
@@ -163,7 +121,12 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     if (state.pageIndex == 0) {
       return _buildHomeHeader(context);
     }
+    final ac = context.appColors;
     return AppBar(
+          backgroundColor: ac.surface,
+          foregroundColor: ac.textPrimary,
+          elevation: 0,
+          scrolledUnderElevation: 0,
           leading: Builder(
             builder: (ctx) {
               return BlocBuilder<ParentHomeBloc, ParentHomeState>(
@@ -202,15 +165,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.calendar_month_outlined),
-              onPressed: () {},
-            ),
-            IconButton(
               icon: const Icon(Icons.notifications_outlined),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.help_outline),
               onPressed: () {},
             ),
           ],
@@ -294,14 +249,23 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
                 width: double.infinity,
                 height: 170,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      ac.primary,
-                      ac.primary.withValues(alpha: 0.85),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: Theme.of(context).brightness == Brightness.dark
+                      ? LinearGradient(
+                          colors: const [
+                            Color(0xFF191C1F),
+                            Color(0xFF23272B),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : LinearGradient(
+                          colors: [
+                            ac.primary,
+                            ac.primary.withValues(alpha: 0.85),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                 ),
                 child: Column(
                   children: [
@@ -660,23 +624,44 @@ class _QuickAccessGrid extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             for (final item in _items)
-              GestureDetector(
-                onTap: () {
-                  context.read<ParentHomeBloc>().add(
-                    ChangePage(pageIndex: item.pageIndex),
-                  );
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(item.icon, size: 23, color: ac.textPrimary),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.name,
-                      style: TextStyle(fontSize: 11, color: ac.textSecondary),
-                      textAlign: TextAlign.center,
+              Expanded(
+                child: SizedBox(
+                  height: 76,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        context.read<ParentHomeBloc>().add(
+                          ChangePage(pageIndex: item.pageIndex),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: ac.fill,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: ac.border),
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(item.icon, size: 23, color: ac.textPrimary),
+                          ),
+                          const SizedBox(height: 7),
+                          Text(
+                            item.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 11, color: ac.textSecondary),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
               ),
           ],

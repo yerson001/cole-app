@@ -14,6 +14,7 @@ import 'package:coleapp/features/parent/presentation/fotocheck/bloc/FotocheckSta
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
 import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
+import 'package:coleapp/features/parent/presentation/widgets/pill_segmented.dart';
 import 'package:coleapp/injection.dart';
 
 class FotocheckContent extends StatelessWidget {
@@ -107,7 +108,7 @@ class _FotocheckViewState extends State<_FotocheckView>
     _flipController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
-      value: 1,
+      value: 0,
     );
   }
 
@@ -184,14 +185,6 @@ class _FotocheckViewState extends State<_FotocheckView>
     final students = parentState.students;
     final student = fotocheckState.selectedStudent ?? students.first;
     final isSticker = fotocheckState.template == PhotocheckTemplate.sticker;
-    final primary = _parseColor(
-      parentState.branch?.primaryColor,
-      fallback: Theme.of(context).colorScheme.primary,
-    );
-    final secondary = _parseColor(
-      parentState.branch?.secondaryColor,
-      fallback: primary,
-    );
 
     return Column(
       children: [
@@ -200,6 +193,7 @@ class _FotocheckViewState extends State<_FotocheckView>
           child: ChildSelector(
             students: students,
             selectedStudent: fotocheckState.selectedStudent,
+            clean: true,
             onChanged: (s) {
               if (s != null) {
                 context.read<FotocheckBloc>().add(SelectStudent(student: s));
@@ -209,25 +203,23 @@ class _FotocheckViewState extends State<_FotocheckView>
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: SegmentedButton<PhotocheckTemplate>(
+          child: PillSegmented<PhotocheckTemplate>(
+            selected: fotocheckState.template,
+            onChanged: (template) {
+              context.read<FotocheckBloc>().add(ChangeTemplate(template: template));
+            },
             segments: const [
-              ButtonSegment(
+              PillSegment(
                 value: PhotocheckTemplate.photocheck,
-                label: Text('Fotocheck'),
-                icon: Icon(Icons.badge_outlined),
+                label: 'Fotocheck',
+                icon: Icons.badge_outlined,
               ),
-              ButtonSegment(
+              PillSegment(
                 value: PhotocheckTemplate.sticker,
-                label: Text('Sticker'),
-                icon: Icon(Icons.sell_outlined),
+                label: 'Sticker',
+                icon: Icons.sell_outlined,
               ),
             ],
-            selected: {fotocheckState.template},
-            onSelectionChanged: (selection) {
-              context.read<FotocheckBloc>().add(
-                ChangeTemplate(template: selection.first),
-              );
-            },
           ),
         ),
         Expanded(
@@ -250,15 +242,11 @@ class _FotocheckViewState extends State<_FotocheckView>
                             branch: parentState.branch,
                             student: student,
                             qrData: fotocheckState.qrData ?? '',
-                            primary: primary,
-                            secondary: secondary,
                           ),
                           back: _PhotocheckBack(
                             branch: parentState.branch,
                             prefix: fotocheckState.prefix ?? '',
                             qrData: fotocheckState.qrData ?? '',
-                            primary: primary,
-                            secondary: secondary,
                           ),
                         ),
                 ),
@@ -340,15 +328,11 @@ class _PhotocheckFront extends StatelessWidget {
   final BranchModel? branch;
   final StudentModel student;
   final String qrData;
-  final Color primary;
-  final Color secondary;
 
   const _PhotocheckFront({
     required this.branch,
     required this.student,
     required this.qrData,
-    required this.primary,
-    required this.secondary,
   });
 
   @override
@@ -366,9 +350,8 @@ class _PhotocheckFront extends StatelessWidget {
             'assets/images/photocheck-background.png',
             fit: BoxFit.cover,
           ),
-          CustomPaint(painter: _ShapesPainter(primary: primary, secondary: secondary)),
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.fromLTRB(20, 30, 20, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -376,20 +359,36 @@ class _PhotocheckFront extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        (branch?.name ?? '').toUpperCase(),
-                        style: const TextStyle(
-                          fontFamily: 'NotoSerif',
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'INSTITUCIÓN EDUCATIVA',
+                            style: const TextStyle(
+                              fontFamily: 'NotoSerif',
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            (branch?.name ?? '').toUpperCase(),
+                            style: const TextStyle(
+                              fontFamily: 'NotoSerif',
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     if (branch?.urlLogo != null && branch!.urlLogo!.isNotEmpty)
                       SizedBox(
-                        width: 34,
-                        height: 34,
+                        width: 40,
+                        height: 40,
                         child: CachedNetworkImage(
                           imageUrl: branch!.urlLogo!,
                           fit: BoxFit.contain,
@@ -398,10 +397,10 @@ class _PhotocheckFront extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -421,13 +420,13 @@ class _PhotocheckFront extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 3),
-                      _LabelRow(label: 'Nivel', value: student.level.name),
-                      _LabelRow(label: 'Grado', value: student.grade.name),
-                      _LabelRow(label: 'Sección', value: student.section.name),
+                      _LabelRow(label: 'NIVEL', value: student.level.name),
+                      _LabelRow(label: 'GRADO', value: student.grade.name),
+                      _LabelRow(label: 'SECCIÓN', value: student.section.name),
                     ],
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(height: 18),
                 Align(
                   alignment: Alignment.center,
                   child: Container(
@@ -439,18 +438,18 @@ class _PhotocheckFront extends StatelessWidget {
                     ),
                     child: QrImageView(
                       data: qrData,
-                      size: 96,
+                      size: 132,
                     ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(height: 40),
                 Center(
                   child: Text(
                     branch?.lema ?? '',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontFamily: 'NotoSerif',
-                      fontSize: 11,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
@@ -469,15 +468,11 @@ class _PhotocheckBack extends StatelessWidget {
   final BranchModel? branch;
   final String prefix;
   final String qrData;
-  final Color primary;
-  final Color secondary;
 
   const _PhotocheckBack({
     required this.branch,
     required this.prefix,
     required this.qrData,
-    required this.primary,
-    required this.secondary,
   });
 
   @override
@@ -495,17 +490,26 @@ class _PhotocheckBack extends StatelessWidget {
             'assets/images/photocheck-background.png',
             fit: BoxFit.cover,
           ),
-          CustomPaint(painter: _ShapesPainterBack(primary: primary, secondary: secondary)),
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 28, 10, 10),
             child: Column(
               children: [
                 Text(
-                  (branch?.name ?? '').toUpperCase(),
+                  'INSTITUCIÓN',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: 'NotoSerif',
-                    fontSize: 13,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                Text(
+                  'EDUCATIVA ${(branch?.name ?? '').toUpperCase()}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'NotoSerif',
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -518,37 +522,34 @@ class _PhotocheckBack extends StatelessWidget {
                     border: Border.all(color: Colors.black, width: 1.5),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.diagonal3Values(-1, 1, 1),
-                        child: QrImageView(
-                          data: qrData,
-                          size: 96,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        prefix,
-                        style: const TextStyle(
-                          fontFamily: 'NotoSerif',
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.diagonal3Values(-1, 1, 1),
+                    child: QrImageView(
+                      data: qrData,
+                      size: 132,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
+                Text(
+                  prefix,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'NotoSerif',
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 14),
                 Image.asset(
                   'assets/images/colecheck.png',
                   width: 84,
                   height: 30,
                   fit: BoxFit.contain,
                 ),
+                const Spacer(),
               ],
             ),
           ),
@@ -582,17 +583,18 @@ class _StickerCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              Image.asset(
-                'assets/images/colecheck.png',
-                height: 34,
-                fit: BoxFit.contain,
-              ),
               const Spacer(),
               QrImageView(
                 data: qrData,
-                size: 110,
+                size: 150,
               ),
               const Spacer(),
+              Image.asset(
+                'assets/images/colecheck.png',
+                height: 26,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 2),
               Text(
                 student.lastName.toUpperCase(),
                 maxLines: 1,
@@ -624,148 +626,45 @@ class _LabelRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(
-              fontFamily: 'NotoSerif',
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+          Expanded(
+            child: Text(
+              label,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontFamily: 'NotoSerif',
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontFamily: 'NotoSerif',
-              fontSize: 10,
-              color: Colors.black87,
+          SizedBox(
+            width: 16,
+            child: Text(
+              ':',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'NotoSerif',
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.left,
+              style: const TextStyle(
+                fontFamily: 'NotoSerif',
+                fontSize: 10,
+                color: Colors.black87,
+              ),
             ),
           ),
         ],
       ),
     );
   }
-}
-
-class _ShapesPainter extends CustomPainter {
-  final Color primary;
-  final Color secondary;
-
-  _ShapesPainter({required this.primary, required this.secondary});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    Paint paint(Color c) => Paint()..color = c;
-
-    canvas.save();
-    canvas.translate(w * 0.95, h * 1.05);
-    canvas.rotate(-0.52);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.6, -w * 0.6, w * 1.2, w * 1.2), paint(primary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 0.5, h * 0.92);
-    canvas.rotate(0.17);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.8, -w * 0.8, w * 1.6, w * 1.6), paint(secondary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 0.05, h * 0.18);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.5, -w * 0.5, w * 1.0, w * 1.0), paint(secondary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 0.55, h * 0.1);
-    canvas.rotate(0.78);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.6, -w * 0.6, w * 1.2, w * 1.2), paint(primary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 0.22, h * 1.6);
-    canvas.rotate(-1.48);
-    canvas.scale(1.1);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.5, -w * 0.5, w, w), paint(primary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 0.35, h * 0.95);
-    canvas.rotate(-0.61);
-    final line = Paint()
-      ..color = secondary
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset.zero, Offset(w * 0.7, w * 0.7), line);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _ShapesPainter oldDelegate) =>
-      oldDelegate.primary != primary || oldDelegate.secondary != secondary;
-}
-
-class _ShapesPainterBack extends CustomPainter {
-  final Color primary;
-  final Color secondary;
-
-  _ShapesPainterBack({required this.primary, required this.secondary});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    Paint paint(Color c) => Paint()..color = c;
-
-    canvas.save();
-    canvas.translate(w * 1.1, h * 0.2);
-    canvas.rotate(1.05);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.5, -w * 0.5, w, w), paint(primary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 1.35, h * 0.55);
-    canvas.rotate(1.92);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.8, -w * 0.8, w * 1.6, w * 1.6), paint(secondary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 0.55, h * 0.35);
-    canvas.rotate(1.57);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.45, -w * 0.45, w * 0.9, w * 0.9), paint(primary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 1.15, h * 0.85);
-    canvas.rotate(1.57);
-    canvas.drawRect(Rect.fromLTWH(-w * 0.45, -w * 0.45, w * 0.9, w * 0.9), paint(primary));
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(w * 0.85, h * 0.35);
-    canvas.rotate(1.13);
-    final line = Paint()
-      ..color = secondary
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset.zero, Offset(w * 0.8, w * 0.8), line);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _ShapesPainterBack oldDelegate) =>
-      oldDelegate.primary != primary || oldDelegate.secondary != secondary;
-}
-
-Color _parseColor(String? hex, {required Color fallback}) {
-  if (hex == null || hex.isEmpty) return fallback;
-  var value = hex.replaceFirst('#', '');
-  if (value.length == 6) value = 'FF$value';
-  final parsed = int.tryParse(value, radix: 16);
-  if (parsed == null) return fallback;
-  return Color(parsed);
 }
