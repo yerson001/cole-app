@@ -165,45 +165,51 @@ class PhotocheckPdfService {
     required pw.Font fontBold,
     required pw.Font fontSemiBold,
   }) {
-    return pw.Container(
-      decoration: pw.BoxDecoration(
-        color: PdfColors.white,
-        border: pw.Border.all(color: PdfColors.black, width: 1.5),
-      ),
-      padding: pw.EdgeInsets.all(6 * _mm),
+    return pw.ClipRRect(
+      horizontalRadius: 2 * _mm,
+      verticalRadius: 2 * _mm,
+      child: pw.Container(
+        decoration: pw.BoxDecoration(
+          color: PdfColors.white,
+          border: pw.Border.all(color: PdfColors.black, width: 1.5),
+          borderRadius: pw.BorderRadius.circular(3 * _mm),
+        ),
+        padding: pw.EdgeInsets.all(3 * _mm),
       child: pw.Column(
         children: [
-          pw.Image(logo, width: 34 * _mm, height: 11 * _mm, fit: pw.BoxFit.contain),
           pw.Spacer(),
-          pw.Container(
-            width: 29 * _mm,
-            height: 29 * _mm,
+          pw.SizedBox(
+            width: 20 * _mm,
+            height: 20 * _mm,
             child: pw.BarcodeWidget(
               data: qrData,
               barcode: pw.Barcode.qrCode(),
               color: PdfColors.black,
               backgroundColor: PdfColors.white,
-              width: 29 * _mm,
-              height: 29 * _mm,
+              width: 20 * _mm,
+              height: 20 * _mm,
               drawText: false,
             ),
           ),
           pw.Spacer(),
+          pw.Image(logo, width: 14 * _mm, height: 5 * _mm, fit: pw.BoxFit.contain),
+          pw.SizedBox(height: 1 * _mm),
           pw.Text(
             lastName.toUpperCase(),
             maxLines: 1,
             overflow: pw.TextOverflow.clip,
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(
+style: pw.TextStyle(
               font: fontSemiBold,
-              fontSize: 9,
-              color: PdfColors.grey700,
+              fontSize: 6.5,
+              color: PdfColors.grey800,
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   static pw.Widget _buildFront({
     required String qrData,
@@ -223,7 +229,9 @@ class PhotocheckPdfService {
   }) {
     final w = 57 * _mm;
     if (w <= 0) return pw.SizedBox();
-    return pw.ClipRect(
+    return pw.ClipRRect(
+      horizontalRadius: 2 * _mm,
+      verticalRadius: 2 * _mm,
       child: pw.Stack(
         fit: pw.StackFit.expand,
         children: [
@@ -232,7 +240,7 @@ class PhotocheckPdfService {
             painter: (canvas, size) => _paintFrontShapes(canvas, size, primary, secondary),
           ),
           pw.Padding(
-            padding: pw.EdgeInsets.all(4.5 * _mm),
+            padding: pw.EdgeInsets.fromLTRB(4.5 * _mm, 6.5 * _mm, 4.5 * _mm, 3.5 * _mm),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
@@ -240,27 +248,44 @@ class PhotocheckPdfService {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Expanded(
-                      child: pw.Text(
-                        schoolName.toUpperCase(),
-                        style: pw.TextStyle(
-                          font: fontBold,
-                          fontSize: 6.5,
-                          color: PdfColors.grey800,
-                        ),
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          _outlinedText(
+                            'INSTITUCIÓN EDUCATIVA',
+                            pw.TextStyle(
+                              font: fontBold,
+                              fontSize: 6,
+                              color: PdfColors.grey800,
+                            ),
+                            pw.TextAlign.left,
+                            stroke: 0.7,
+                          ),
+                          _outlinedText(
+                            schoolName.toUpperCase(),
+                            pw.TextStyle(
+                              font: fontBold,
+                              fontSize: 6,
+                              color: PdfColors.grey800,
+                            ),
+                            pw.TextAlign.left,
+                            stroke: 0.7,
+                          ),
+                        ],
                       ),
                     ),
                     if (schoolLogo != null)
                       pw.SizedBox(
-                        width: 16 * _mm,
-                        height: 16 * _mm,
+                        width: 9 * _mm,
+                        height: 9 * _mm,
                         child: pw.Image(schoolLogo, fit: pw.BoxFit.contain),
                       ),
                   ],
                 ),
-                pw.SizedBox(height: 3 * _mm),
+                pw.SizedBox(height: 2 * _mm),
                 pw.Container(
-                  width: w,
-                  padding: pw.EdgeInsets.symmetric(horizontal: 3 * _mm, vertical: 2.5 * _mm),
+                  width: w - 9 * _mm,
+                  padding: pw.EdgeInsets.symmetric(horizontal: 2 * _mm, vertical: 1.5 * _mm),
                   decoration: pw.BoxDecoration(
                     color: PdfColors.white,
                     borderRadius: pw.BorderRadius.circular(2 * _mm),
@@ -274,14 +299,14 @@ class PhotocheckPdfService {
                         textAlign: pw.TextAlign.center,
                         style: pw.TextStyle(
                           font: fontExtraBold,
-                          fontSize: 10,
+                          fontSize: 8,
                           color: PdfColors.grey800,
                         ),
                       ),
-                      pw.SizedBox(height: 1.5 * _mm),
-                      _buildInfoRow('Nivel', level, fontSemiBold),
-                      _buildInfoRow('Grado', degree, fontSemiBold),
-                      _buildInfoRow('Sección', section, fontSemiBold),
+                      pw.SizedBox(height: 1 * _mm),
+                      _buildInfoRow('NIVEL', level, fontBold),
+                      _buildInfoRow('GRADO', degree, fontBold),
+                      _buildInfoRow('SECCIÓN', section, fontBold),
                     ],
                   ),
                 ),
@@ -292,18 +317,18 @@ class PhotocheckPdfService {
                     decoration: pw.BoxDecoration(
                       color: PdfColors.white,
                       border: pw.Border.all(color: PdfColors.black, width: 1.5),
-                      borderRadius: pw.BorderRadius.circular(2 * _mm),
+                      borderRadius: pw.BorderRadius.circular(3 * _mm),
                     ),
                     child: pw.SizedBox(
-                      width: 29 * _mm,
-                      height: 29 * _mm,
+                      width: 22 * _mm,
+                      height: 22 * _mm,
                       child: pw.BarcodeWidget(
                         data: qrData,
                         barcode: pw.Barcode.qrCode(),
                         color: PdfColors.black,
                         backgroundColor: PdfColors.white,
-                        width: 29 * _mm,
-                        height: 29 * _mm,
+                        width: 22 * _mm,
+                        height: 22 * _mm,
                         drawText: false,
                       ),
                     ),
@@ -311,14 +336,15 @@ class PhotocheckPdfService {
                 ),
                 pw.Spacer(),
                 pw.Center(
-                  child: pw.Text(
+                  child: _outlinedText(
                     schoolLema,
-                    textAlign: pw.TextAlign.center,
-                    style: pw.TextStyle(
+                    pw.TextStyle(
                       font: fontSemiBold,
-                      fontSize: 7,
+                      fontSize: 6.5,
                       color: PdfColors.grey800,
                     ),
+                    pw.TextAlign.center,
+                    stroke: 0.7,
                   ),
                 ),
               ],
@@ -340,7 +366,9 @@ class PhotocheckPdfService {
     required pw.Font fontBold,
     required pw.Font fontSemiBold,
   }) {
-    return pw.ClipRect(
+    return pw.ClipRRect(
+      horizontalRadius: 2 * _mm,
+      verticalRadius: 2 * _mm,
       child: pw.Stack(
         fit: pw.StackFit.expand,
         children: [
@@ -349,11 +377,20 @@ class PhotocheckPdfService {
             painter: (canvas, size) => _paintBackShapes(canvas, size, primary, secondary),
           ),
           pw.Padding(
-            padding: pw.EdgeInsets.fromLTRB(4.5 * _mm, 10 * _mm, 4.5 * _mm, 4.5 * _mm),
+            padding: pw.EdgeInsets.fromLTRB(2.5 * _mm, 6 * _mm, 2.5 * _mm, 2.5 * _mm),
             child: pw.Column(
               children: [
                 pw.Text(
-                  schoolName.toUpperCase(),
+                  'INSTITUCIÓN',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(
+                    font: fontBold,
+                    fontSize: 8,
+                    color: PdfColors.grey800,
+                  ),
+                ),
+                pw.Text(
+                  'EDUCATIVA ${schoolName.toUpperCase()}',
                   textAlign: pw.TextAlign.center,
                   style: pw.TextStyle(
                     font: fontBold,
@@ -367,46 +404,40 @@ class PhotocheckPdfService {
                   decoration: pw.BoxDecoration(
                     color: PdfColors.white,
                     border: pw.Border.all(color: PdfColors.black, width: 1.5),
-                    borderRadius: pw.BorderRadius.circular(2 * _mm),
+                    borderRadius: pw.BorderRadius.circular(3 * _mm),
                   ),
-                  child: pw.Column(
-                    mainAxisSize: pw.MainAxisSize.min,
-                    children: [
-                      pw.Transform(
-                        transform: Matrix4.diagonal3Values(-1, 1, 1),
-                        alignment: pw.Alignment.center,
-                        child: pw.SizedBox(
-                          width: 29 * _mm,
-                          height: 29 * _mm,
-                          child: pw.BarcodeWidget(
-                            data: qrData,
-                            barcode: pw.Barcode.qrCode(),
-                            color: PdfColors.black,
-                            backgroundColor: PdfColors.white,
-                            width: 29 * _mm,
-                            height: 29 * _mm,
-                            drawText: false,
-                          ),
-                        ),
-                      ),
-                      pw.Text(
-                        prefix,
-                        style: pw.TextStyle(
-                          font: fontSemiBold,
-                          fontSize: 6,
-                          color: PdfColors.grey800,
-                        ),
-                      ),
-                    ],
+                  child: pw.SizedBox(
+                    width: 20 * _mm,
+                    height: 20 * _mm,
+                    child: pw.BarcodeWidget(
+                      data: qrData,
+                      barcode: pw.Barcode.qrCode(),
+                      color: PdfColors.black,
+                      backgroundColor: PdfColors.white,
+                      width: 20 * _mm,
+                      height: 20 * _mm,
+                      drawText: false,
+                    ),
                   ),
                 ),
-                pw.SizedBox(height: 4 * _mm),
+                pw.SizedBox(height: 1.5 * _mm),
+                pw.Text(
+                  prefix,
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(
+                    font: fontSemiBold,
+                    fontSize: 6,
+                    color: PdfColors.grey800,
+                  ),
+                ),
+                pw.SizedBox(height: 3 * _mm),
                 pw.Image(
                   colecheckLogo,
-                  width: 30 * _mm,
-                  height: 9 * _mm,
+                  width: 20 * _mm,
+                  height: 6 * _mm,
                   fit: pw.BoxFit.contain,
                 ),
+                pw.Spacer(),
               ],
             ),
           ),
@@ -415,19 +446,53 @@ class PhotocheckPdfService {
     );
   }
 
+  static pw.Widget _outlinedText(
+    String text,
+    pw.TextStyle style,
+    pw.TextAlign align, {
+    double stroke = 0.7,
+  }) {
+    final white = style.copyWith(color: PdfColors.white);
+    final copies = <pw.Widget>[
+      pw.Transform(transform: Matrix4.translationValues(-stroke, -stroke, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Transform(transform: Matrix4.translationValues(0, -stroke, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Transform(transform: Matrix4.translationValues(stroke, -stroke, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Transform(transform: Matrix4.translationValues(-stroke, 0, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Transform(transform: Matrix4.translationValues(stroke, 0, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Transform(transform: Matrix4.translationValues(-stroke, stroke, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Transform(transform: Matrix4.translationValues(0, stroke, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Transform(transform: Matrix4.translationValues(stroke, stroke, 0), child: pw.Text(text, textAlign: align, style: white)),
+      pw.Text(text, textAlign: align, style: style),
+    ];
+    return pw.Stack(alignment: pw.Alignment.center, children: copies);
+  }
+
   static pw.Widget _buildInfoRow(String label, String value, pw.Font font) {
     return pw.Padding(
       padding: pw.EdgeInsets.symmetric(vertical: 0.5 * _mm),
       child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.center,
         children: [
-          pw.Text(
-            '$label: ',
-            style: pw.TextStyle(font: font, fontSize: 6.5, color: PdfColors.grey800),
+          pw.Expanded(
+            child: pw.Text(
+              label,
+              textAlign: pw.TextAlign.right,
+              style: pw.TextStyle(font: font, fontSize: 6, color: PdfColors.grey800),
+            ),
           ),
-          pw.Text(
-            value,
-            style: pw.TextStyle(font: font, fontSize: 6.5, color: PdfColors.grey800),
+          pw.SizedBox(
+            width: 3 * _mm,
+            child: pw.Text(
+              ':',
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(font: font, fontSize: 6, color: PdfColors.grey800),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              textAlign: pw.TextAlign.left,
+              style: pw.TextStyle(font: font, fontSize: 6, color: PdfColors.grey800),
+            ),
           ),
         ],
       ),
@@ -437,62 +502,71 @@ class PhotocheckPdfService {
   static void _paintFrontShapes(PdfGraphics canvas, PdfPoint size, PdfColor primary, PdfColor secondary) {
     final w = size.x;
     final h = size.y;
+    final s = w * 0.56;
 
-    void rect(PdfColor color, double tx, double ty, double angle, double rw, double rh) {
-      canvas
-        ..saveContext()
-        ..setColor(color)
-        ..setTransform(Matrix4.translationValues(tx, ty, 0))
-        ..setTransform(Matrix4.rotationZ(angle))
-        ..drawRect(-rw / 2, -rh / 2, rw, rh)
-        ..restoreContext();
-    }
+    _fillPolygon(canvas, primary, [
+      [0, h],
+      [s, h],
+      [0, h - s],
+    ]);
 
-    rect(primary, w * 0.95, h * 1.05, -0.52, w * 1.2, w * 1.2);
-    rect(secondary, w * 0.5, h * 0.92, 0.17, w * 1.6, w * 1.6);
-    rect(secondary, w * 0.05, h * 0.18, 0, w * 1.0, w * 1.0);
-    rect(primary, w * 0.55, h * 0.1, 0.78, w * 1.2, w * 1.2);
-    rect(primary, w * 0.22, h * 1.6, -1.48, w * 1.1, w * 1.1);
+    _fillPolygon(canvas, primary, [
+      [w - s, 0],
+      [w, 0],
+      [w, s],
+    ]);
 
-    canvas
-      ..saveContext()
-      ..setColor(secondary)
-      ..setTransform(Matrix4.translationValues(w * 0.35, h * 0.95, 0))
-      ..setTransform(Matrix4.rotationZ(-0.61))
-      ..moveTo(0, 0)
-      ..lineTo(w * 0.7, w * 0.7)
-      ..strokePath()
-      ..restoreContext();
+    _fillPolygon(canvas, secondary, [
+      [0, 0],
+      [0, s / 2],
+      [w, s / 2 - w * 0.07463],
+      [w, 0],
+    ]);
+
+    _fillPolygon(canvas, primary, [
+      [w / 2 - w * 0.5597, 0],
+      [w / 2 + w * 0.2612, 0],
+      [w - w * 0.0746, w * 0.1866],
+    ]);
   }
 
   static void _paintBackShapes(PdfGraphics canvas, PdfPoint size, PdfColor primary, PdfColor secondary) {
     final w = size.x;
     final h = size.y;
+    final rightS = w * 0.3;
+    final midY = h / 2;
 
-    void rect(PdfColor color, double tx, double ty, double angle, double rw, double rh) {
-      canvas
-        ..saveContext()
-        ..setColor(color)
-        ..setTransform(Matrix4.translationValues(tx, ty, 0))
-        ..setTransform(Matrix4.rotationZ(angle))
-        ..drawRect(-rw / 2, -rh / 2, rw, rh)
-        ..restoreContext();
-    }
+    _fillPolygon(canvas, primary, [
+      [w, h],
+      [w - rightS, h],
+      [w, midY - w * 0.149],
+    ]);
 
-    rect(primary, w * 1.1, h * 0.2, 1.05, w * 1.0, w * 1.0);
-    rect(secondary, w * 1.35, h * 0.55, 1.92, w * 1.6, w * 1.6);
-    rect(primary, w * 0.55, h * 0.35, 1.57, w * 0.9, w * 0.9);
-    rect(primary, w * 1.15, h * 0.85, 1.57, w * 0.9, w * 0.9);
+    _fillPolygon(canvas, secondary, [
+      [w, 0],
+      [w - rightS, 0],
+      [w, midY - w * 0.149],
+    ]);
 
+    _fillPolygon(canvas, primary, [
+      [0, 1.4 * h],
+      [w * 0.2, 0.59 * h],
+      [w * 0.1, 0.41 * h],
+      [0, 0.2 * h],
+    ]);
+  }
+
+  static void _fillPolygon(PdfGraphics canvas, PdfColor color, List<List<double>> pts) {
     canvas
       ..saveContext()
-      ..setColor(secondary)
-      ..setTransform(Matrix4.translationValues(w * 0.85, h * 0.35, 0))
-      ..setTransform(Matrix4.rotationZ(1.13))
-      ..moveTo(0, 0)
-      ..lineTo(w * 0.8, w * 0.8)
-      ..strokePath()
-      ..restoreContext();
+      ..setFillColor(color)
+      ..moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) {
+      canvas.lineTo(pts[i][0], pts[i][1]);
+    }
+    canvas.closePath();
+    canvas.fillPath();
+    canvas.restoreContext();
   }
 
   static PdfColor _parsePdfColor(String? hex, PdfColor fallback) {

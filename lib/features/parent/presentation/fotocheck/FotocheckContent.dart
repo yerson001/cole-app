@@ -230,25 +230,55 @@ class _FotocheckViewState extends State<_FotocheckView>
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 300),
-                  child: isSticker
-                      ? _StickerCard(
-                          student: student,
-                          qrData: fotocheckState.qrData ?? '',
-                        )
-                      : _FlipCard(
-                          controller: _flipController,
-                          onTap: _toggleFlip,
-                          front: _PhotocheckFront(
-                            branch: parentState.branch,
-                            student: student,
-                            qrData: fotocheckState.qrData ?? '',
-                          ),
-                          back: _PhotocheckBack(
-                            branch: parentState.branch,
-                            prefix: fotocheckState.prefix ?? '',
-                            qrData: fotocheckState.qrData ?? '',
+                  child: Stack(
+                    children: [
+                      isSticker
+                          ? _StickerCard(
+                              student: student,
+                              qrData: fotocheckState.qrData ?? '',
+                            )
+                          : _FlipCard(
+                              controller: _flipController,
+                              onTap: _toggleFlip,
+                              front: _PhotocheckFront(
+                                branch: parentState.branch,
+                                student: student,
+                                qrData: fotocheckState.qrData ?? '',
+                              ),
+                              back: _PhotocheckBack(
+                                branch: parentState.branch,
+                                prefix: fotocheckState.prefix ?? '',
+                                qrData: fotocheckState.qrData ?? '',
+                              ),
+                            ),
+                      Positioned(
+                        right: 14,
+                        bottom: 14,
+                        child: Material(
+                          color: Theme.of(context).colorScheme.surface,
+                          shape: const CircleBorder(),
+                          elevation: 3,
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: _generating ? null : _generatePdf,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: _generating
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Tooltip(
+                                      message: 'Descargar PDF',
+                                      child: Icon(Icons.download_outlined, size: 22),
+                                    ),
+                            ),
                           ),
                         ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -261,18 +291,6 @@ class _FotocheckViewState extends State<_FotocheckView>
                     fontFamily: 'NotoSerif',
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: _generating ? null : _generatePdf,
-                icon: _generating
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.picture_as_pdf_outlined),
-                label: Text(_generating ? 'Generando…' : 'Generar PDF'),
               ),
             ],
           ),

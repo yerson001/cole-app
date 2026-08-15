@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalNotificationService {
   static final LocalNotificationService instance =
@@ -27,6 +28,14 @@ class LocalNotificationService {
   }
 
   Future<void> _createChannel() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('notification_sound_v4') != true) {
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.deleteNotificationChannel(channelId: 'colecheck_push');
+      await prefs.setBool('notification_sound_v4', true);
+    }
     const channel = AndroidNotificationChannel(
       'colecheck_push',
       'ColeCheck Avisos',
@@ -34,6 +43,7 @@ class LocalNotificationService {
       importance: Importance.max,
       playSound: true,
       enableVibration: true,
+      sound: RawResourceAndroidNotificationSound('notification'),
     );
     await _plugin
         .resolvePlatformSpecificImplementation<
@@ -65,6 +75,9 @@ class LocalNotificationService {
               'Avisos de asistencia, comunicados y agenda',
           importance: Importance.high,
           priority: Priority.high,
+          playSound: true,
+          enableVibration: true,
+          sound: RawResourceAndroidNotificationSound('notification'),
         ),
       ),
     );

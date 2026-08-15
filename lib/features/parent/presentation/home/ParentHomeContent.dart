@@ -67,27 +67,51 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: _buildAppBar(context),
-      drawer: _buildDrawer(context),
-      body: BlocBuilder<ParentHomeBloc, ParentHomeState>(
-        builder: (context, state) {
-          final navIndex = _pageToNav(state.pageIndex);
-          if (navIndex >= 0) {
-            return _BottomNavPages(navIndex: navIndex, students: state.students);
-          }
-          if (state.pageIndex == 1) {
-            return BlocBuilder<ProfileInfoBloc, ProfileInfoState>(
-              builder: (context, pState) {
-                return ProfileInfoContent(pState.user, students: state.students);
-              },
-            );
-          }
-          return pageList[state.pageIndex];
-        },
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        final page = context.read<ParentHomeBloc>().state.pageIndex;
+        const navPages = {0, 1, 6, 8, 10};
+        if (navPages.contains(page)) {
+          _scaffoldKey.currentState?.openDrawer();
+        } else {
+          context.read<ParentHomeBloc>().add(
+            ChangePage(
+              pageIndex: context.read<ParentHomeBloc>().state.previousPageIndex,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: _buildAppBar(context),
+        drawer: _buildDrawer(context),
+        body: BlocBuilder<ParentHomeBloc, ParentHomeState>(
+          builder: (context, state) {
+            final navIndex = _pageToNav(state.pageIndex);
+            if (navIndex >= 0) {
+              return _BottomNavPages(
+                navIndex: navIndex,
+                students: state.students,
+              );
+            }
+            if (state.pageIndex == 1) {
+              return BlocBuilder<ProfileInfoBloc, ProfileInfoState>(
+                builder: (context, pState) {
+                  return ProfileInfoContent(
+                    pState.user,
+                    students: state.students,
+                    branch: state.branch,
+                  );
+                },
+              );
+            }
+            return pageList[state.pageIndex];
+          },
+        ),
+        bottomNavigationBar: _buildBottomNav(context),
       ),
-      bottomNavigationBar: _buildBottomNav(context),
     );
   }
 
@@ -100,9 +124,31 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     final greeting = hour < 12
         ? 'Buenos días'
         : (hour < 19 ? 'Buenas tardes' : 'Buenas noches');
-    const days = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    final fullDate = '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
+    const days = [
+      'lunes',
+      'martes',
+      'miércoles',
+      'jueves',
+      'viernes',
+      'sábado',
+      'domingo',
+    ];
+    const months = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ];
+    final fullDate =
+        '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
     return PreferredSize(
       preferredSize: Size.fromHeight(
         CurvedHeader.preferredHeight(MediaQuery.of(context).padding.top, 16),
@@ -123,54 +169,70 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
     }
     final ac = context.appColors;
     return AppBar(
-          backgroundColor: ac.surface,
-          foregroundColor: ac.textPrimary,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leading: Builder(
-            builder: (ctx) {
-              return BlocBuilder<ParentHomeBloc, ParentHomeState>(
-                builder: (context, state) {
-                  if (state.pageIndex == 0) {
-                    return IconButton(
-                      icon: const Icon(Icons.menu_rounded),
-                      onPressed: () => Scaffold.of(ctx).openDrawer(),
-                    );
-                  }
-                  if (state.pageIndex == 1) {
-                    return IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      onPressed: () => Scaffold.of(ctx).openDrawer(),
-                    );
-                  }
-                  return IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    onPressed: () {
-                      context.read<ParentHomeBloc>().add(
-                        ChangePage(pageIndex: state.previousPageIndex),
-                      );
-                    },
+      backgroundColor: ac.surface,
+      foregroundColor: ac.textPrimary,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      leading: Builder(
+        builder: (ctx) {
+          return BlocBuilder<ParentHomeBloc, ParentHomeState>(
+            builder: (context, state) {
+              if (state.pageIndex == 0) {
+                return IconButton(
+                  icon: const Icon(Icons.menu_rounded),
+                  onPressed: () => Scaffold.of(ctx).openDrawer(),
+                );
+              }
+              if (state.pageIndex == 1) {
+                return IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  onPressed: () => Scaffold.of(ctx).openDrawer(),
+                );
+              }
+              return IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () {
+                  context.read<ParentHomeBloc>().add(
+                    ChangePage(pageIndex: state.previousPageIndex),
                   );
                 },
               );
             },
-          ),
-          title: BlocBuilder<ParentHomeBloc, ParentHomeState>(
-            builder: (context, state) {
-              final titles = ['', 'Perfil', 'Fotocheck', 'Horario', 'Calificaciones',
-                'Pensiones', 'Cuotas', 'Reuniones', 'Agenda', 'Más', 'Comunicados'];
-              final title = state.pageIndex < titles.length ? titles[state.pageIndex] : '';
-              return Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
-            },
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined),
-              onPressed: () {},
-            ),
-          ],
-          centerTitle: true,
-        );
+          );
+        },
+      ),
+      title: BlocBuilder<ParentHomeBloc, ParentHomeState>(
+        builder: (context, state) {
+          final titles = [
+            '',
+            'Perfil',
+            'Fotocheck',
+            'Horario',
+            'Calificaciones',
+            'Pensiones',
+            'Cuotas',
+            'Reuniones',
+            'Agenda',
+            'Más',
+            'Comunicados',
+          ];
+          final title = state.pageIndex < titles.length
+              ? titles[state.pageIndex]
+              : '';
+          return Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          );
+        },
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          onPressed: () {},
+        ),
+      ],
+      centerTitle: true,
+    );
   }
 
   Widget _buildBottomNav(BuildContext context) {
@@ -180,17 +242,34 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
           currentIndex: _bottomNavIndex(state.pageIndex),
           onTap: (index) {
             final pageIndex = _bottomNavToPageIndex(index);
-            context.read<ParentHomeBloc>().add(ChangePage(pageIndex: pageIndex));
+            context.read<ParentHomeBloc>().add(
+              ChangePage(pageIndex: pageIndex),
+            );
           },
           type: BottomNavigationBarType.fixed,
           selectedItemColor: context.appColors.primary,
           unselectedItemColor: Colors.grey,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'INICIO'),
-            BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), label: 'AGENDA'),
-            BottomNavigationBarItem(icon: Icon(Icons.campaign_outlined), label: 'AVISOS'),
-            BottomNavigationBarItem(icon: Icon(Icons.receipt_long_outlined), label: 'CUOTAS'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'PERFIL'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: 'INICIO',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today_outlined),
+              label: 'AGENDA',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.campaign_outlined),
+              label: 'AVISOS',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.receipt_long_outlined),
+              label: 'CUOTAS',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'PERFIL',
+            ),
           ],
         );
       },
@@ -208,23 +287,35 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
 
   static int _bottomNavToPageIndex(int navIndex) {
     switch (navIndex) {
-      case 0: return 0;
-      case 1: return 8;
-      case 2: return 10;
-      case 3: return 6;
-      case 4: return 1;
-      default: return 0;
+      case 0:
+        return 0;
+      case 1:
+        return 8;
+      case 2:
+        return 10;
+      case 3:
+        return 6;
+      case 4:
+        return 1;
+      default:
+        return 0;
     }
   }
 
   int _pageToNav(int pageIndex) {
     switch (pageIndex) {
-      case 0: return 0;
-      case 8: return 1;
-      case 10: return 2;
-      case 6: return 3;
-      case 1: return 4;
-      default: return -1;
+      case 0:
+        return 0;
+      case 8:
+        return 1;
+      case 10:
+        return 2;
+      case 6:
+        return 3;
+      case 1:
+        return 4;
+      default:
+        return -1;
     }
   }
 
@@ -251,10 +342,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
                 decoration: BoxDecoration(
                   gradient: Theme.of(context).brightness == Brightness.dark
                       ? LinearGradient(
-                          colors: const [
-                            Color(0xFF191C1F),
-                            Color(0xFF23272B),
-                          ],
+                          colors: const [Color(0xFF191C1F), Color(0xFF23272B)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         )
@@ -302,11 +390,17 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 4, top: 12, bottom: 4),
+                        padding: const EdgeInsets.only(
+                          left: 4,
+                          top: 12,
+                          bottom: 4,
+                        ),
                         child: Text(
                           'GENERAL',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.6),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -314,54 +408,90 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
                       ListTile(
                         leading: Icon(Icons.home_outlined, color: ac.primary),
                         title: const Text('Inicio'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         selected: state.pageIndex == 0,
                         onTap: () {
-                          context.read<ParentHomeBloc>().add(ChangePage(pageIndex: 0));
+                          context.read<ParentHomeBloc>().add(
+                            ChangePage(pageIndex: 0),
+                          );
                           Navigator.pop(context);
                         },
                       ),
                       ListTile(
                         leading: Icon(Icons.person_outline, color: ac.primary),
                         title: const Text('Perfil'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         selected: state.pageIndex == 1,
                         onTap: () {
-                          context.read<ParentHomeBloc>().add(ChangePage(pageIndex: 1));
+                          context.read<ParentHomeBloc>().add(
+                            ChangePage(pageIndex: 1),
+                          );
                           Navigator.pop(context);
                         },
                       ),
                       const Divider(height: 1),
                       Padding(
-                        padding: const EdgeInsets.only(left: 4, top: 16, bottom: 4),
+                        padding: const EdgeInsets.only(
+                          left: 4,
+                          top: 16,
+                          bottom: 4,
+                        ),
                         child: Text(
                           'PREFERENCIAS',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.6),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                       ListTile(
-                        leading: Icon(context.watch<ThemeCubit>().icon, color: ac.primary),
+                        leading: Icon(
+                          context.watch<ThemeCubit>().icon,
+                          color: ac.primary,
+                        ),
                         title: const Text('Tema'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         onTap: () {
                           Navigator.pop(context);
-                          Navigator.of(context, rootNavigator: true).push(
-                            MaterialPageRoute(builder: (_) => const ThemePage()),
-                          ).then((_) {
-                            _scaffoldKey.currentState?.openDrawer();
-                          });
+                          Navigator.of(context, rootNavigator: true)
+                              .push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ThemePage(),
+                                ),
+                              )
+                              .then((_) {
+                                _scaffoldKey.currentState?.openDrawer();
+                              });
                         },
                       ),
                       ListTile(
                         leading: Icon(Icons.security, color: ac.primary),
                         title: const Text('Roles'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
                         onTap: () {
                           Navigator.pop(context);
-                          Navigator.of(context, rootNavigator: true).pushNamed('roles').then((_) {
+                          Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).pushNamed('roles').then((_) {
                             _scaffoldKey.currentState?.openDrawer();
                           });
                         },
@@ -382,8 +512,13 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
                             parentBloc.add(Logout());
                             loginBloc.add(ResetLogin());
                           } catch (_) {}
-                          Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const LoginPage()),
+                          Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const LoginPage(),
+                            ),
                             (route) => false,
                           );
                         },
@@ -400,7 +535,9 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
                     color: ac.surface,
                     border: Border(
                       top: BorderSide(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.1),
                       ),
                     ),
                   ),
@@ -411,7 +548,9 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 10,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -448,7 +587,8 @@ class _StudentCard extends StatelessWidget {
       return value[0].toUpperCase() + value.substring(1).toLowerCase();
     }
 
-    final gradeLabel = '${capitalize(student.level.name)} · '
+    final gradeLabel =
+        '${capitalize(student.level.name)} · '
         '${capitalize(student.grade.name)} ${capitalize(student.section.name)}';
     return Container(
       width: double.infinity,
@@ -463,7 +603,10 @@ class _StudentCard extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: avatarColor, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: avatarColor,
+              shape: BoxShape.circle,
+            ),
             alignment: Alignment.center,
             child: Text(
               initials,
@@ -483,7 +626,11 @@ class _StudentCard extends StatelessWidget {
                   '${student.name} ${student.lastName}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ac.textPrimary),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: ac.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -539,7 +686,11 @@ class _TodayLabel extends StatelessWidget {
         ),
         Text(
           total > 0 ? '$current de $total' : '',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: ac.primary),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: ac.primary,
+          ),
         ),
       ],
     );
@@ -648,14 +799,21 @@ class _QuickAccessGrid extends StatelessWidget {
                               border: Border.all(color: ac.border),
                             ),
                             alignment: Alignment.center,
-                            child: Icon(item.icon, size: 23, color: ac.textPrimary),
+                            child: Icon(
+                              item.icon,
+                              size: 23,
+                              color: ac.textPrimary,
+                            ),
                           ),
                           const SizedBox(height: 7),
                           Text(
                             item.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 11, color: ac.textSecondary),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: ac.textSecondary,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -731,7 +889,11 @@ class _BottomNavPagesState extends State<_BottomNavPages> {
         const ComunicadosContent(),
         const CuotasContent(),
         BlocBuilder<ProfileInfoBloc, ProfileInfoState>(
-          builder: (context, pState) => ProfileInfoContent(pState.user, students: widget.students),
+          builder: (context, pState) => ProfileInfoContent(
+            pState.user,
+            students: widget.students,
+            branch: context.read<ParentHomeBloc>().state.branch,
+          ),
         ),
       ],
     );
@@ -763,12 +925,14 @@ class _HomeBodyState extends State<_HomeBody> {
       child: RefreshIndicator(
         onRefresh: () async {
           if (state.students.isNotEmpty && state.branch != null) {
-            bloc.add(GetDayReport(
-              date: _todayDate(),
-              branchId: state.branch!.id,
-              studentIds: state.students.map((s) => s.id).toList(),
-              tenantId: state.tenant,
-            ));
+            bloc.add(
+              GetDayReport(
+                date: _todayDate(),
+                branchId: state.branch!.id,
+                studentIds: state.students.map((s) => s.id).toList(),
+                tenantId: state.tenant,
+              ),
+            );
           }
         },
         child: SingleChildScrollView(
@@ -793,31 +957,41 @@ class _HomeBodyState extends State<_HomeBody> {
               AttendanceSection(
                 reports: reports,
                 isLoading: state.isLoadingDayReport,
-                onPageChanged: (index) => setState(() => _currentReport = index),
+                onPageChanged: (index) =>
+                    setState(() => _currentReport = index),
                 onVerMas: () {
-                  print('[DEBUG] Ver más tapped. students=${state.students.length}, branch=${state.branch?.id}, tenant=${state.tenant}');
+                  print(
+                    '[DEBUG] Ver más tapped. students=${state.students.length}, branch=${state.branch?.id}, tenant=${state.tenant}',
+                  );
                   if (state.students.isNotEmpty) {
                     Navigator.of(context)
-                      .push(
-                        MaterialPageRoute(
-                          builder: (_) => AsistenciaPage(
-                            students: state.students,
-                            tenant: state.tenant,
-                            branchId: state.branch?.id ?? 1,
+                        .push(
+                          MaterialPageRoute(
+                            builder: (_) => AsistenciaPage(
+                              students: state.students,
+                              tenant: state.tenant,
+                              branchId: state.branch?.id ?? 1,
+                            ),
                           ),
-                        ),
-                      )
-                      .then((_) {
-                        print('[DEBUG] Back from AsistenciaPage -> reload daily attendance');
-                        if (state.students.isNotEmpty && state.branch != null) {
-                          context.read<ParentHomeBloc>().add(GetDayReport(
-                            date: _todayDate(),
-                            branchId: state.branch!.id,
-                            studentIds: state.students.map((s) => s.id).toList(),
-                            tenantId: state.tenant,
-                          ));
-                        }
-                      });
+                        )
+                        .then((_) {
+                          print(
+                            '[DEBUG] Back from AsistenciaPage -> reload daily attendance',
+                          );
+                          if (state.students.isNotEmpty &&
+                              state.branch != null) {
+                            context.read<ParentHomeBloc>().add(
+                              GetDayReport(
+                                date: _todayDate(),
+                                branchId: state.branch!.id,
+                                studentIds: state.students
+                                    .map((s) => s.id)
+                                    .toList(),
+                                tenantId: state.tenant,
+                              ),
+                            );
+                          }
+                        });
                   }
                 },
               ),
@@ -854,7 +1028,10 @@ class _HomeTabsState extends State<_HomeTabs> {
     final ac = context.appColors;
     final state = context.watch<ParentHomeBloc>().state;
     final labels = const ['Comunicados', 'Reuniones', 'Agenda'];
-    final totalCount = state.comunicados.length + state.meetings.length + state.agendaItems.length;
+    final totalCount =
+        state.comunicados.length +
+        state.meetings.length +
+        state.agendaItems.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -863,7 +1040,11 @@ class _HomeTabsState extends State<_HomeTabs> {
           children: [
             Text(
               'Contenido',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ac.textPrimary),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: ac.textPrimary,
+              ),
             ),
             const SizedBox(width: 6),
             if (totalCount > 0)
@@ -904,7 +1085,9 @@ class _HomeTabsState extends State<_HomeTabs> {
           ),
         ),
         const SizedBox(height: 8),
-        if (state.isLoadingTabs && state.comunicados.isEmpty && state.meetings.isEmpty)
+        if (state.isLoadingTabs &&
+            state.comunicados.isEmpty &&
+            state.meetings.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 40),
             child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
@@ -978,11 +1161,19 @@ class _HomeTabsState extends State<_HomeTabs> {
       child: Center(
         child: Column(
           children: [
-            Icon(Icons.sentiment_satisfied_alt, size: 26, color: ac.textDisabled),
+            Icon(
+              Icons.sentiment_satisfied_alt,
+              size: 26,
+              color: ac.textDisabled,
+            ),
             const SizedBox(height: 10),
             Text(
               'Todo tranquilo por aqui',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: ac.textPrimary),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: ac.textPrimary,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
@@ -998,14 +1189,40 @@ class _HomeTabsState extends State<_HomeTabs> {
   String _formatShortDate(String? iso) {
     final date = DateTime.tryParse(iso ?? '');
     if (date == null) return '';
-    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const months = [
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
+    ];
     return '${date.day} ${months[date.month - 1]}';
   }
 
   String _formatMeetingDate(String iso) {
     final date = DateTime.tryParse(iso);
     if (date == null) return '';
-    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const months = [
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
+    ];
     const days = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
     return '${days[date.weekday - 1]} ${date.day} ${months[date.month - 1]}';
   }
@@ -1033,7 +1250,9 @@ class _HomeTabItem extends StatelessWidget {
           alignment: Alignment.center,
           decoration: active
               ? BoxDecoration(
-                  border: Border(bottom: BorderSide(color: ac.primary, width: 2)),
+                  border: Border(
+                    bottom: BorderSide(color: ac.primary, width: 2),
+                  ),
                 )
               : null,
           child: Text(
@@ -1134,15 +1353,8 @@ class _HomeTabCard extends StatelessWidget {
             ],
           ),
         ),
-        Divider(
-          height: 1,
-          thickness: 1,
-          color: ac.border,
-          indent: 52,
-        ),
+        Divider(height: 1, thickness: 1, color: ac.border, indent: 52),
       ],
     );
   }
 }
-
-
