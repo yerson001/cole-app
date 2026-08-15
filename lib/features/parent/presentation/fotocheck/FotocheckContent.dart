@@ -337,6 +337,14 @@ class _PhotocheckFront extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = _parseColor(
+      branch?.primaryColor,
+      fallback: Theme.of(context).colorScheme.primary,
+    );
+    final secondary = _parseColor(
+      branch?.secondaryColor,
+      fallback: primary,
+    );
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -350,6 +358,9 @@ class _PhotocheckFront extends StatelessWidget {
             'assets/images/photocheck-background.png',
             fit: BoxFit.cover,
           ),
+          CustomPaint(
+            painter: _CornerCutPainter(topColor: primary, bottomColor: secondary),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 30, 20, 16),
             child: Column(
@@ -362,7 +373,7 @@ class _PhotocheckFront extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          _OutlinedText(
                             'INSTITUCIÓN EDUCATIVA',
                             style: const TextStyle(
                               fontFamily: 'NotoSerif',
@@ -372,7 +383,7 @@ class _PhotocheckFront extends StatelessWidget {
                               color: Colors.black87,
                             ),
                           ),
-                          Text(
+                          _OutlinedText(
                             (branch?.name ?? '').toUpperCase(),
                             style: const TextStyle(
                               fontFamily: 'NotoSerif',
@@ -444,7 +455,7 @@ class _PhotocheckFront extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
                 Center(
-                  child: Text(
+                  child: _OutlinedText(
                     branch?.lema ?? '',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -477,6 +488,14 @@ class _PhotocheckBack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = _parseColor(
+      branch?.primaryColor,
+      fallback: Theme.of(context).colorScheme.primary,
+    );
+    final secondary = _parseColor(
+      branch?.secondaryColor,
+      fallback: primary,
+    );
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -489,6 +508,9 @@ class _PhotocheckBack extends StatelessWidget {
           Image.asset(
             'assets/images/photocheck-background.png',
             fit: BoxFit.cover,
+          ),
+          CustomPaint(
+            painter: _BackCutPainter(primary: primary, secondary: secondary),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 28, 10, 10),
@@ -504,9 +526,9 @@ class _PhotocheckBack extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
-                Text(
+                _OutlinedText(
                   'EDUCATIVA ${(branch?.name ?? '').toUpperCase()}',
-                  textAlign: TextAlign.center,
+                  strokeWidth: 0.7,
                   style: const TextStyle(
                     fontFamily: 'NotoSerif',
                     fontSize: 16,
@@ -665,6 +687,131 @@ class _LabelRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CornerCutPainter extends CustomPainter {
+  final Color topColor;
+  final Color bottomColor;
+
+  _CornerCutPainter({required this.topColor, required this.bottomColor});
+
+  @override
+void paint(Canvas canvas, Size size) {
+    final s = size.width * 0.56;
+    final w = size.width;
+    final h = size.height;
+    final topLeft = Path()
+      ..moveTo(0, 0)
+      ..lineTo(s, 0)
+      ..lineTo(0, s)
+      ..close();
+    canvas.drawPath(topLeft, Paint()..color = topColor);
+    final bottomRight = Path()
+      ..moveTo(w - s, h)
+      ..lineTo(w, h)
+      ..lineTo(w, h - s)
+      ..close();
+    canvas.drawPath(bottomRight, Paint()..color = topColor);
+    final cut = Path()
+      ..moveTo(0, h)
+      ..lineTo(0, h - s / 2)
+      ..lineTo(w, h - (s / 2 - 20))
+      ..lineTo(w, h)
+      ..close();
+    canvas.drawPath(cut, Paint()..color = bottomColor);
+final centerCut = Path()
+      ..moveTo(w / 2 - 150, h)
+      ..lineTo(w / 2 + 70, h)
+      ..lineTo(w-20, h - 50)
+      ..close();
+    canvas.drawPath(centerCut, Paint()..color = topColor);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CornerCutPainter oldDelegate) =>
+      oldDelegate.topColor != topColor || oldDelegate.bottomColor != bottomColor;
+}
+
+class _BackCutPainter extends CustomPainter {
+  final Color primary;
+  final Color secondary;
+
+  _BackCutPainter({required this.primary, required this.secondary});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final rightS = w * 0.3;
+    final midY = h / 2;
+
+    final topTri = Path()
+      ..moveTo(w, 0)
+      ..lineTo(w - rightS, 0)
+      ..lineTo(w, midY+40)
+      ..close();
+    canvas.drawPath(topTri, Paint()..color = primary);
+
+    final bottomTri = Path()
+      ..moveTo(w, h)
+      ..lineTo(w - rightS, h)
+      ..lineTo(w, midY+40)
+      ..close();
+    canvas.drawPath(bottomTri, Paint()..color = secondary);
+
+    final trap = Path()
+      ..moveTo(0, midY - h * 0.9)
+      ..lineTo(w * 0.20, midY - h * 0.09)
+      ..lineTo(w * 0.10, midY + h * 0.09)
+      ..lineTo(0, midY + h * 0.30)
+      ..close();
+    canvas.drawPath(trap, Paint()..color = primary);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BackCutPainter oldDelegate) =>
+      oldDelegate.primary != primary || oldDelegate.secondary != secondary;
+}
+
+Color _parseColor(String? hex, {required Color fallback}) {
+  if (hex == null || hex.isEmpty) return fallback;
+  var value = hex.replaceFirst('#', '');
+  if (value.length == 6) value = 'FF$value';
+  final parsed = int.tryParse(value, radix: 16);
+  if (parsed == null) return fallback;
+  return Color(parsed);
+}
+
+class _OutlinedText extends StatelessWidget {
+  final String text;
+  final TextStyle style;
+  final TextAlign textAlign;
+  final double strokeWidth;
+
+  const _OutlinedText(
+    this.text, {
+    required this.style,
+    this.textAlign = TextAlign.center,
+    this.strokeWidth = 0.7,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final strokeStyle = style.copyWith(
+      color: null,
+      foreground: Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeJoin = StrokeJoin.round
+        ..color = Colors.white,
+    );
+    return Stack(
+      children: [
+        Text(text, textAlign: textAlign, style: strokeStyle),
+        Text(text, textAlign: textAlign, style: style),
+      ],
     );
   }
 }
