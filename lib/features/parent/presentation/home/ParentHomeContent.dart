@@ -60,6 +60,7 @@ class _ParentHomeContentState extends State<ParentHomeContent>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final pending = PendingNotificationRoute().pageIndex;
       if (pending != null) {
+        debugPrint('[HOME] Consumiendo pending pageIndex: $pending');
         context.read<ParentHomeBloc>().add(ChangePage(pageIndex: pending));
         PendingNotificationRoute().clear();
       }
@@ -111,7 +112,7 @@ class _ParentHomeContentState extends State<ParentHomeContent>
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         final page = context.read<ParentHomeBloc>().state.pageIndex;
-        const navPages = {0, 1, 6, 8, 10};
+        const navPages = {0, 6, 8, 10};
         if (navPages.contains(page)) {
           _scaffoldKey.currentState?.openDrawer();
         } else {
@@ -230,7 +231,11 @@ class _ParentHomeContentState extends State<ParentHomeContent>
               if (state.pageIndex == 1) {
                 return IconButton(
                   icon: const Icon(Icons.arrow_back_rounded),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
+                  onPressed: () {
+                    context.read<ParentHomeBloc>().add(
+                      ChangePage(pageIndex: state.previousPageIndex),
+                    );
+                  },
                 );
               }
               return IconButton(
@@ -1464,7 +1469,7 @@ class _HomeTabCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   width: 40,

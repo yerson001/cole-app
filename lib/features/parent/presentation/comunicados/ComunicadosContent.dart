@@ -170,8 +170,7 @@ class _ComunicadosBodyState extends State<_ComunicadosBody> {
                               .itemsOn(day)
                               .map((i) => calendarTypeColor(i.type))
                               .toList(),
-                          onDayTap: (day) =>
-                              _changeDate(context, 0, date: day),
+                          onDayTap: (day) => _changeDate(context, 0, date: day),
                         ),
                         Divider(height: 20, thickness: 1, color: ac.border),
                         Expanded(
@@ -190,8 +189,7 @@ class _ComunicadosBodyState extends State<_ComunicadosBody> {
                               .itemsOn(day)
                               .map((i) => calendarTypeColor(i.type))
                               .toList(),
-                          onDayTap: (day) =>
-                              _changeDate(context, 0, date: day),
+                          onDayTap: (day) => _changeDate(context, 0, date: day),
                         ),
                         Divider(height: 20, thickness: 1, color: ac.border),
                         Expanded(

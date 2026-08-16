@@ -147,8 +147,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
                               .itemsOn(day)
                               .map((i) => calendarTypeColor(i.type))
                               .toList(),
-                          onDayTap: (day) =>
-                              _changeDate(context, 0, date: day),
+                          onDayTap: (day) => _changeDate(context, 0, date: day),
                         ),
                         Divider(height: 20, thickness: 1, color: ac.border),
                         Expanded(
@@ -164,8 +163,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
                               .itemsOn(day)
                               .map((i) => calendarTypeColor(i.type))
                               .toList(),
-                          onDayTap: (day) =>
-                              _changeDate(context, 0, date: day),
+                          onDayTap: (day) => _changeDate(context, 0, date: day),
                         ),
                         Divider(height: 20, thickness: 1, color: ac.border),
                         Expanded(
@@ -345,11 +343,9 @@ class _AgendaItemTile extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 38,
@@ -387,11 +383,7 @@ class _AgendaItemTile extends StatelessWidget {
                       ),
                       const Spacer(),
                       if (course != null) ...[
-                        Icon(
-                          Icons.menu_book,
-                          size: 14,
-                          color: ac.textPrimary,
-                        ),
+                        Icon(Icons.menu_book, size: 14, color: ac.textPrimary),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(

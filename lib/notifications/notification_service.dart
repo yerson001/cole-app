@@ -6,7 +6,8 @@ import 'package:coleapp/notifications/local_notification_service.dart';
 
 /// Guarda la página a la que debe ir la app tras abrir una notificación push.
 class PendingNotificationRoute {
-  static final PendingNotificationRoute _instance = PendingNotificationRoute._internal();
+  static final PendingNotificationRoute _instance =
+      PendingNotificationRoute._internal();
   factory PendingNotificationRoute() => _instance;
   PendingNotificationRoute._internal();
 
@@ -35,7 +36,9 @@ class NotificationService {
       badge: true,
       sound: true,
     );
-    debugPrint('[FCM] Permiso de notificaciones: ${settings.authorizationStatus}');
+    debugPrint(
+      '[FCM] Permiso de notificaciones: ${settings.authorizationStatus}',
+    );
 
     final token = await _messaging.getToken();
     debugPrint('[FCM] Device token: $token');
@@ -65,15 +68,23 @@ class NotificationService {
   }
 
   /// Al tocar una notificación, decide si va a Avisos, Agenda o Home según
-  /// el contenido del push, y navega al home del padre.
+  /// el contenido del push.
+  /// Si la app está recién arrancando, solo guarda el destino; el Splash/Home
+  /// lo consumirá. Si ya hay navigator, navega inmediatamente.
   Future<void> _handleMessageOpened(RemoteMessage message) async {
     debugPrint('[FCM] Notificación abierta: ${message.data}');
     final pageIndex = _resolvePageIndex(message);
     PendingNotificationRoute().pageIndex = pageIndex;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appNavigatorKey.currentState
-          ?.pushNamedAndRemoveUntil('parent/home', (route) => false);
-    });
+    debugPrint('[FCM] pageIndex pendiente: $pageIndex');
+
+    final navigator = appNavigatorKey.currentState;
+    if (navigator != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        navigator.pushNamedAndRemoveUntil('parent/home', (route) => false);
+      });
+    } else {
+      debugPrint('[FCM] Navigator aún no listo, pending se consumirá en home');
+    }
   }
 
   int _resolvePageIndex(RemoteMessage message) {
@@ -92,11 +103,12 @@ class NotificationService {
       }
     }
 
-    final text = '${message.notification?.title ?? ''} '
-        '${message.notification?.body ?? ''} '
-        '${message.data['title'] ?? ''} '
-        '${message.data['body'] ?? ''}'
-        .toLowerCase();
+    final text =
+        '${message.notification?.title ?? ''} '
+                '${message.notification?.body ?? ''} '
+                '${message.data['title'] ?? ''} '
+                '${message.data['body'] ?? ''}'
+            .toLowerCase();
 
     if (text.contains('aviso') ||
         text.contains('comunicado') ||
