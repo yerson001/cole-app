@@ -81,28 +81,21 @@ class _SplashScreenState extends State<SplashScreen>
     final c = context.appColors;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
 
-    if (PendingNotificationRoute().hasPending) {
-      return Scaffold(
-        body: Container(
-          color: bgColor,
-          child: Center(
-            child: CircularProgressIndicator(strokeWidth: 2, color: c.primary),
-          ),
-        ),
-      );
-    }
-
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
         if (state is SplashSessionFound) {
           final roles = state.authResponse.user.roles;
           if (PendingNotificationRoute().hasPending) {
-            _log.info('Sesión activa con notificación pendiente, navegando a parent/home');
+            _log.info(
+              'Sesión activa con notificación pendiente, navegando a parent/home',
+            );
             Navigator.pushReplacementNamed(context, 'parent/home');
             return;
           }
           if (roles.length > 1) {
-            _log.info('Sesión activa con múltiples roles, navegando a selector');
+            _log.info(
+              'Sesión activa con múltiples roles, navegando a selector',
+            );
             Navigator.pushReplacementNamed(context, 'roles');
           } else {
             _log.info('Sesión activa, navegando a ${roles.first.route}');
@@ -114,71 +107,81 @@ class _SplashScreenState extends State<SplashScreen>
         }
       },
       child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [bgColor, c.surface],
-            ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizeTransition(
-                          sizeFactor: _coleWidth,
-                          axis: Axis.horizontal,
-                          alignment: Alignment.centerLeft,
-                          child: Opacity(
-                            opacity: _coleFade.value,
-                            child: Image.asset(
-                              'assets/images/cole.png',
-                              height: 60,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Transform.scale(
-                          scale: _checkScale.value,
-                          child: Image.asset(
-                            'assets/images/check.png',
-                            height: 60, 
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const Spacer(flex: 1),
-                _DotSpinner(color: c.primary),
-                const SizedBox(height: 24),
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 100),
-                    child: LinearProgressIndicator(
-                      value: _progress.value,
-                      backgroundColor: c.primary.withValues(alpha: 0.1),
-                      color: c.primary,
-                      minHeight: 4,
-                    ),
+        body: PendingNotificationRoute().hasPending
+            ? Container(
+                color: bgColor,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: c.primary,
                   ),
                 ),
-                const Spacer(flex: 1),
-              ],
-            ),
-          ),
-        ),
+              )
+            : Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [bgColor, c.surface],
+                  ),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(flex: 2),
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizeTransition(
+                                sizeFactor: _coleWidth,
+                                axis: Axis.horizontal,
+                                alignment: Alignment.centerLeft,
+                                child: Opacity(
+                                  opacity: _coleFade.value,
+                                  child: Image.asset(
+                                    'assets/images/cole.png',
+                                    height: 60,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Transform.scale(
+                                scale: _checkScale.value,
+                                child: Image.asset(
+                                  'assets/images/check.png',
+                                  height: 60,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const Spacer(flex: 1),
+                      _DotSpinner(color: c.primary),
+                      const SizedBox(height: 24),
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 100),
+                          child: LinearProgressIndicator(
+                            value: _progress.value,
+                            backgroundColor: c.primary.withValues(alpha: 0.1),
+                            color: c.primary,
+                            minHeight: 4,
+                          ),
+                        ),
+                      ),
+                      const Spacer(flex: 1),
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -204,9 +207,10 @@ class _DotSpinnerState extends State<_DotSpinner>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat();
-    _anim = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _anim = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
