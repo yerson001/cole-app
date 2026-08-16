@@ -86,10 +86,12 @@ class _SplashScreenState extends State<SplashScreen>
         if (state is SplashSessionFound) {
           final roles = state.authResponse.user.roles;
           if (PendingNotificationRoute().hasPending) {
-            _log.info(
-              'Sesión activa con notificación pendiente, navegando a parent/home',
-            );
-            Navigator.pushReplacementNamed(context, 'parent/home');
+            _log.info('Sesión activa con notificación pendiente');
+            if (roles.length == 1) {
+              Navigator.pushReplacementNamed(context, roles.first.route);
+            } else {
+              Navigator.pushReplacementNamed(context, 'roles');
+            }
             return;
           }
           if (roles.length > 1) {
