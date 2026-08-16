@@ -24,10 +24,6 @@ class LoginPage extends StatelessWidget {
             } else {
               Navigator.pushNamedAndRemoveUntil(context, authResponse.user.roles.first.route, (route) => false);
             }
-          } else if (response is ErrorResource) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(response.message)),
-            );
           }
         },
         child: BlocBuilder<LoginBloc, LoginState>(

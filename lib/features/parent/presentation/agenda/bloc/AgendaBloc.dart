@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:coleapp/core/errors/resource.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
+import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaEvent.dart';
 import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaState.dart';
 
@@ -14,49 +15,104 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
         isLoading: true,
         tenantId: event.tenantId,
         parentId: event.parentId,
+        students: event.students ?? state.students,
         clearError: true,
       ));
 
-      Resource<AgendaModel> result;
       if (event.studentId != null && event.studentId! > 0) {
-        result = await parentUseCases.getAgendaByStudentUseCase.call(
+        final result = await parentUseCases.getAgendaByStudentUseCase.call(
           studentId: event.studentId!,
           startDate: event.startDate,
           endDate: event.endDate,
           tenantId: event.tenantId,
         );
-      } else if (event.parentId != null && event.parentId! > 0) {
-        result = await parentUseCases.getAgendaByParentUseCase.call(
+        if (result is SuccessResource<AgendaModel>) {
+          emit(state.copyWith(
+            items: result.data.items,
+            isLoading: false,
+            clearError: true,
+          ));
+        } else {
+          emit(state.copyWith(
+            isLoading: false,
+            error: (result as ErrorResource).message,
+            items: const [],
+          ));
+        }
+        return;
+      }
+
+      final students = event.students ?? state.students;
+      if (students.isNotEmpty) {
+        try {
+          final results = await Future.wait(students.map((s) =>
+            parentUseCases.getAgendaByStudentUseCase.call(
+              studentId: s.id,
+              startDate: event.startDate,
+              endDate: event.endDate,
+              tenantId: event.tenantId,
+            )));
+          final byId = <int, AgendaItemModel>{};
+          for (var i = 0; i < students.length; i++) {
+            final result = results[i];
+            if (result is SuccessResource<AgendaModel>) {
+              final student = students[i];
+              for (final item in result.data.items) {
+                byId[item.id] = item.student != null
+                    ? item
+                    : _withStudent(item, student);
+              }
+            }
+          }
+          emit(state.copyWith(
+            items: byId.values.toList(),
+            isLoading: false,
+            clearError: true,
+          ));
+        } catch (_) {
+          emit(state.copyWith(
+            isLoading: false,
+            error: 'No se pudieron cargar los avisos de los hijos',
+            items: const [],
+          ));
+        }
+        return;
+      }
+
+      if (event.parentId != null && event.parentId! > 0) {
+        final result = await parentUseCases.getAgendaByParentUseCase.call(
           parentId: event.parentId!,
           startDate: event.startDate,
           endDate: event.endDate,
           tenantId: event.tenantId,
         );
-      } else {
-        emit(state.copyWith(
-          isLoading: false,
-          error: 'No se encontró padre o estudiante para cargar la agenda',
-        ));
+        if (result is SuccessResource<AgendaModel>) {
+          emit(state.copyWith(
+            items: result.data.items,
+            isLoading: false,
+            clearError: true,
+          ));
+        } else {
+          emit(state.copyWith(
+            isLoading: false,
+            error: (result as ErrorResource).message,
+            items: const [],
+          ));
+        }
         return;
       }
 
-      if (result is SuccessResource<AgendaModel>) {
-        emit(state.copyWith(
-          items: result.data.items,
-          isLoading: false,
-          clearError: true,
-        ));
-      } else {
-        emit(state.copyWith(
-          isLoading: false,
-          error: (result as ErrorResource).message,
-          items: const [],
-        ));
-      }
+      emit(state.copyWith(
+        isLoading: false,
+        error: 'No se encontró padre o estudiante para cargar la agenda',
+      ));
     });
 
     on<SelectStudent>((event, emit) {
-      emit(state.copyWith(selectedStudent: event.student));
+      emit(state.copyWith(
+        selectedStudent: event.student,
+        clearSelection: event.student == null,
+      ));
       if (state.parentId != null) {
         final range = _dateRangeForDate(state.selectedDate, state.view);
         add(LoadAgenda(
@@ -113,6 +169,16 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
         emit(state.copyWith(items: updatedItems));
       }
     });
+  }
+
+  AgendaItemModel _withStudent(AgendaItemModel item, StudentModel student) {
+    return item.copyWith(
+      student: AgendaStudentModel(
+        id: student.id,
+        name: student.name,
+        lastName: student.lastName,
+      ),
+    );
   }
 
   ({String startDate, String endDate}) _dateRangeForDate(DateTime date, AgendaView view) {

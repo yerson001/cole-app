@@ -23,10 +23,13 @@ import 'package:coleapp/features/parent/presentation/agenda/AgendaContent.dart';
 import 'package:coleapp/features/parent/presentation/comunicados/ComunicadosContent.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
+import 'package:coleapp/features/parent/data/models/agenda_model.dart';
+import 'package:coleapp/features/parent/presentation/agenda/AgendaDetailPage.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
 import 'package:coleapp/features/parent/presentation/widgets/curved_header.dart';
+import 'package:coleapp/notifications/local_notification_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ParentHomeContent extends StatefulWidget {
@@ -36,19 +39,45 @@ class ParentHomeContent extends StatefulWidget {
   State<ParentHomeContent> createState() => _ParentHomeContentState();
 }
 
-class _ParentHomeContentState extends State<ParentHomeContent> {
+class _ParentHomeContentState extends State<ParentHomeContent>
+    with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _sessionLoaded = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_sessionLoaded) {
         _sessionLoaded = true;
         context.read<ParentHomeBloc>().add(GetParentUser());
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState lifeState) {
+    if (lifeState == AppLifecycleState.resumed) {
+      final bloc = context.read<ParentHomeBloc>();
+      final st = bloc.state;
+      if (st.students.isNotEmpty && st.branch != null) {
+        bloc.add(
+          GetDayReport(
+            date: _todayDate(),
+            branchId: st.branch!.id,
+            studentIds: st.students.map((s) => s.id).toList(),
+            tenantId: st.tenant,
+          ),
+        );
+      }
+    }
   }
 
   final List<Widget> pageList = const [
@@ -214,7 +243,7 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
             'Reuniones',
             'Agenda',
             'Más',
-            'Comunicados',
+            'Avisos',
           ];
           final title = state.pageIndex < titles.length
               ? titles[state.pageIndex]
@@ -557,6 +586,55 @@ class _ParentHomeContentState extends State<ParentHomeContent> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _NotificationsBanner extends StatelessWidget {
+  final VoidCallback onActivate;
+
+  const _NotificationsBanner({required this.onActivate});
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: ac.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ac.primary.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.notifications_off_outlined, color: ac.primary, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Activa las notificaciones para recibir avisos de asistencia, avisos y agenda.',
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.3,
+                color: ac.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: onActivate,
+            style: TextButton.styleFrom(
+              foregroundColor: ac.primary,
+              textStyle: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 12.5,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            child: const Text('Activar'),
+          ),
+        ],
       ),
     );
   }
@@ -909,6 +987,27 @@ class _HomeBody extends StatefulWidget {
 
 class _HomeBodyState extends State<_HomeBody> {
   int _currentReport = 0;
+  bool _notificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkNotifications();
+    });
+  }
+
+  Future<void> _checkNotifications() async {
+    final enabled = await LocalNotificationService.instance.notificationsEnabled();
+    if (mounted && !enabled) {
+      setState(() => _notificationsEnabled = false);
+    }
+  }
+
+  Future<void> _enableNotifications() async {
+    await LocalNotificationService.instance.requestPermissions();
+    await _checkNotifications();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -941,6 +1040,10 @@ class _HomeBodyState extends State<_HomeBody> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (!_notificationsEnabled) ...[
+                _NotificationsBanner(onActivate: _enableNotifications),
+                const SizedBox(height: 12),
+              ],
               if (reports.isNotEmpty && currentStudent != null) ...[
                 _StudentCard(
                   student: currentStudent,
@@ -1027,7 +1130,7 @@ class _HomeTabsState extends State<_HomeTabs> {
   Widget build(BuildContext context) {
     final ac = context.appColors;
     final state = context.watch<ParentHomeBloc>().state;
-    final labels = const ['Comunicados', 'Reuniones', 'Agenda'];
+    final labels = const ['Avisos', 'Agenda', 'Reuniones'];
     final totalCount =
         state.comunicados.length +
         state.meetings.length +
@@ -1099,25 +1202,9 @@ class _HomeTabsState extends State<_HomeTabs> {
   }
 
   Widget _buildTabContent(ParentHomeState state, int index) {
+    final tenantId = state.tenant;
     switch (index) {
       case 1:
-        final meetings = state.meetings;
-        if (meetings.isEmpty) {
-          return _emptyState('No hay reuniones por ahora');
-        }
-        return Column(
-          children: [
-            for (final m in meetings.take(3))
-              _HomeTabCard(
-                icon: Icons.groups,
-                color: const Color(0xFF01AFEB),
-                title: m.parentMeeting.subject,
-                time: m.parentMeeting.timeRange,
-                description: _formatMeetingDate(m.parentMeeting.date),
-              ),
-          ],
-        );
-      case 2:
         final items = state.agendaItems;
         if (items.isEmpty) {
           return _emptyState('No hay eventos en agenda');
@@ -1131,13 +1218,34 @@ class _HomeTabsState extends State<_HomeTabs> {
                 title: item.title,
                 time: _formatShortDate(item.dueDate),
                 description: item.description,
+                onTap: () => _openItemDetail(context, item, tenantId),
+              ),
+          ],
+        );
+      case 2:
+        final meetings = state.meetings;
+        if (meetings.isEmpty) {
+          return _emptyState('No hay reuniones por ahora');
+        }
+        return Column(
+          children: [
+            for (final m in meetings.take(3))
+              _HomeTabCard(
+                icon: Icons.groups,
+                color: const Color(0xFF01AFEB),
+                title: m.parentMeeting.subject,
+                time: m.parentMeeting.timeRange,
+                description: _formatMeetingDate(m.parentMeeting.date),
+                onTap: () {
+                  context.read<ParentHomeBloc>().add(ChangePage(pageIndex: 7));
+                },
               ),
           ],
         );
       default:
         final items = state.comunicados;
         if (items.isEmpty) {
-          return _emptyState('No hay comunicados por ahora');
+          return _emptyState('No hay avisos por ahora');
         }
         return Column(
           children: [
@@ -1148,10 +1256,19 @@ class _HomeTabsState extends State<_HomeTabs> {
                 title: item.title,
                 time: _formatShortDate(item.publishedAt),
                 description: item.description,
+                onTap: () => _openItemDetail(context, item, tenantId),
               ),
           ],
         );
     }
+  }
+
+  void _openItemDetail(BuildContext context, AgendaItemModel item, String tenantId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AgendaDetailPage(item: item, tenantId: tenantId),
+      ),
+    );
   }
 
   Widget _emptyState(String message) {
@@ -1278,6 +1395,7 @@ class _HomeTabCard extends StatelessWidget {
   final String title;
   final String time;
   final String description;
+  final VoidCallback? onTap;
 
   const _HomeTabCard({
     required this.icon,
@@ -1285,76 +1403,82 @@ class _HomeTabCard extends StatelessWidget {
     required this.title,
     required this.time,
     required this.description,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final ac = context.appColors;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.10),
-                  shape: BoxShape.circle,
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(icon, size: 20, color: color),
                 ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 20, color: color),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: ac.textPrimary,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: ac.textPrimary,
+                              ),
                             ),
                           ),
-                        ),
-                        if (time.isNotEmpty)
-                          Text(
-                            time,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: ac.textSecondary.withValues(alpha: 0.7),
+                          if (time.isNotEmpty)
+                            Text(
+                              time,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: ac
+                                    .textSecondary
+                                    .withValues(alpha: 0.7),
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.35,
-                        color: ac.textSecondary.withValues(alpha: 0.8),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 3),
+                      Text(
+                        description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.35,
+                          color: ac.textSecondary.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Divider(height: 1, thickness: 1, color: ac.border, indent: 52),
-      ],
+          Divider(height: 1, thickness: 1, color: ac.border, indent: 52),
+        ],
+      ),
     );
   }
 }

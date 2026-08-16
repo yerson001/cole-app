@@ -14,7 +14,7 @@ class MasContent extends StatelessWidget {
     _MasItem('Cuotas', Icons.receipt_long, 6),
     _MasItem('Reuniones', Icons.groups, 7),
     _MasItem('Agenda', Icons.book, 8),
-    _MasItem('Comunicados', Icons.campaign, 10),
+    _MasItem('Avisos', Icons.campaign, 10),
   ];
 
   @override

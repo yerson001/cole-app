@@ -9,6 +9,7 @@ class LoadAgenda extends AgendaEvent {
   final String tenantId;
   final String startDate;
   final String endDate;
+  final List<StudentModel>? students;
 
   LoadAgenda({
     this.parentId,
@@ -16,6 +17,7 @@ class LoadAgenda extends AgendaEvent {
     required this.tenantId,
     required this.startDate,
     required this.endDate,
+    this.students,
   });
 }
 

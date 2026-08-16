@@ -2,6 +2,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:coleapp/core/errors/resource.dart';
 import 'package:coleapp/features/parent/data/datasource/local/parent_local_storage.dart';
 import 'package:coleapp/features/parent/data/datasource/remote/parent_service.dart';
+import 'package:coleapp/features/parent/data/models/agenda_detail_model.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
@@ -193,6 +194,39 @@ class ParentRepositoryImpl implements ParentRepository {
     try {
       await _service.markAgendaItemAsRead(itemId: itemId, tenantId: tenantId);
       return SuccessResource(null);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<HomeworkDetailModel>> getHomeworkDetail(int homeworkId,
+      {required String tenantId}) async {
+    try {
+      final detail = await _service.getHomeworkDetail(homeworkId, tenantId: tenantId);
+      return SuccessResource(detail);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<AnnouncementDetailModel>> getAnnouncementDetail(int announcementId,
+      {required String tenantId}) async {
+    try {
+      final detail = await _service.getAnnouncementDetail(announcementId, tenantId: tenantId);
+      return SuccessResource(detail);
+    } catch (e) {
+      return ErrorResource(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<ObservationDetailModel>> getObservationDetail(int observationId,
+      {required String tenantId}) async {
+    try {
+      final detail = await _service.getObservationDetail(observationId, tenantId: tenantId);
+      return SuccessResource(detail);
     } catch (e) {
       return ErrorResource(e.toString());
     }

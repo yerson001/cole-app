@@ -4,11 +4,13 @@ import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
+import 'package:coleapp/features/parent/presentation/agenda/AgendaDetailPage.dart';
 import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaBloc.dart';
 import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaEvent.dart';
 import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaState.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
+import 'package:coleapp/features/parent/presentation/widgets/agenda_calendar.dart';
 import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 import 'package:coleapp/injection.dart';
 
@@ -46,10 +48,9 @@ class _AgendaBodyState extends State<_AgendaBody> {
         tenantId: tenantId,
         startDate: range.startDate,
         endDate: range.endDate,
+        students: state.students,
       ));
-      context.read<AgendaBloc>().add(SelectStudent(
-        student: state.students.isNotEmpty ? state.students.first : null,
-      ));
+      context.read<AgendaBloc>().add(SelectStudent(student: null));
     }
   }
 
@@ -87,6 +88,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
                 tenantId: tenantId,
                 startDate: range.startDate,
                 endDate: range.endDate,
+                students: parentState.students,
               ));
             },
             child: Column(
@@ -97,57 +99,80 @@ class _AgendaBodyState extends State<_AgendaBody> {
                   tenantId: tenantId,
                   parentId: parentId,
                 ),
-                _ViewFilter(
+                CalendarViewFilter(
                   view: state.view,
                   onChanged: (view) =>
                     context.read<AgendaBloc>().add(ChangeView(view: view)),
                 ),
-                _NavigationHeader(
+                CalendarNavigationHeader(
                   view: state.view,
                   selectedDate: state.selectedDate,
                   onPrevious: () => _changeDate(context, -1),
                   onNext: () => _changeDate(context, 1),
                   onToday: () => _changeDate(context, 0, today: true),
                 ),
-                if (state.error != null && state.items.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      state.error!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+if (state.error != null && state.items.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        state.error!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      ),
                     ),
+                  Expanded(
+                    child: switch (state.view) {
+                      AgendaView.daily => Column(
+                          children: [
+                            Divider(height: 1, thickness: 1, color: ac.border),
+                            Expanded(
+                              child: _AgendaList(
+                                state: state,
+                                tenantId: tenantId,
+                              ),
+                            ),
+                          ],
+                        ),
+                      AgendaView.weekly => Column(
+                          children: [
+                            CalendarWeekGrid(
+                              selectedDate: state.selectedDate,
+                              dayDots: (day) => state
+                                  .itemsOn(day)
+                                  .map((i) => calendarTypeColor(i.type))
+                                  .toList(),
+                              onDayTap: (day) => _changeDate(context, 0, date: day),
+                            ),
+                            Divider(height: 20, thickness: 1, color: ac.border),
+                            Expanded(
+                              child: _AgendaList(
+                                state: state,
+                                tenantId: tenantId,
+                              ),
+                            ),
+                          ],
+                        ),
+                      AgendaView.monthly => Column(
+                          children: [
+                            CalendarMonthGrid(
+                              selectedDate: state.selectedDate,
+                              dayDots: (day) => state
+                                  .itemsOn(day)
+                                  .map((i) => calendarTypeColor(i.type))
+                                  .toList(),
+                              onDayTap: (day) => _changeDate(context, 0, date: day),
+                            ),
+                            Divider(height: 20, thickness: 1, color: ac.border),
+                            Expanded(
+                              child: _AgendaList(
+                                state: state,
+                                tenantId: tenantId,
+                              ),
+                            ),
+                          ],
+                        ),
+                    },
                   ),
-                Expanded(
-                  child: switch (state.view) {
-                    AgendaView.daily => Column(
-                        children: [
-                          Divider(height: 1, thickness: 1, color: ac.border),
-                          Expanded(child: _AgendaList(state: state)),
-                        ],
-                      ),
-                    AgendaView.weekly => Column(
-                        children: [
-                          _WeekGrid(
-                            state: state,
-                            onDayTap: (day) => _changeDate(context, 0, date: day),
-                          ),
-                          Divider(height: 20, thickness: 1, color: ac.border),
-                          Expanded(child: _AgendaList(state: state)),
-                        ],
-                      ),
-                    AgendaView.monthly => Column(
-                        children: [
-                          _MonthGrid(
-                            state: state,
-                            onDayTap: (day) => _changeDate(context, 0, date: day),
-                          ),
-                          Divider(height: 20, thickness: 1, color: ac.border),
-                          Expanded(child: _AgendaList(state: state)),
-                        ],
-                      ),
-                  },
-                ),
               ],
             ),
           );
@@ -224,347 +249,11 @@ class _StudentSelector extends StatelessWidget {
   }
 }
 
-class _ViewFilter extends StatelessWidget {
-  final AgendaView view;
-  final ValueChanged<AgendaView> onChanged;
-
-  const _ViewFilter({required this.view, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final ac = context.appColors;
-    const labels = {
-      AgendaView.monthly: 'Mensual',
-      AgendaView.weekly: 'Semanal',
-      AgendaView.daily: 'Diario',
-    };
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: ac.fill,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.all(3),
-        child: Row(
-          children: [
-            for (final entry in labels.entries)
-              Expanded(
-                child: _ViewOption(
-                  label: entry.value,
-                  isSelected: view == entry.key,
-                  onTap: () => onChanged(entry.key),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ViewOption extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ViewOption({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ac = context.appColors;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? ac.card : Colors.transparent,
-          borderRadius: BorderRadius.circular(9),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-              color: isSelected ? ac.textPrimary : ac.primary,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavigationHeader extends StatelessWidget {
-  final AgendaView view;
-  final DateTime selectedDate;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-  final VoidCallback onToday;
-
-  const _NavigationHeader({
-    required this.view,
-    required this.selectedDate,
-    required this.onPrevious,
-    required this.onNext,
-    required this.onToday,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final title = switch (view) {
-      AgendaView.daily => _formatDayHeader(selectedDate),
-      AgendaView.weekly => _formatWeekHeader(selectedDate),
-      AgendaView.monthly => _formatMonthHeader(selectedDate),
-    };
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: onPrevious,
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: onToday,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: onNext,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WeekGrid extends StatelessWidget {
-  final AgendaState state;
-  final ValueChanged<DateTime> onDayTap;
-
-  const _WeekGrid({required this.state, required this.onDayTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final ac = context.appColors;
-    final today = DateTime.now();
-    const dayNames = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: List.generate(7, (i) {
-          final day = state.weekDays[i];
-          final items = state.itemsOn(day);
-          final isSelected = state.isSameDay(day, state.selectedDate);
-          final isToday = state.isSameDay(day, today);
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onDayTap(day),
-              child: Column(
-                children: [
-                  Text(
-                    dayNames[i],
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      color: isSelected ? ac.primary : ac.textDisabled,
-                      fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isSelected ? ac.primary : Colors.transparent,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected
-                              ? Colors.white
-                              : (isToday ? ac.primary : ac.textPrimary),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    height: 8,
-                    child: Wrap(
-                      spacing: 2,
-                      children: [
-                        for (final item in items)
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: _dotColor(item.type),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Color _dotColor(String type) {
-    switch (type) {
-      case 'ANNOUNCEMENT':
-        return Colors.green;
-      case 'TASK':
-        return Colors.orange;
-      case 'STUDENT_OBSERVATION':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-}
-
-class _MonthGrid extends StatelessWidget {
-  final AgendaState state;
-  final ValueChanged<DateTime> onDayTap;
-
-  const _MonthGrid({required this.state, required this.onDayTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final ac = context.appColors;
-    final today = DateTime.now();
-    const dayNames = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO'];
-    final days = state.monthDays;
-    final weeks = <List<DateTime>>[];
-    for (var i = 0; i < days.length; i += 7) {
-      weeks.add(days.sublist(i, i + 7));
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          Row(
-            children: List.generate(7, (i) => Expanded(
-              child: Text(
-                dayNames[i],
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: (i == 5 || i == 6)
-                      ? ac.primary
-                      : ac.textDisabled,
-                ),
-              ),
-            )),
-          ),
-          const SizedBox(height: 4),
-          ...weeks.map((week) => Row(
-            children: List.generate(7, (i) {
-              final day = week[i];
-              final isCurrentMonth = day.month == state.selectedDate.month;
-              final isSelected = state.isSameDay(day, state.selectedDate);
-              final isToday = state.isSameDay(day, today);
-              final items = state.itemsOn(day);
-              return Expanded(
-                child: InkWell(
-                  onTap: () => onDayTap(day),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    margin: const EdgeInsets.all(1),
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? ac.primary.withValues(alpha: 0.15)
-                          : null,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Opacity(
-                      opacity: isCurrentMonth ? 1 : 0.35,
-                      child: Column(
-                        children: [
-                          Text(
-                            '${day.day}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: isToday
-                                  ? FontWeight.bold
-                                  : FontWeight.w400,
-                              color: isToday
-                                  ? ac.primary
-                                  : ac.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Wrap(
-                            spacing: 2,
-                            children: [
-                              for (final item in items)
-                                Container(
-                                  width: 5,
-                                  height: 5,
-                                  decoration: BoxDecoration(
-                                    color: _dotColor(item.type),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          )),
-        ],
-      ),
-    );
-  }
-
-  Color _dotColor(String type) {
-    switch (type) {
-      case 'ANNOUNCEMENT':
-        return Colors.green;
-      case 'TASK':
-        return Colors.orange;
-      case 'STUDENT_OBSERVATION':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-}
-
 class _AgendaList extends StatelessWidget {
   final AgendaState state;
+  final String tenantId;
 
-  const _AgendaList({required this.state});
+  const _AgendaList({required this.state, required this.tenantId});
 
   @override
   Widget build(BuildContext context) {
@@ -607,140 +296,220 @@ class _AgendaList extends StatelessWidget {
         ],
       );
     }
-    return ListView.builder(
+    return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
+      separatorBuilder: (_, __) =>
+          Divider(height: 1, thickness: 1, color: ac.border),
       itemBuilder: (context, index) {
         final item = items[index];
-        return _AgendaItemCard(item: item);
+        return _AgendaItemTile(item: item, tenantId: tenantId);
       },
     );
   }
 }
 
-class _AgendaItemCard extends StatelessWidget {
+class _AgendaItemTile extends StatelessWidget {
   final AgendaItemModel item;
+  final String tenantId;
 
-  const _AgendaItemCard({required this.item});
+  const _AgendaItemTile({required this.item, required this.tenantId});
+
+  static const Color _gold = Color(0xFFD4AF37);
 
   @override
   Widget build(BuildContext context) {
     final ac = context.appColors;
     final (typeColor, icon, typeLabel) = _typeInfo(item.type);
-    final published = item.publishedAt != null
-        ? _formatDateTime(DateTime.parse(item.publishedAt!))
+    final course = item.course;
+    final due = item.dueDate != null
+        ? _formatDateOnly(DateTime.parse(item.dueDate!))
         : null;
+    final studentName = (item.student?.name ?? '').trim();
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: typeColor.withValues(alpha: 0.4), width: 1),
-      ),
-      child: InkWell(
-        onTap: () {
-          if (!item.isRead) {
-            context.read<AgendaBloc>().add(MarkItemAsRead(itemId: item.id));
-          }
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: typeColor, size: 22),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        if (!item.isRead) {
+          context.read<AgendaBloc>().add(MarkItemAsRead(itemId: item.id));
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AgendaDetailPage(item: item, tenantId: tenantId),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        decoration: BoxDecoration(
+          color: item.isRead ? null : typeColor.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(12),
+          border: item.isRead
+              ? null
+              : Border.all(color: typeColor.withValues(alpha: 0.45)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: typeColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: typeColor.withValues(alpha: 0.25)),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            style: TextStyle(
-                              fontWeight: item.isRead ? FontWeight.w500 : FontWeight.bold,
-                              fontSize: 15,
-                            ),
+              child: Icon(icon, color: typeColor, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: typeColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          typeLabel,
+                          style: TextStyle(
+                            color: typeColor,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        if (!item.isRead)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: ac.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: typeColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
-                        typeLabel,
-                        style: TextStyle(
-                          color: typeColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
-                        fontWeight: item.isRead ? FontWeight.normal : FontWeight.w500,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.person_outline, size: 14, color: Colors.grey.shade600),
+                      const Spacer(),
+                      if (course != null) ...[
+                        Icon(Icons.menu_book, size: 14, color: _gold),
                         const SizedBox(width: 4),
-                        Expanded(
+                        Flexible(
                           child: Text(
-                            item.sender.fullName,
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            course,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.normal,
+                              color: _gold,
+                            ),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (published != null) ...[
-                          const SizedBox(width: 8),
-                          Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: TextStyle(
+                            fontWeight: item.isRead
+                                ? FontWeight.w500
+                                : FontWeight.bold,
+                            fontSize: 14.5,
+                            color: item.isRead ? null : ac.textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (!item.isRead) ...[
+                        const SizedBox(width: 8),
+                        _UnreadBadge(color: typeColor),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    item.description,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.3,
+                      color: Colors.grey.shade700,
+                      fontWeight: item.isRead
+                          ? FontWeight.normal
+                          : FontWeight.w500,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (due != null || _hasSender || studentName.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        if (studentName.isNotEmpty) ...[
+                          Icon(
+                            Icons.person,
+                            size: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              studentName,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.normal,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
+                        if (_hasSender) ...[
+                          Icon(
+                            Icons.person_outline,
+                            size: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              _docenteLabel(item.sender),
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        if (due != null) ...[
+                          Icon(
+                            Icons.event,
+                            size: 13,
+                            color: Colors.grey.shade600,
+                          ),
                           const SizedBox(width: 4),
                           Text(
-                            published,
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            'Entrega: $due',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ],
                     ),
                   ],
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -749,7 +518,7 @@ class _AgendaItemCard extends StatelessWidget {
   (Color, IconData, String) _typeInfo(String type) {
     switch (type) {
       case 'ANNOUNCEMENT':
-        return (Colors.green, Icons.campaign_outlined, 'Comunicado');
+        return (Colors.green, Icons.campaign_outlined, 'Aviso');
       case 'TASK':
         return (Colors.orange, Icons.assignment_outlined, 'Tarea');
       case 'STUDENT_OBSERVATION':
@@ -758,48 +527,64 @@ class _AgendaItemCard extends StatelessWidget {
         return (Colors.grey, Icons.event_note_outlined, type);
     }
   }
-}
 
-String _formatDayHeader(DateTime date) {
-  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  const months = [
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-  ];
-  final dayName = days[date.weekday - 1];
-  final monthName = months[date.month - 1];
-  return '$dayName, ${date.day} de $monthName';
-}
-
-String _formatWeekHeader(DateTime date) {
-  const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-  final monday = date.subtract(Duration(days: date.weekday - 1));
-  final sunday = monday.add(const Duration(days: 6));
-  final startMonth = months[monday.month - 1];
-  final endMonth = months[sunday.month - 1];
-  final year = sunday.year;
-  if (monday.month == sunday.month) {
-    return '${monday.day} $startMonth - ${sunday.day} $endMonth $year';
+  bool get _hasSender {
+    final name = item.sender.name.trim();
+    final lastName = item.sender.lastName.trim();
+    return name.isNotEmpty || lastName.isNotEmpty;
   }
-  return '${monday.day} $startMonth - ${sunday.day} $endMonth $year';
+
+  String _docenteLabel(AgendaSenderModel sender) {
+    final name = sender.name.trim();
+    final lastName = sender.lastName.trim();
+    final joined = [name, lastName].where((s) => s.isNotEmpty).join(' ');
+    return joined.isEmpty ? '' : 'Doc. $joined';
+  }
 }
 
-String _formatMonthHeader(DateTime date) {
-  const months = [
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-  ];
-  final monthName = months[date.month - 1];
-  return '$monthName ${date.year}';
+class _UnreadBadge extends StatelessWidget {
+  final Color color;
+
+  const _UnreadBadge({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'SIN LEER',
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-String _formatDateTime(DateTime date) {
+String _formatDateOnly(DateTime date) {
   const months = [
     'ene', 'feb', 'mar', 'abr', 'may', 'jun',
     'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
   ];
   final month = months[date.month - 1];
-  final hour = date.hour.toString().padLeft(2, '0');
-  final minute = date.minute.toString().padLeft(2, '0');
-  return '${date.day} $month · $hour:$minute';
+  return '${date.day} $month ${date.year}';
 }

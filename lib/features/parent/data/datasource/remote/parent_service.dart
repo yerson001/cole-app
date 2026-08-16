@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:coleapp/core/constants/api_constants.dart';
+import 'package:coleapp/features/parent/data/models/agenda_detail_model.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
@@ -206,6 +207,51 @@ class ParentService {
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Error al marcar como leído: ${response.statusCode}');
     }
+  }
+
+  Future<HomeworkDetailModel> getHomeworkDetail(int homeworkId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/homework/$homeworkId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      return HomeworkDetailModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    }
+    throw Exception('Error al obtener tarea: ${response.statusCode}');
+  }
+
+  Future<AnnouncementDetailModel> getAnnouncementDetail(int announcementId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/announcements/$announcementId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      return AnnouncementDetailModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    }
+    throw Exception('Error al obtener aviso: ${response.statusCode}');
+  }
+
+  Future<ObservationDetailModel> getObservationDetail(int observationId, {required String tenantId}) async {
+    final uri = Uri.parse('${ApiConstants.baseUrl}/student-observations/$observationId');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'tenant-id': tenantId,
+      },
+    );
+    if (response.statusCode == 200) {
+      return ObservationDetailModel.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    }
+    throw Exception('Error al obtener observación: ${response.statusCode}');
   }
 
   Future<List<ScheduleModel>> getScheduleBySectionId(int sectionId, {required String tenantId}) async {

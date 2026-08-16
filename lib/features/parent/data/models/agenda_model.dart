@@ -26,6 +26,7 @@ class AgendaItemModel {
   final String title;
   final String description;
   final String? dueDate;
+  final String? dueTime;
   final String? publishedAt;
   final AgendaSenderModel sender;
   final bool completed;
@@ -33,6 +34,8 @@ class AgendaItemModel {
   final AgendaStudentModel? student;
   final String? readAt;
   final bool isRead;
+  final String? course;
+  final int? courseSectionId;
 
   AgendaItemModel({
     required this.id,
@@ -41,6 +44,7 @@ class AgendaItemModel {
     required this.title,
     required this.description,
     this.dueDate,
+    this.dueTime,
     this.publishedAt,
     required this.sender,
     required this.completed,
@@ -48,6 +52,8 @@ class AgendaItemModel {
     this.student,
     this.readAt,
     this.isRead = false,
+    this.course,
+    this.courseSectionId,
   });
 
   factory AgendaItemModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +64,7 @@ class AgendaItemModel {
       title: json['title'] as String,
       description: json['description'] as String,
       dueDate: json['dueDate'] as String?,
+      dueTime: json['dueTime'] as String?,
       publishedAt: json['publishedAt'] as String?,
       sender: AgendaSenderModel.fromJson(json['sender'] as Map<String, dynamic>),
       completed: json['completed'] as bool? ?? false,
@@ -67,10 +74,16 @@ class AgendaItemModel {
           : null,
       readAt: json['readAt'] as String?,
       isRead: json['isRead'] as bool? ?? (json['readAt'] != null),
+      course: json['course'] as String?,
+      courseSectionId: json['courseSectionId'] as int?,
     );
   }
 
-  AgendaItemModel copyWith({String? readAt, bool? isRead}) {
+  AgendaItemModel copyWith({
+    String? readAt,
+    bool? isRead,
+    AgendaStudentModel? student,
+  }) {
     return AgendaItemModel(
       id: id,
       type: type,
@@ -78,13 +91,16 @@ class AgendaItemModel {
       title: title,
       description: description,
       dueDate: dueDate,
+      dueTime: dueTime,
       publishedAt: publishedAt,
       sender: sender,
       completed: completed,
       createdAt: createdAt,
-      student: student,
+      student: student ?? this.student,
       readAt: readAt ?? this.readAt,
       isRead: isRead ?? this.isRead,
+      course: course,
+      courseSectionId: courseSectionId,
     );
   }
 }

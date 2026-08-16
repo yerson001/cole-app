@@ -39,7 +39,7 @@ class LocalNotificationService {
     const channel = AndroidNotificationChannel(
       'colecheck_push',
       'ColeCheck Avisos',
-      description: 'Asistencia, comunicados y agenda',
+      description: 'Asistencia, avisos y agenda',
       importance: Importance.max,
       playSound: true,
       enableVibration: true,
@@ -58,6 +58,14 @@ class LocalNotificationService {
         ?.requestNotificationsPermission();
   }
 
+  Future<bool> notificationsEnabled() async {
+    final enabled = await _plugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.areNotificationsEnabled();
+    return enabled ?? true;
+  }
+
   Future<void> show({
     required String id,
     required String title,
@@ -72,7 +80,7 @@ class LocalNotificationService {
           'colecheck_push',
           'Notificaciones ColeCheck',
           channelDescription:
-              'Avisos de asistencia, comunicados y agenda',
+              'Avisos de asistencia, avisos y agenda',
           importance: Importance.high,
           priority: Priority.high,
           playSound: true,

@@ -17,7 +17,7 @@ class AgendaState extends Equatable {
 
   const AgendaState({
     required this.selectedDate,
-    this.view = AgendaView.weekly,
+    this.view = AgendaView.daily,
     this.items = const [],
     this.students = const [],
     this.selectedStudent,
@@ -38,13 +38,16 @@ class AgendaState extends Equatable {
     String? tenantId,
     int? parentId,
     bool clearError = false,
+    bool clearSelection = false,
   }) {
     return AgendaState(
       selectedDate: selectedDate ?? this.selectedDate,
       view: view ?? this.view,
       items: items ?? this.items,
       students: students ?? this.students,
-      selectedStudent: selectedStudent ?? this.selectedStudent,
+      selectedStudent: clearSelection
+          ? null
+          : (selectedStudent ?? this.selectedStudent),
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       tenantId: tenantId ?? this.tenantId,

@@ -51,13 +51,16 @@ import 'package:coleapp/features/parent/domain/usecases/check_in_meeting_by_pare
 import 'package:coleapp/features/parent/domain/usecases/check_out_meeting_by_parent_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_parent_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_announcement_detail_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_attendance_in_range_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_students_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_fees_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_homework_detail_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_tenant_id_by_key_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_monthly_payments_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_observation_detail_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_student_fees_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_student_grades_by_student_use_case.dart';
@@ -194,6 +197,18 @@ abstract class AppModule {
       MarkAgendaItemAsReadUseCase(repository: parentRepository);
 
   @injectable
+  GetHomeworkDetailUseCase get getHomeworkDetailUseCase =>
+      GetHomeworkDetailUseCase(repository: parentRepository);
+
+  @injectable
+  GetAnnouncementDetailUseCase get getAnnouncementDetailUseCase =>
+      GetAnnouncementDetailUseCase(repository: parentRepository);
+
+  @injectable
+  GetObservationDetailUseCase get getObservationDetailUseCase =>
+      GetObservationDetailUseCase(repository: parentRepository);
+
+  @injectable
   GetScheduleBySectionIdUseCase get getScheduleBySectionIdUseCase =>
       GetScheduleBySectionIdUseCase(repository: parentRepository);
 
@@ -230,6 +245,9 @@ abstract class AppModule {
     getAgendaByParentUseCase: getAgendaByParentUseCase,
     getAgendaByStudentUseCase: getAgendaByStudentUseCase,
     markAgendaItemAsReadUseCase: markAgendaItemAsReadUseCase,
+    getHomeworkDetailUseCase: getHomeworkDetailUseCase,
+    getAnnouncementDetailUseCase: getAnnouncementDetailUseCase,
+    getObservationDetailUseCase: getObservationDetailUseCase,
     getScheduleBySectionIdUseCase: getScheduleBySectionIdUseCase,
     getStudentGradesByStudentUseCase: getStudentGradesByStudentUseCase,
     getStudentFeesByStudentUseCase: getStudentFeesByStudentUseCase,

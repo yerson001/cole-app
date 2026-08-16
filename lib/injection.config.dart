@@ -44,6 +44,8 @@ import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_parent_use
     as _i311;
 import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_student_use_case.dart'
     as _i107;
+import 'package:coleapp/features/parent/domain/usecases/get_announcement_detail_use_case.dart'
+    as _i1026;
 import 'package:coleapp/features/parent/domain/usecases/get_attendance_in_range_use_case.dart'
     as _i555;
 import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart'
@@ -52,10 +54,14 @@ import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.
     as _i720;
 import 'package:coleapp/features/parent/domain/usecases/get_fees_by_student_use_case.dart'
     as _i1043;
+import 'package:coleapp/features/parent/domain/usecases/get_homework_detail_use_case.dart'
+    as _i348;
 import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart'
     as _i986;
 import 'package:coleapp/features/parent/domain/usecases/get_monthly_payments_by_student_use_case.dart'
     as _i746;
+import 'package:coleapp/features/parent/domain/usecases/get_observation_detail_use_case.dart'
+    as _i766;
 import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart'
     as _i987;
 import 'package:coleapp/features/parent/domain/usecases/get_student_fees_by_student_use_case.dart'
@@ -119,6 +125,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i962.MarkAgendaItemAsReadUseCase>(
       () => appModule.markAgendaItemAsReadUseCase,
+    );
+    gh.factory<_i348.GetHomeworkDetailUseCase>(
+      () => appModule.getHomeworkDetailUseCase,
+    );
+    gh.factory<_i1026.GetAnnouncementDetailUseCase>(
+      () => appModule.getAnnouncementDetailUseCase,
+    );
+    gh.factory<_i766.GetObservationDetailUseCase>(
+      () => appModule.getObservationDetailUseCase,
     );
     gh.factory<_i987.GetScheduleBySectionIdUseCase>(
       () => appModule.getScheduleBySectionIdUseCase,

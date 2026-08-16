@@ -7,8 +7,11 @@ import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
 import 'package:coleapp/features/parent/presentation/cuotas/bloc/CuotasBloc.dart';
 import 'package:coleapp/features/parent/presentation/cuotas/bloc/CuotasEvent.dart';
 import 'package:coleapp/features/parent/presentation/cuotas/bloc/CuotasState.dart';
+import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaState.dart'
+    show AgendaView;
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
+import 'package:coleapp/features/parent/presentation/widgets/agenda_calendar.dart';
 import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
 import 'package:coleapp/injection.dart';
 
@@ -57,6 +60,7 @@ class _CuotasBodyState extends State<_CuotasBody> {
       listener: (context, state) => _tryInitialize(state),
       child: BlocBuilder<CuotasBloc, CuotasState>(
         builder: (context, state) {
+          final ac = context.appColors;
           final tenantId = parentState.tenant;
 
           if (parentState.students.isEmpty) {
@@ -66,6 +70,15 @@ class _CuotasBodyState extends State<_CuotasBody> {
           if (state.isLoading && state.fees.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
+
+          List<Color> dayDots(DateTime day) {
+            return state
+                .feesOn(day)
+                .map((fee) => _feeStatusColor(fee))
+                .toList();
+          }
+
+          final dayFees = state.feesForSelectedDate;
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -82,32 +95,110 @@ class _CuotasBodyState extends State<_CuotasBody> {
                   students: parentState.students,
                   selectedStudent: state.selectedStudent,
                 ),
+                CalendarViewFilter(
+                  view: state.view,
+                  onChanged: (view) =>
+                    context.read<CuotasBloc>().add(ChangeView(view: view)),
+                ),
+                CalendarNavigationHeader(
+                  view: state.view,
+                  selectedDate: state.selectedDate,
+                  onPrevious: () => _changeDate(context, -1),
+                  onNext: () => _changeDate(context, 1),
+                  onToday: () => _changeDate(context, 0, today: true),
+                ),
                 Expanded(
-                  child: state.fees.isEmpty
-                    ? _EmptyState(
-                        icon: Icons.receipt_long,
-                        title: 'Cuotas al día',
-                        message: 'No tienes cuotas pendientes por ahora.',
-                      )
-                    : ListView.separated(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: state.fees.length,
-                        separatorBuilder: (_, __) => Divider(
-                          height: 16,
-                          thickness: 1,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
-                        ),
-                        itemBuilder: (context, index) {
-                          return _FeeCard(fee: state.fees[index]);
-                        },
+                  child: switch (state.view) {
+                    AgendaView.daily => Column(
+                        children: [
+                          Divider(height: 1, thickness: 1, color: ac.border),
+                          Expanded(child: _FeesList(fees: dayFees)),
+                        ],
                       ),
+                    AgendaView.weekly => Column(
+                        children: [
+                          CalendarWeekGrid(
+                            selectedDate: state.selectedDate,
+                            dayDots: dayDots,
+                            onDayTap: (day) =>
+                              _changeDate(context, 0, date: day),
+                          ),
+                          Divider(height: 20, thickness: 1, color: ac.border),
+                          Expanded(child: _FeesList(fees: dayFees)),
+                        ],
+                      ),
+                    AgendaView.monthly => Column(
+                        children: [
+                          CalendarMonthGrid(
+                            selectedDate: state.selectedDate,
+                            dayDots: dayDots,
+                            onDayTap: (day) =>
+                              _changeDate(context, 0, date: day),
+                          ),
+                          Divider(height: 20, thickness: 1, color: ac.border),
+                          Expanded(child: _FeesList(fees: dayFees)),
+                        ],
+                      ),
+                  },
                 ),
               ],
             ),
           );
         },
       ),
+    );
+  }
+
+  Color _feeStatusColor(FeeModel fee) {
+    final isPaid = fee.paymentItems.isNotEmpty && fee.paymentItems.first.isPaid;
+    return isPaid ? Colors.green : Colors.red;
+  }
+
+  void _changeDate(BuildContext context, int step,
+      {bool today = false, DateTime? date}) {
+    final bloc = context.read<CuotasBloc>();
+    DateTime newDate;
+    if (date != null) {
+      newDate = date;
+    } else if (today) {
+      newDate = DateTime.now();
+    } else {
+      newDate = switch (bloc.state.view) {
+        AgendaView.daily => bloc.state.selectedDate.add(Duration(days: step)),
+        AgendaView.weekly => bloc.state.selectedDate.add(Duration(days: 7 * step)),
+        AgendaView.monthly => DateTime(
+            bloc.state.selectedDate.year,
+            bloc.state.selectedDate.month + step,
+            1,
+          ),
+      };
+    }
+    bloc.add(ChangeDate(date: newDate));
+  }
+}
+
+class _FeesList extends StatelessWidget {
+  final List<FeeModel> fees;
+
+  const _FeesList({required this.fees});
+
+  @override
+  Widget build(BuildContext context) {
+    final ac = context.appColors;
+    if (fees.isEmpty) {
+      return _EmptyState(
+        icon: Icons.receipt_long,
+        title: 'Sin cuotas este día',
+        message: 'No hay cuotas que venzan esta fecha.',
+      );
+    }
+    return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      itemCount: fees.length,
+      separatorBuilder: (_, __) =>
+          Divider(height: 16, thickness: 1, color: ac.border),
+      itemBuilder: (context, index) => _FeeCard(fee: fees[index]),
     );
   }
 }
@@ -210,9 +301,15 @@ class _FeeCard extends StatelessWidget {
 String _formatDate(String date) {
   final parsed = DateTime.tryParse(date);
   if (parsed == null) return date;
-  final day = parsed.day.toString().padLeft(2, '0');
-  final month = parsed.month.toString().padLeft(2, '0');
-  return '$day/$month/${parsed.year}';
+  const months = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ];
+  final month = months[parsed.month - 1];
+  if (parsed.year == DateTime.now().year) {
+    return '${parsed.day} de $month';
+  }
+  return '${parsed.day} de $month de ${parsed.year}';
 }
 
 class _EmptyState extends StatelessWidget {

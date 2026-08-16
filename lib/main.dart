@@ -103,3 +103,6 @@ Listo. En modo oscuro ahora:
 - Top bar / inputs / tarjetas (#24292D) → AppBar, inputs, cards
 - Primary / íconos (#225BAA) → íconos, acentos, botones principales
  */
+
+
+

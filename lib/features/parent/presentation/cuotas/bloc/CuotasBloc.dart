@@ -8,7 +8,7 @@ import 'package:coleapp/features/parent/presentation/cuotas/bloc/CuotasState.dar
 class CuotasBloc extends Bloc<CuotasEvent, CuotasState> {
   final ParentUseCases parentUseCases;
 
-  CuotasBloc(this.parentUseCases) : super(const CuotasState()) {
+  CuotasBloc(this.parentUseCases) : super(CuotasState(selectedDate: DateTime.now())) {
     on<LoadCuotas>((event, emit) async {
       emit(state.copyWith(
         isLoading: true,
@@ -42,6 +42,14 @@ class CuotasBloc extends Bloc<CuotasEvent, CuotasState> {
       if (state.tenantId.isNotEmpty) {
         add(LoadCuotas(student: event.student, tenantId: state.tenantId));
       }
+    });
+
+    on<ChangeDate>((event, emit) {
+      emit(state.copyWith(selectedDate: event.date));
+    });
+
+    on<ChangeView>((event, emit) {
+      emit(state.copyWith(view: event.view));
     });
   }
 }

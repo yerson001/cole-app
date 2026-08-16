@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:coleapp/core/navigation/app_navigator.dart';
 import 'package:coleapp/notifications/background_message_handler.dart';
 import 'package:coleapp/notifications/local_notification_service.dart';
 
@@ -42,6 +43,24 @@ class NotificationService {
 
     _messaging.onTokenRefresh.listen((newToken) {
       debugPrint('[FCM] Token refrescado: $newToken');
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpened);
+
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      _handleMessageOpened(initialMessage);
+    }
+  }
+
+  /// Al tocar una notificación, regresa al home del padre (y lo recalca via
+  /// `ParentHomeContent.initState` → GetParentUser), para ver la asistencia
+  /// actualizada.
+  Future<void> _handleMessageOpened(RemoteMessage message) async {
+    debugPrint('[FCM] Notificación abierta: ${message.data}');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appNavigatorKey.currentState
+          ?.pushNamedAndRemoveUntil('parent/home', (route) => false);
     });
   }
 

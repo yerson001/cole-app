@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import 'package:coleapp/core/errors/resource.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/core/themes/theme_cubit.dart';
 import 'package:coleapp/features/auth/data/datasource/local/auth_local_storage.dart';
@@ -29,6 +30,7 @@ class _LoginContentState extends State<LoginContent> {
   String _usernameInit = '';
   String _passwordInit = '';
   int _formKeyCounter = 0;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -59,7 +61,8 @@ class _LoginContentState extends State<LoginContent> {
           prev.tenant != current.tenant ||
           prev.username != current.username ||
           prev.password != current.password ||
-          prev.rememberMe != current.rememberMe,
+          prev.rememberMe != current.rememberMe ||
+          prev.response != current.response,
       listener: (context, state) {
         if (!_tenantLoaded) {
           _tenant = state.tenant.value;
@@ -67,6 +70,12 @@ class _LoginContentState extends State<LoginContent> {
           _passwordInit = state.password.value;
           _tenantLoaded = true;
           _formKeyCounter++;
+        }
+        final response = state.response;
+        if (response is LoadingResource) {
+          _errorMessage = null;
+        } else if (response is ErrorResource) {
+          _errorMessage = response.message;
         }
         if (mounted) setState(() => _remember = state.rememberMe);
       },
@@ -91,6 +100,10 @@ class _LoginContentState extends State<LoginContent> {
                 const SizedBox(height: 8),
                 const SizedBox(height: 16),
                 _buildFormSection(),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 14),
+                  _buildErrorBanner(),
+                ],
                 const SizedBox(height: 32),
                 _buildDividerWithText('o accede con'),
                 const SizedBox(height: 16),
@@ -160,6 +173,38 @@ class _LoginContentState extends State<LoginContent> {
     );
   }
 
+  Widget _buildErrorBanner() {
+    final c = context.appColors;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: c.error.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: c.error.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.error_outline, color: c.error, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                _errorMessage ?? '',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: c.error,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFormSection() {
     final c = context.appColors;
     final disabled = _tenant.isEmpty;
@@ -182,6 +227,7 @@ class _LoginContentState extends State<LoginContent> {
                   keyboardType: TextInputType.number,
                   onChanged: (v) {
                     context.read<LoginBloc>().add(UsernameChanged(v));
+                    if (_errorMessage != null) setState(() => _errorMessage = null);
                   },
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Ingrese su usuario';
@@ -247,6 +293,7 @@ class _LoginContentState extends State<LoginContent> {
                   obscureText: _obscurePass,
                   onChanged: (v) {
                     context.read<LoginBloc>().add(PasswordChanged(v));
+                    if (_errorMessage != null) setState(() => _errorMessage = null);
                   },
                   validator: (v) =>
                       v == null || v.trim().isEmpty ? 'Ingrese su contraseña' : null,

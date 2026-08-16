@@ -1,14 +1,17 @@
-import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.dart';
-import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/check_in_meeting_by_parent_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/check_out_meeting_by_parent_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/clear_branch_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_parent_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_agenda_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_announcement_detail_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_attendance_in_range_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_branch_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_day_report_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_fees_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_homework_detail_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_meetings_by_parent_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_monthly_payments_by_student_use_case.dart';
+import 'package:coleapp/features/parent/domain/usecases/get_observation_detail_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_schedule_by_section_id_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_student_fees_by_student_use_case.dart';
 import 'package:coleapp/features/parent/domain/usecases/get_student_grades_by_student_use_case.dart';
@@ -28,6 +31,9 @@ class ParentUseCases {
   final GetAgendaByParentUseCase getAgendaByParentUseCase;
   final GetAgendaByStudentUseCase getAgendaByStudentUseCase;
   final MarkAgendaItemAsReadUseCase markAgendaItemAsReadUseCase;
+  final GetHomeworkDetailUseCase getHomeworkDetailUseCase;
+  final GetAnnouncementDetailUseCase getAnnouncementDetailUseCase;
+  final GetObservationDetailUseCase getObservationDetailUseCase;
   final GetScheduleBySectionIdUseCase getScheduleBySectionIdUseCase;
   final GetStudentGradesByStudentUseCase getStudentGradesByStudentUseCase;
   final GetStudentFeesByStudentUseCase getStudentFeesByStudentUseCase;
@@ -47,6 +53,9 @@ class ParentUseCases {
     required this.getAgendaByParentUseCase,
     required this.getAgendaByStudentUseCase,
     required this.markAgendaItemAsReadUseCase,
+    required this.getHomeworkDetailUseCase,
+    required this.getAnnouncementDetailUseCase,
+    required this.getObservationDetailUseCase,
     required this.getScheduleBySectionIdUseCase,
     required this.getStudentGradesByStudentUseCase,
     required this.getStudentFeesByStudentUseCase,

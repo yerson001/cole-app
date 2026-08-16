@@ -12,7 +12,6 @@ import 'package:coleapp/features/secretary/presentation/bloc/secretary_bloc.dart
 import 'package:coleapp/features/assistant/presentation/bloc/assistant_bloc.dart';
 import 'package:coleapp/features/teacher/presentation/bloc/teacher_bloc.dart';
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.dart';
-import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeEvent.dart';
 import 'package:coleapp/injection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

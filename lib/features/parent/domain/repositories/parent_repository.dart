@@ -1,4 +1,5 @@
 import 'package:coleapp/core/errors/resource.dart';
+import 'package:coleapp/features/parent/data/models/agenda_detail_model.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/data/models/branch_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
@@ -41,6 +42,9 @@ abstract class ParentRepository {
     required String tenantId,
   });
   Future<Resource<void>> markAgendaItemAsRead({required int itemId, required String tenantId});
+  Future<Resource<HomeworkDetailModel>> getHomeworkDetail(int homeworkId, {required String tenantId});
+  Future<Resource<AnnouncementDetailModel>> getAnnouncementDetail(int announcementId, {required String tenantId});
+  Future<Resource<ObservationDetailModel>> getObservationDetail(int observationId, {required String tenantId});
   Future<Resource<List<ScheduleModel>>> getScheduleBySectionId(int sectionId, {required String tenantId});
   Future<Resource<List<StudentGradeModel>>> getStudentGradesByStudent(int studentId, {required String tenantId});
   Future<Resource<List<StudentFeeModel>>> getStudentFeesByStudent(int studentId, {required String tenantId});
