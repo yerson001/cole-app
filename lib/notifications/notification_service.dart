@@ -13,6 +13,8 @@ class PendingNotificationRoute {
 
   int? pageIndex;
 
+  bool get hasPending => pageIndex != null;
+
   void clear() => pageIndex = null;
 }
 

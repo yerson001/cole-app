@@ -6,6 +6,7 @@ import 'package:coleapp/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_event.dart';
 import 'package:coleapp/features/auth/presentation/bloc/login_state.dart';
 import 'package:coleapp/features/auth/presentation/screens/login_content.dart';
+import 'package:coleapp/notifications/notification_service.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -29,6 +30,14 @@ class LoginPage extends StatelessWidget {
               const SnackBar(
                 content: Text('No se encontraron roles. Intente de nuevo.'),
               ),
+            );
+            return;
+          }
+          if (PendingNotificationRoute().hasPending) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              'parent/home',
+              (route) => false,
             );
             return;
           }

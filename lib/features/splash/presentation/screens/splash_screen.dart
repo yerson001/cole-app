@@ -5,6 +5,7 @@ import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:coleapp/features/splash/presentation/bloc/splash_event.dart';
 import 'package:coleapp/features/splash/presentation/bloc/splash_state.dart';
+import 'package:coleapp/notifications/notification_service.dart';
 
 final _log = Logger('SPLASH');
 
@@ -59,7 +60,10 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
     _log.info('Animación iniciada');
 
-    Future.delayed(const Duration(seconds: 2), () {
+    final delay = PendingNotificationRoute().hasPending
+        ? Duration.zero
+        : const Duration(seconds: 2);
+    Future.delayed(delay, () {
       if (mounted) {
         context.read<SplashBloc>().add(CheckSplashSession());
       }
@@ -80,6 +84,11 @@ class _SplashScreenState extends State<SplashScreen>
       listener: (context, state) {
         if (state is SplashSessionFound) {
           final roles = state.authResponse.user.roles;
+          if (PendingNotificationRoute().hasPending) {
+            _log.info('Sesión activa con notificación pendiente, navegando a parent/home');
+            Navigator.pushReplacementNamed(context, 'parent/home');
+            return;
+          }
           if (roles.length > 1) {
             _log.info('Sesión activa con múltiples roles, navegando a selector');
             Navigator.pushReplacementNamed(context, 'roles');
