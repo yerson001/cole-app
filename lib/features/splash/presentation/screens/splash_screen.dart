@@ -80,6 +80,18 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final c = context.appColors;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
+
+    if (PendingNotificationRoute().hasPending) {
+      return Scaffold(
+        body: Container(
+          color: bgColor,
+          child: Center(
+            child: CircularProgressIndicator(strokeWidth: 2, color: c.primary),
+          ),
+        ),
+      );
+    }
+
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
         if (state is SplashSessionFound) {

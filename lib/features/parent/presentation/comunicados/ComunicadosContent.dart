@@ -86,13 +86,8 @@ class _ComunicadosBodyState extends State<_ComunicadosBody> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final visible = state.selectedStudentId == null
-              ? state.comunicados
-              : state.comunicados
-                    .where((c) => c.student?.id == state.selectedStudentId)
-                    .toList();
           List<AgendaItemModel> itemsOn(DateTime day) =>
-              visible.where((item) {
+              state.comunicados.where((item) {
                 final published = item.localDate;
                 if (published == null) return false;
                 return published.year == day.year &&
