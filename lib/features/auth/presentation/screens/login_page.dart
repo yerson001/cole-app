@@ -14,18 +14,35 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocListener<LoginBloc, LoginState>(
-        listener: (context, state) {
-          final response = state.response;
-          if (response is SuccessResource) {
-            final authResponse = response.data as AuthResponse;
-            context.read<LoginBloc>().add(SaveSession(authResponse, state.rememberMe));
-            if (authResponse.user.roles.length > 1) {
-              Navigator.pushNamedAndRemoveUntil(context, 'roles', (route) => false);
-            } else {
-              Navigator.pushNamedAndRemoveUntil(context, authResponse.user.roles.first.route, (route) => false);
-            }
+      listener: (context, state) async {
+        final response = state.response;
+        if (response is SuccessResource) {
+          final authResponse = response.data as AuthResponse;
+          await context.read<LoginBloc>().authUseCases.saveuserUseCase.call(
+            authResponse,
+            rememberMe: state.rememberMe,
+          );
+          if (!context.mounted) return;
+          if (authResponse.user.roles.isEmpty) {
+            context.read<LoginBloc>().add(ResetLogin());
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('No se encontraron roles. Intente de nuevo.'),
+              ),
+            );
+            return;
           }
-        },
+          if (authResponse.user.roles.length > 1) {
+            Navigator.pushNamedAndRemoveUntil(context, 'roles', (route) => false);
+          } else {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              authResponse.user.roles.first.route,
+              (route) => false,
+            );
+          }
+        }
+      },
         child: BlocBuilder<LoginBloc, LoginState>(
           builder: (context, state) {
             if (state.response is LoadingResource) {

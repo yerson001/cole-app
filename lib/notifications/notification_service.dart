@@ -4,6 +4,17 @@ import 'package:coleapp/core/navigation/app_navigator.dart';
 import 'package:coleapp/notifications/background_message_handler.dart';
 import 'package:coleapp/notifications/local_notification_service.dart';
 
+/// Guarda la página a la que debe ir la app tras abrir una notificación push.
+class PendingNotificationRoute {
+  static final PendingNotificationRoute _instance = PendingNotificationRoute._internal();
+  factory PendingNotificationRoute() => _instance;
+  PendingNotificationRoute._internal();
+
+  int? pageIndex;
+
+  void clear() => pageIndex = null;
+}
+
 class NotificationService {
   static final NotificationService instance = NotificationService._internal();
 
@@ -53,15 +64,53 @@ class NotificationService {
     }
   }
 
-  /// Al tocar una notificación, regresa al home del padre (y lo recalca via
-  /// `ParentHomeContent.initState` → GetParentUser), para ver la asistencia
-  /// actualizada.
+  /// Al tocar una notificación, decide si va a Avisos, Agenda o Home según
+  /// el contenido del push, y navega al home del padre.
   Future<void> _handleMessageOpened(RemoteMessage message) async {
     debugPrint('[FCM] Notificación abierta: ${message.data}');
+    final pageIndex = _resolvePageIndex(message);
+    PendingNotificationRoute().pageIndex = pageIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       appNavigatorKey.currentState
           ?.pushNamedAndRemoveUntil('parent/home', (route) => false);
     });
+  }
+
+  int _resolvePageIndex(RemoteMessage message) {
+    final type = message.data['type']?.toString().toUpperCase();
+    if (type != null) {
+      switch (type) {
+        case 'ANNOUNCEMENT':
+          return 10;
+        case 'TASK':
+        case 'STUDENT_OBSERVATION':
+          return 8;
+        case 'ATTENDANCE':
+        case 'MEETING':
+        default:
+          return 0;
+      }
+    }
+
+    final text = '${message.notification?.title ?? ''} '
+        '${message.notification?.body ?? ''} '
+        '${message.data['title'] ?? ''} '
+        '${message.data['body'] ?? ''}'
+        .toLowerCase();
+
+    if (text.contains('aviso') ||
+        text.contains('comunicado') ||
+        text.contains('anuncio')) {
+      return 10;
+    }
+    if (text.contains('tarea') ||
+        text.contains('observación') ||
+        text.contains('observacion') ||
+        text.contains('llamada de atención') ||
+        text.contains('llamada de atencion')) {
+      return 8;
+    }
+    return 0;
   }
 
   /// Suscribe el dispositivo al topic del padre: user_{tenant}_{dni}

@@ -5,6 +5,7 @@ class HomeworkDetailModel {
   final String? dueDate;
   final String? dueTime;
   final String? publishedAt;
+  final String? createdAt;
   final HomeworkCourseSectionModel courseSection;
   final HomeworkSenderModel sender;
 
@@ -15,6 +16,7 @@ class HomeworkDetailModel {
     this.dueDate,
     this.dueTime,
     this.publishedAt,
+    this.createdAt,
     required this.courseSection,
     required this.sender,
   });
@@ -27,6 +29,7 @@ class HomeworkDetailModel {
       dueDate: json['dueDate'] as String?,
       dueTime: json['dueTime'] as String?,
       publishedAt: json['publishedAt'] as String?,
+      createdAt: json['createdAt'] as String?,
       courseSection: json['courseSection'] != null
           ? HomeworkCourseSectionModel.fromJson(
               json['courseSection'] as Map<String, dynamic>)
@@ -36,6 +39,9 @@ class HomeworkDetailModel {
       ),
     );
   }
+
+  DateTime? get localDate =>
+      DateTime.tryParse(publishedAt ?? createdAt ?? '')?.toLocal();
 
   String? get fullCourseSection {
     final section = courseSection.section;
@@ -147,6 +153,7 @@ class AnnouncementDetailModel {
   final String title;
   final String content;
   final String? publishedAt;
+  final String? createdAt;
   final HomeworkSenderModel sender;
 
   AnnouncementDetailModel({
@@ -154,6 +161,7 @@ class AnnouncementDetailModel {
     required this.title,
     required this.content,
     this.publishedAt,
+    this.createdAt,
     required this.sender,
   });
 
@@ -163,11 +171,15 @@ class AnnouncementDetailModel {
       title: json['title'] as String,
       content: json['content'] as String? ?? '',
       publishedAt: json['publishedAt'] as String?,
+      createdAt: json['createdAt'] as String?,
       sender: HomeworkSenderModel.fromJson(
         json['sender'] as Map<String, dynamic>? ?? const {},
       ),
     );
   }
+
+  DateTime? get localDate =>
+      DateTime.tryParse(publishedAt ?? createdAt ?? '')?.toLocal();
 }
 
 class ObservationDetailModel {
@@ -175,6 +187,7 @@ class ObservationDetailModel {
   final String title;
   final String content;
   final String? publishedAt;
+  final String? createdAt;
   final String? severity;
   final HomeworkSenderModel sender;
 
@@ -183,6 +196,7 @@ class ObservationDetailModel {
     required this.title,
     required this.content,
     this.publishedAt,
+    this.createdAt,
     this.severity,
     required this.sender,
   });
@@ -193,10 +207,14 @@ class ObservationDetailModel {
       title: json['title'] as String,
       content: json['content'] as String? ?? '',
       publishedAt: json['publishedAt'] as String?,
+      createdAt: json['createdAt'] as String?,
       severity: json['severity'] as String?,
       sender: HomeworkSenderModel.fromJson(
         json['sender'] as Map<String, dynamic>? ?? const {},
       ),
     );
   }
+
+  DateTime? get localDate =>
+      DateTime.tryParse(publishedAt ?? createdAt ?? '')?.toLocal();
 }

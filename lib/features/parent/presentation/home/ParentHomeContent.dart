@@ -24,12 +24,15 @@ import 'package:coleapp/features/parent/presentation/comunicados/ComunicadosCont
 import 'package:coleapp/features/parent/data/models/student_model.dart';
 import 'package:coleapp/features/parent/data/models/day_report_model.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
+import 'package:coleapp/features/parent/data/models/meeting_model.dart';
 import 'package:coleapp/features/parent/presentation/agenda/AgendaDetailPage.dart';
 import 'package:coleapp/features/parent/presentation/mas/MasContent.dart';
 import 'package:coleapp/features/parent/presentation/asistencia/asistencia_page.dart';
 import 'package:coleapp/features/parent/presentation/widgets/attendance_section.dart';
 import 'package:coleapp/features/parent/presentation/widgets/curved_header.dart';
+import 'package:coleapp/features/parent/presentation/widgets/type_colors.dart';
 import 'package:coleapp/notifications/local_notification_service.dart';
+import 'package:coleapp/notifications/notification_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ParentHomeContent extends StatefulWidget {
@@ -52,6 +55,13 @@ class _ParentHomeContentState extends State<ParentHomeContent>
       if (mounted && !_sessionLoaded) {
         _sessionLoaded = true;
         context.read<ParentHomeBloc>().add(GetParentUser());
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pending = PendingNotificationRoute().pageIndex;
+      if (pending != null) {
+        context.read<ParentHomeBloc>().add(ChangePage(pageIndex: pending));
+        PendingNotificationRoute().clear();
       }
     });
   }
@@ -178,6 +188,10 @@ class _ParentHomeContentState extends State<ParentHomeContent>
     ];
     final fullDate =
         '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
+    final todayTotal =
+        state.comunicados.where(_itemIsToday).length +
+        state.agendaItems.where(_itemIsToday).length +
+        state.meetings.where(_meetingIsToday).length;
     return PreferredSize(
       preferredSize: Size.fromHeight(
         CurvedHeader.preferredHeight(MediaQuery.of(context).padding.top, 16),
@@ -185,6 +199,7 @@ class _ParentHomeContentState extends State<ParentHomeContent>
       child: CurvedHeader(
         title: greetingName.isEmpty ? greeting : '$greeting, $greetingName',
         subtitle: fullDate,
+        notificationCount: todayTotal,
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
         onNotificationsPressed: () {},
       ),
@@ -255,9 +270,11 @@ class _ParentHomeContentState extends State<ParentHomeContent>
         },
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () {},
+        _BellIconButton(
+          count:
+              state.comunicados.where(_itemIsToday).length +
+              state.agendaItems.where(_itemIsToday).length +
+              state.meetings.where(_meetingIsToday).length,
         ),
       ],
       centerTitle: true,
@@ -267,6 +284,8 @@ class _ParentHomeContentState extends State<ParentHomeContent>
   Widget _buildBottomNav(BuildContext context) {
     return BlocBuilder<ParentHomeBloc, ParentHomeState>(
       builder: (context, state) {
+        final todayAvisos = state.comunicados.where(_itemIsToday).length;
+        final todayAgenda = state.agendaItems.where(_itemIsToday).length;
         return BottomNavigationBar(
           currentIndex: _bottomNavIndex(state.pageIndex),
           onTap: (index) {
@@ -278,24 +297,38 @@ class _ParentHomeContentState extends State<ParentHomeContent>
           type: BottomNavigationBarType.fixed,
           selectedItemColor: context.appColors.primary,
           unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               label: 'INICIO',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today_outlined),
+              icon: _NavDot(
+                icon: Icon(Icons.calendar_today_outlined),
+                count: todayAgenda,
+              ),
+              activeIcon: _NavDot(
+                icon: Icon(Icons.calendar_today),
+                count: todayAgenda,
+              ),
               label: 'AGENDA',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.campaign_outlined),
+              icon: _NavDot(
+                icon: Icon(Icons.campaign_outlined),
+                count: todayAvisos,
+              ),
+              activeIcon: _NavDot(
+                icon: Icon(Icons.campaign),
+                count: todayAvisos,
+              ),
               label: 'AVISOS',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.receipt_long_outlined),
               label: 'CUOTAS',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               label: 'PERFIL',
             ),
@@ -998,7 +1031,8 @@ class _HomeBodyState extends State<_HomeBody> {
   }
 
   Future<void> _checkNotifications() async {
-    final enabled = await LocalNotificationService.instance.notificationsEnabled();
+    final enabled = await LocalNotificationService.instance
+        .notificationsEnabled();
     if (mounted && !enabled) {
       setState(() => _notificationsEnabled = false);
     }
@@ -1116,6 +1150,29 @@ String _todayDate() {
   return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 }
 
+bool _sameDayFn(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
+bool _itemIsToday(AgendaItemModel item) {
+  final now = DateTime.now();
+  final published = item.localDate;
+  if (published == null) return false;
+  return _sameDayFn(published, now);
+}
+
+bool _meetingIsToday(ParentMeetingModel meeting) {
+  final now = DateTime.now();
+  final date = DateTime.tryParse(meeting.parentMeeting.date);
+  if (date == null) return false;
+  return _sameDayFn(date, now);
+}
+
+String _homeSenderName(AgendaItemModel item) {
+  final name = item.sender.name.trim();
+  final lastName = item.sender.lastName.trim();
+  return [name, lastName].where((s) => s.isNotEmpty).join(' ');
+}
+
 class _HomeTabs extends StatefulWidget {
   const _HomeTabs();
 
@@ -1131,45 +1188,19 @@ class _HomeTabsState extends State<_HomeTabs> {
     final ac = context.appColors;
     final state = context.watch<ParentHomeBloc>().state;
     final labels = const ['Avisos', 'Agenda', 'Reuniones'];
-    final totalCount =
-        state.comunicados.length +
-        state.meetings.length +
-        state.agendaItems.length;
+    final todayAvisos = state.comunicados.where(_itemIsToday).toList();
+    final todayAgenda = state.agendaItems.where(_itemIsToday).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              'Contenido',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: ac.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 6),
-            if (totalCount > 0)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                height: 16,
-                constraints: const BoxConstraints(minWidth: 16),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: ac.error,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '$totalCount',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-          ],
+        Text(
+          'Contenido',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: ac.textPrimary,
+          ),
         ),
         const SizedBox(height: 10),
         Container(
@@ -1196,28 +1227,36 @@ class _HomeTabsState extends State<_HomeTabs> {
             child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
           )
         else
-          _buildTabContent(state, _selected),
+          _buildTabContent(state, _selected, todayAvisos, todayAgenda),
       ],
     );
   }
 
-  Widget _buildTabContent(ParentHomeState state, int index) {
+  Widget _buildTabContent(
+    ParentHomeState state,
+    int index,
+    List<AgendaItemModel> todayAvisos,
+    List<AgendaItemModel> todayAgenda,
+  ) {
     final tenantId = state.tenant;
     switch (index) {
       case 1:
-        final items = state.agendaItems;
-        if (items.isEmpty) {
-          return _emptyState('No hay eventos en agenda');
+        if (todayAgenda.isEmpty) {
+          return _emptyState('No hay eventos en la agenda de hoy');
         }
         return Column(
           children: [
-            for (final item in items.take(3))
+            for (final item in todayAgenda.take(3))
               _HomeTabCard(
                 icon: Icons.event,
-                color: const Color(0xFFFF9B38),
+                color: taskColor,
                 title: item.title,
-                time: _formatShortDate(item.dueDate),
+                time: _formatShortDate(
+                  item.dueDate ?? item.localDate?.toIso8601String(),
+                ),
                 description: item.description,
+                childName: item.student?.name ?? '',
+                senderName: _homeSenderName(item),
                 onTap: () => _openItemDetail(context, item, tenantId),
               ),
           ],
@@ -1243,19 +1282,20 @@ class _HomeTabsState extends State<_HomeTabs> {
           ],
         );
       default:
-        final items = state.comunicados;
-        if (items.isEmpty) {
+        if (todayAvisos.isEmpty) {
           return _emptyState('No hay avisos por ahora');
         }
         return Column(
           children: [
-            for (final item in items.take(3))
+            for (final item in todayAvisos.take(3))
               _HomeTabCard(
                 icon: Icons.campaign_outlined,
-                color: const Color(0xFFFE4349),
+                color: announcementHomeColor,
                 title: item.title,
-                time: _formatShortDate(item.publishedAt),
+                time: _formatShortDate(item.localDate?.toIso8601String()),
                 description: item.description,
+                childName: item.student?.name ?? '',
+                senderName: _homeSenderName(item),
                 onTap: () => _openItemDetail(context, item, tenantId),
               ),
           ],
@@ -1263,7 +1303,11 @@ class _HomeTabsState extends State<_HomeTabs> {
     }
   }
 
-  void _openItemDetail(BuildContext context, AgendaItemModel item, String tenantId) {
+  void _openItemDetail(
+    BuildContext context,
+    AgendaItemModel item,
+    String tenantId,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AgendaDetailPage(item: item, tenantId: tenantId),
@@ -1395,6 +1439,8 @@ class _HomeTabCard extends StatelessWidget {
   final String title;
   final String time;
   final String description;
+  final String childName;
+  final String senderName;
   final VoidCallback? onTap;
 
   const _HomeTabCard({
@@ -1403,6 +1449,8 @@ class _HomeTabCard extends StatelessWidget {
     required this.title,
     required this.time,
     required this.description,
+    this.childName = '',
+    this.senderName = '',
     this.onTap,
   });
 
@@ -1452,9 +1500,7 @@ class _HomeTabCard extends StatelessWidget {
                               time,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: ac
-                                    .textSecondary
-                                    .withValues(alpha: 0.7),
+                                color: ac.textSecondary.withValues(alpha: 0.7),
                               ),
                             ),
                         ],
@@ -1470,6 +1516,53 @@ class _HomeTabCard extends StatelessWidget {
                           color: ac.textSecondary.withValues(alpha: 0.8),
                         ),
                       ),
+                      if (childName.isNotEmpty || senderName.isNotEmpty) ...[
+                        const SizedBox(height: 7),
+                        Row(
+                          children: [
+                            if (childName.isNotEmpty) ...[
+                              Icon(
+                                Icons.person,
+                                size: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  childName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                            ],
+                            if (senderName.isNotEmpty) ...[
+                              Icon(
+                                Icons.person_outline,
+                                size: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  senderName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1479,6 +1572,88 @@ class _HomeTabCard extends StatelessWidget {
           Divider(height: 1, thickness: 1, color: ac.border, indent: 52),
         ],
       ),
+    );
+  }
+}
+
+class _NavDot extends StatelessWidget {
+  final Widget icon;
+  final int count;
+
+  const _NavDot({required this.icon, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        icon,
+        if (count > 0)
+          Positioned(
+            right: -6,
+            top: -5,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              height: 15,
+              constraints: const BoxConstraints(minWidth: 15),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE53935),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '$count',
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _BellIconButton extends StatelessWidget {
+  final int count;
+
+  const _BellIconButton({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          onPressed: () {},
+        ),
+        if (count > 0)
+          Positioned(
+            right: 2,
+            top: 2,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              height: 15,
+              constraints: const BoxConstraints(minWidth: 15),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE53935),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '$count',
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:coleapp/features/roles/presentation/bloc/roles_bloc.dart';
+import 'package:coleapp/features/roles/presentation/bloc/roles_event.dart';
 import 'package:coleapp/features/roles/presentation/bloc/roles_state.dart';
 
 class RolesPage extends StatefulWidget {
@@ -11,6 +12,12 @@ class RolesPage extends StatefulWidget {
 }
 
 class _RolesPageState extends State<RolesPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<RolesBloc>().add(GetRolesList());
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).colorScheme;

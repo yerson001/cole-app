@@ -12,6 +12,8 @@ import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeBloc.da
 import 'package:coleapp/features/parent/presentation/home/bloc/ParentHomeState.dart';
 import 'package:coleapp/features/parent/presentation/widgets/agenda_calendar.dart';
 import 'package:coleapp/features/parent/presentation/widgets/child_selector.dart';
+import 'package:coleapp/features/parent/presentation/widgets/type_colors.dart';
+import 'package:coleapp/features/parent/presentation/widgets/unread_indicator.dart';
 import 'package:coleapp/injection.dart';
 
 class AgendaContent extends StatelessWidget {
@@ -34,24 +36,26 @@ class _AgendaBody extends StatefulWidget {
 }
 
 class _AgendaBodyState extends State<_AgendaBody> {
-  bool _initialized = false;
+  int? _loadedStudentsLength;
 
   void _tryInitialize(ParentHomeState state) {
     final parentId = state.user?.profile?.id;
     final tenantId = state.tenant;
-    if (parentId != null && tenantId.isNotEmpty && !_initialized) {
-      _initialized = true;
-      final now = DateTime.now();
-      final range = _initialRange(now);
-      context.read<AgendaBloc>().add(LoadAgenda(
+    final students = state.students;
+    if (parentId == null || tenantId.isEmpty || students.isEmpty) return;
+    if (_loadedStudentsLength == students.length) return;
+    _loadedStudentsLength = students.length;
+    final now = DateTime.now();
+    final range = _initialRange(now);
+    context.read<AgendaBloc>().add(
+      LoadAgenda(
         parentId: parentId,
         tenantId: tenantId,
         startDate: range.startDate,
         endDate: range.endDate,
-        students: state.students,
-      ));
-      context.read<AgendaBloc>().add(SelectStudent(student: null));
-    }
+        students: students,
+      ),
+    );
   }
 
   @override
@@ -61,9 +65,9 @@ class _AgendaBodyState extends State<_AgendaBody> {
 
     return BlocListener<ParentHomeBloc, ParentHomeState>(
       listenWhen: (previous, current) =>
-        previous.user?.profile?.id != current.user?.profile?.id ||
-        previous.tenant != current.tenant ||
-        previous.students.length != current.students.length,
+          previous.user?.profile?.id != current.user?.profile?.id ||
+          previous.tenant != current.tenant ||
+          previous.students.length != current.students.length,
       listener: (context, state) => _tryInitialize(state),
       child: BlocBuilder<AgendaBloc, AgendaState>(
         builder: (context, state) {
@@ -75,21 +79,24 @@ class _AgendaBodyState extends State<_AgendaBody> {
             return const Center(child: Text('No hay sesión de padre activa'));
           }
 
-          if (state.isLoading && state.items.isEmpty) {
+          if (parentState.students.isEmpty ||
+              (state.isLoading && state.items.isEmpty)) {
             return const Center(child: CircularProgressIndicator());
           }
 
           return RefreshIndicator(
             onRefresh: () async {
               final range = _initialRange(state.selectedDate);
-              context.read<AgendaBloc>().add(LoadAgenda(
-                parentId: parentId,
-                studentId: state.selectedStudent?.id,
-                tenantId: tenantId,
-                startDate: range.startDate,
-                endDate: range.endDate,
-                students: parentState.students,
-              ));
+              context.read<AgendaBloc>().add(
+                LoadAgenda(
+                  parentId: parentId,
+                  studentId: state.selectedStudent?.id,
+                  tenantId: tenantId,
+                  startDate: range.startDate,
+                  endDate: range.endDate,
+                  students: parentState.students,
+                ),
+              );
             },
             child: Column(
               children: [
@@ -102,7 +109,7 @@ class _AgendaBodyState extends State<_AgendaBody> {
                 CalendarViewFilter(
                   view: state.view,
                   onChanged: (view) =>
-                    context.read<AgendaBloc>().add(ChangeView(view: view)),
+                      context.read<AgendaBloc>().add(ChangeView(view: view)),
                 ),
                 CalendarNavigationHeader(
                   view: state.view,
@@ -111,68 +118,63 @@ class _AgendaBodyState extends State<_AgendaBody> {
                   onNext: () => _changeDate(context, 1),
                   onToday: () => _changeDate(context, 0, today: true),
                 ),
-if (state.error != null && state.items.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        state.error!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                if (state.error != null && state.items.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      state.error!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
-                  Expanded(
-                    child: switch (state.view) {
-                      AgendaView.daily => Column(
-                          children: [
-                            Divider(height: 1, thickness: 1, color: ac.border),
-                            Expanded(
-                              child: _AgendaList(
-                                state: state,
-                                tenantId: tenantId,
-                              ),
-                            ),
-                          ],
-                        ),
-                      AgendaView.weekly => Column(
-                          children: [
-                            CalendarWeekGrid(
-                              selectedDate: state.selectedDate,
-                              dayDots: (day) => state
-                                  .itemsOn(day)
-                                  .map((i) => calendarTypeColor(i.type))
-                                  .toList(),
-                              onDayTap: (day) => _changeDate(context, 0, date: day),
-                            ),
-                            Divider(height: 20, thickness: 1, color: ac.border),
-                            Expanded(
-                              child: _AgendaList(
-                                state: state,
-                                tenantId: tenantId,
-                              ),
-                            ),
-                          ],
-                        ),
-                      AgendaView.monthly => Column(
-                          children: [
-                            CalendarMonthGrid(
-                              selectedDate: state.selectedDate,
-                              dayDots: (day) => state
-                                  .itemsOn(day)
-                                  .map((i) => calendarTypeColor(i.type))
-                                  .toList(),
-                              onDayTap: (day) => _changeDate(context, 0, date: day),
-                            ),
-                            Divider(height: 20, thickness: 1, color: ac.border),
-                            Expanded(
-                              child: _AgendaList(
-                                state: state,
-                                tenantId: tenantId,
-                              ),
-                            ),
-                          ],
-                        ),
-                    },
                   ),
+                Expanded(
+                  child: switch (state.view) {
+                    AgendaView.daily => Column(
+                      children: [
+                        Divider(height: 1, thickness: 1, color: ac.border),
+                        Expanded(
+                          child: _AgendaList(state: state, tenantId: tenantId),
+                        ),
+                      ],
+                    ),
+                    AgendaView.weekly => Column(
+                      children: [
+                        CalendarWeekGrid(
+                          selectedDate: state.selectedDate,
+                          dayDots: (day) => state
+                              .itemsOn(day)
+                              .map((i) => calendarTypeColor(i.type))
+                              .toList(),
+                          onDayTap: (day) =>
+                              _changeDate(context, 0, date: day),
+                        ),
+                        Divider(height: 20, thickness: 1, color: ac.border),
+                        Expanded(
+                          child: _AgendaList(state: state, tenantId: tenantId),
+                        ),
+                      ],
+                    ),
+                    AgendaView.monthly => Column(
+                      children: [
+                        CalendarMonthGrid(
+                          selectedDate: state.selectedDate,
+                          dayDots: (day) => state
+                              .itemsOn(day)
+                              .map((i) => calendarTypeColor(i.type))
+                              .toList(),
+                          onDayTap: (day) =>
+                              _changeDate(context, 0, date: day),
+                        ),
+                        Divider(height: 20, thickness: 1, color: ac.border),
+                        Expanded(
+                          child: _AgendaList(state: state, tenantId: tenantId),
+                        ),
+                      ],
+                    ),
+                  },
+                ),
               ],
             ),
           );
@@ -181,7 +183,12 @@ if (state.error != null && state.items.isEmpty)
     );
   }
 
-  void _changeDate(BuildContext context, int step, {bool today = false, DateTime? date}) {
+  void _changeDate(
+    BuildContext context,
+    int step, {
+    bool today = false,
+    DateTime? date,
+  }) {
     final bloc = context.read<AgendaBloc>();
     DateTime newDate;
     if (date != null) {
@@ -191,25 +198,23 @@ if (state.error != null && state.items.isEmpty)
     } else {
       newDate = switch (bloc.state.view) {
         AgendaView.daily => bloc.state.selectedDate.add(Duration(days: step)),
-        AgendaView.weekly => bloc.state.selectedDate.add(Duration(days: 7 * step)),
-        AgendaView.monthly =>
-          DateTime(
-            bloc.state.selectedDate.year,
-            bloc.state.selectedDate.month + step,
-            1,
-          ),
+        AgendaView.weekly => bloc.state.selectedDate.add(
+          Duration(days: 7 * step),
+        ),
+        AgendaView.monthly => DateTime(
+          bloc.state.selectedDate.year,
+          bloc.state.selectedDate.month + step,
+          1,
+        ),
       };
     }
     bloc.add(ChangeDate(date: newDate));
   }
 
   ({String startDate, String endDate}) _initialRange(DateTime date) {
-    final startDay = DateTime(date.year, date.month, date.day);
-    final end = startDay.add(const Duration(days: 30));
-    return (
-      startDate: _formatDate(startDay),
-      endDate: _formatDate(end),
-    );
+    final start = DateTime(date.year, date.month, 1);
+    final end = DateTime(date.year, date.month + 1, 1);
+    return (startDate: _formatDate(start), endDate: _formatDate(end));
   }
 
   String _formatDate(DateTime date) {
@@ -316,8 +321,6 @@ class _AgendaItemTile extends StatelessWidget {
 
   const _AgendaItemTile({required this.item, required this.tenantId});
 
-  static const Color _gold = Color(0xFFD4AF37);
-
   @override
   Widget build(BuildContext context) {
     final ac = context.appColors;
@@ -343,11 +346,7 @@ class _AgendaItemTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
         decoration: BoxDecoration(
-          color: item.isRead ? null : typeColor.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(12),
-          border: item.isRead
-              ? null
-              : Border.all(color: typeColor.withValues(alpha: 0.45)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,9 +355,8 @@ class _AgendaItemTile extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: typeColor.withValues(alpha: 0.12),
+                color: ac.fill,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: typeColor.withValues(alpha: 0.25)),
               ),
               child: Icon(icon, color: typeColor, size: 20),
             ),
@@ -375,13 +373,13 @@ class _AgendaItemTile extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: typeColor.withValues(alpha: 0.1),
+                          color: typeColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           typeLabel,
-                          style: TextStyle(
-                            color: typeColor,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 10.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -389,7 +387,11 @@ class _AgendaItemTile extends StatelessWidget {
                       ),
                       const Spacer(),
                       if (course != null) ...[
-                        Icon(Icons.menu_book, size: 14, color: _gold),
+                        Icon(
+                          Icons.menu_book,
+                          size: 14,
+                          color: ac.textPrimary,
+                        ),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -397,7 +399,7 @@ class _AgendaItemTile extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.normal,
-                              color: _gold,
+                              color: ac.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -421,10 +423,6 @@ class _AgendaItemTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (!item.isRead) ...[
-                        const SizedBox(width: 8),
-                        _UnreadBadge(color: typeColor),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 3),
@@ -509,6 +507,10 @@ class _AgendaItemTile extends StatelessWidget {
                 ],
               ),
             ),
+            if (!item.isRead) ...[
+              const SizedBox(width: 10),
+              const UnreadIndicator(),
+            ],
           ],
         ),
       ),
@@ -518,11 +520,11 @@ class _AgendaItemTile extends StatelessWidget {
   (Color, IconData, String) _typeInfo(String type) {
     switch (type) {
       case 'ANNOUNCEMENT':
-        return (Colors.green, Icons.campaign_outlined, 'Aviso');
+        return (announcementColor, Icons.campaign_outlined, 'Aviso');
       case 'TASK':
-        return (Colors.orange, Icons.assignment_outlined, 'Tarea');
+        return (taskColor, Icons.assignment_outlined, 'Tarea');
       case 'STUDENT_OBSERVATION':
-        return (Colors.red, Icons.feedback_outlined, 'Observación');
+        return (observationColor, Icons.feedback_outlined, 'Observación');
       default:
         return (Colors.grey, Icons.event_note_outlined, type);
     }
@@ -538,52 +540,24 @@ class _AgendaItemTile extends StatelessWidget {
     final name = sender.name.trim();
     final lastName = sender.lastName.trim();
     final joined = [name, lastName].where((s) => s.isNotEmpty).join(' ');
-    return joined.isEmpty ? '' : 'Doc. $joined';
-  }
-}
-
-class _UnreadBadge extends StatelessWidget {
-  final Color color;
-
-  const _UnreadBadge({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'SIN LEER',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w800,
-              color: color,
-              letterSpacing: 0.6,
-            ),
-          ),
-        ],
-      ),
-    );
+    return joined.isEmpty ? '' : 'Prof. $joined';
   }
 }
 
 String _formatDateOnly(DateTime date) {
   const months = [
-    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-    'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    'ene',
+    'feb',
+    'mar',
+    'abr',
+    'may',
+    'jun',
+    'jul',
+    'ago',
+    'sep',
+    'oct',
+    'nov',
+    'dic',
   ];
   final month = months[date.month - 1];
   return '${date.day} $month ${date.year}';

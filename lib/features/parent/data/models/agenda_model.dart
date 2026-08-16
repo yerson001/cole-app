@@ -79,6 +79,9 @@ class AgendaItemModel {
     );
   }
 
+  DateTime? get localDate =>
+      DateTime.tryParse(publishedAt ?? createdAt ?? '')?.toLocal();
+
   AgendaItemModel copyWith({
     String? readAt,
     bool? isRead,

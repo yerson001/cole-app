@@ -7,7 +7,7 @@ class AttendanceCard extends StatelessWidget {
 
   const AttendanceCard({super.key, required this.report});
 
-  static const _naranja = Color(0xFFB0790F);
+  static const _naranja = Color(0xFFF57C00);
   static const _salidaAzul = Color(0xFF00B9FE);
   static const _gris = Color(0xFF9E9E9E);
   static const _labelGris = Color(0xFF757575);

@@ -8,6 +8,7 @@ class CurvedHeader extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onMenuPressed;
   final VoidCallback? onNotificationsPressed;
+  final int notificationCount;
   final double arc;
 
   const CurvedHeader({
@@ -16,6 +17,7 @@ class CurvedHeader extends StatelessWidget {
     this.subtitle,
     this.onMenuPressed,
     this.onNotificationsPressed,
+    this.notificationCount = 0,
     this.arc = 16,
   });
 
@@ -88,15 +90,32 @@ class CurvedHeader extends StatelessWidget {
                     Positioned(
                       right: 8,
                       top: 8,
-                      child: Container(
-                        width: 9,
-                        height: 9,
-                        decoration: BoxDecoration(
-                          color: _error,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: headerColor, width: 1.5),
-                        ),
-                      ),
+                      child: notificationCount > 0
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              height: 16,
+                              constraints: const BoxConstraints(minWidth: 16),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: _error,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: headerColor,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Text(
+                                '$notificationCount',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ],
                 ),

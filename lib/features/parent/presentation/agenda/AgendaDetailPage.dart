@@ -4,6 +4,7 @@ import 'package:coleapp/core/errors/resource.dart';
 import 'package:coleapp/features/parent/data/models/agenda_detail_model.dart';
 import 'package:coleapp/features/parent/data/models/agenda_model.dart';
 import 'package:coleapp/features/parent/domain/usecases/parent_use_cases.dart';
+import 'package:coleapp/features/parent/presentation/widgets/type_colors.dart';
 import 'package:coleapp/injection.dart';
 
 class AgendaDetailPage extends StatefulWidget {
@@ -100,9 +101,14 @@ class _AgendaDetailPageState extends State<AgendaDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ac = context.appColors;
     return Scaffold(
       appBar: AppBar(
         title: Text(_detailTitle()),
+        backgroundColor: ac.surface,
+        foregroundColor: ac.textPrimary,
+        elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       body: _buildBody(context),
     );
@@ -179,10 +185,10 @@ class _AgendaDetailPageState extends State<AgendaDetailPage> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: notebookType.$1.withValues(alpha: 0.12),
+                        color: notebookType.$1,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(notebookType.$2, color: notebookType.$1, size: 22),
+                      child: Icon(notebookType.$2, color: Colors.white, size: 22),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -334,9 +340,13 @@ class _AgendaDetailPageState extends State<AgendaDetailPage> {
   }
 
   String? _currentPublishedAt() {
-    if (_homework != null) return _homework!.publishedAt;
-    if (_announcement != null) return _announcement!.publishedAt;
-    if (_observation != null) return _observation!.publishedAt;
+    if (_homework != null) return _homework!.localDate?.toIso8601String();
+    if (_announcement != null) {
+      return _announcement!.localDate?.toIso8601String();
+    }
+    if (_observation != null) {
+      return _observation!.localDate?.toIso8601String();
+    }
     return null;
   }
 
@@ -350,11 +360,11 @@ class _AgendaDetailPageState extends State<AgendaDetailPage> {
   (Color, IconData, String) _typeInfo(BuildContext context) {
     switch (_type) {
       case 'ANNOUNCEMENT':
-        return (Colors.green, Icons.campaign_outlined, 'Aviso');
+        return (announcementColor, Icons.campaign_outlined, 'Aviso');
       case 'TASK':
-        return (Colors.orange, Icons.assignment_outlined, 'Tarea');
+        return (taskColor, Icons.assignment_outlined, 'Tarea');
       case 'STUDENT_OBSERVATION':
-        return (Colors.red, Icons.feedback_outlined, 'Observación');
+        return (observationColor, Icons.feedback_outlined, 'Observación');
       default:
         return (Colors.grey, Icons.event_note_outlined, 'Detalle');
     }
@@ -370,7 +380,7 @@ class _AgendaDetailPageState extends State<AgendaDetailPage> {
       'FACILITY_STAFF': 'Personal de servicio',
       'STUDENT': 'Estudiante',
       'PARENT': 'Apoderado',
-      'TEACHER': 'Docente',
+      'TEACHER': 'Profesor',
     };
     return map[role] ?? role;
   }

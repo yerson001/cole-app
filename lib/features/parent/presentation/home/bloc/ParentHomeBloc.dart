@@ -168,8 +168,8 @@ class ParentHomeBloc extends Bloc<ParentHomeEvent, ParentHomeState> {
             .where((i) => i.type == 'ANNOUNCEMENT')
             .toList()
           ..sort((a, b) {
-            final aDate = DateTime.tryParse(a.publishedAt ?? '') ?? DateTime(0);
-            final bDate = DateTime.tryParse(b.publishedAt ?? '') ?? DateTime(0);
+            final aDate = a.localDate ?? DateTime(0);
+            final bDate = b.localDate ?? DateTime(0);
             return bDate.compareTo(aDate);
           });
         agendaItems = items.where((i) => i.type != 'ANNOUNCEMENT').toList();

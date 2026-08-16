@@ -12,16 +12,18 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
   final ParentUseCases parentUseCases;
 
   ComunicadosBloc(this.parentUseCases)
-      : super(ComunicadosState(selectedDate: DateTime.now())) {
+    : super(ComunicadosState(selectedDate: DateTime.now())) {
     on<LoadComunicados>((event, emit) async {
-      emit(state.copyWith(
-        isLoading: true,
-        tenantId: event.tenantId,
-        parentId: event.parentId,
-        selectedStudentId: event.studentId,
-        students: event.students ?? state.students,
-        clearError: true,
-      ));
+      emit(
+        state.copyWith(
+          isLoading: true,
+          tenantId: event.tenantId,
+          parentId: event.parentId,
+          selectedStudentId: event.studentId,
+          students: event.students ?? state.students,
+          clearError: true,
+        ),
+      );
 
       final sid = event.studentId;
       if (sid != null && sid > 0) {
@@ -32,17 +34,21 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
           tenantId: event.tenantId,
         );
         if (result is SuccessResource<AgendaModel>) {
-          emit(state.copyWith(
-            comunicados: _sortedAnnouncements(result.data.items),
-            isLoading: false,
-            clearError: true,
-          ));
+          emit(
+            state.copyWith(
+              comunicados: _sortedAnnouncements(result.data.items),
+              isLoading: false,
+              clearError: true,
+            ),
+          );
         } else {
-          emit(state.copyWith(
-            isLoading: false,
-            error: (result as ErrorResource).message,
-            comunicados: const [],
-          ));
+          emit(
+            state.copyWith(
+              isLoading: false,
+              error: (result as ErrorResource).message,
+              comunicados: const [],
+            ),
+          );
         }
         return;
       }
@@ -50,13 +56,16 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
       final students = event.students ?? state.students;
       if (students.isNotEmpty) {
         try {
-          final results = await Future.wait(students.map((s) =>
-            parentUseCases.getAgendaByStudentUseCase.call(
-              studentId: s.id,
-              startDate: event.startDate,
-              endDate: event.endDate,
-              tenantId: event.tenantId,
-            )));
+          final results = await Future.wait(
+            students.map(
+              (s) => parentUseCases.getAgendaByStudentUseCase.call(
+                studentId: s.id,
+                startDate: event.startDate,
+                endDate: event.endDate,
+                tenantId: event.tenantId,
+              ),
+            ),
+          );
           final byId = <int, AgendaItemModel>{};
           for (var i = 0; i < students.length; i++) {
             final result = results[i];
@@ -70,17 +79,21 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
               }
             }
           }
-          emit(state.copyWith(
-            comunicados: _sortedAnnouncements(byId.values.toList()),
-            isLoading: false,
-            clearError: true,
-          ));
+          emit(
+            state.copyWith(
+              comunicados: _sortedAnnouncements(byId.values.toList()),
+              isLoading: false,
+              clearError: true,
+            ),
+          );
         } catch (_) {
-          emit(state.copyWith(
-            isLoading: false,
-            error: 'No se pudieron cargar los avisos de los hijos',
-            comunicados: const [],
-          ));
+          emit(
+            state.copyWith(
+              isLoading: false,
+              error: 'No se pudieron cargar los avisos de los hijos',
+              comunicados: const [],
+            ),
+          );
         }
         return;
       }
@@ -92,34 +105,42 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
         tenantId: event.tenantId,
       );
       if (result is SuccessResource<AgendaModel>) {
-        emit(state.copyWith(
-          comunicados: _sortedAnnouncements(result.data.items),
-          isLoading: false,
-          clearError: true,
-        ));
+        emit(
+          state.copyWith(
+            comunicados: _sortedAnnouncements(result.data.items),
+            isLoading: false,
+            clearError: true,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          isLoading: false,
-          error: (result as ErrorResource).message,
-          comunicados: const [],
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            error: (result as ErrorResource).message,
+            comunicados: const [],
+          ),
+        );
       }
     });
 
     on<SelectStudent>((event, emit) async {
-      emit(state.copyWith(
-        selectedStudentId: event.studentId,
-        clearSelection: event.studentId == null,
-      ));
+      emit(
+        state.copyWith(
+          selectedStudentId: event.studentId,
+          clearSelection: event.studentId == null,
+        ),
+      );
       if (state.parentId != null) {
         final range = _dateRangeForDate(state.selectedDate, state.view);
-        add(LoadComunicados(
-          parentId: state.parentId!,
-          tenantId: state.tenantId,
-          startDate: range.startDate,
-          endDate: range.endDate,
-          studentId: event.studentId,
-        ));
+        add(
+          LoadComunicados(
+            parentId: state.parentId!,
+            tenantId: state.tenantId,
+            startDate: range.startDate,
+            endDate: range.endDate,
+            studentId: event.studentId,
+          ),
+        );
       }
     });
 
@@ -132,7 +153,10 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
       if (result is SuccessResource<void>) {
         final updated = state.comunicados.map((item) {
           if (item.id == event.itemId) {
-            return item.copyWith(readAt: DateTime.now().toIso8601String(), isRead: true);
+            return item.copyWith(
+              readAt: DateTime.now().toIso8601String(),
+              isRead: true,
+            );
           }
           return item;
         }).toList();
@@ -144,13 +168,15 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
       emit(state.copyWith(selectedDate: event.date));
       if (state.parentId != null) {
         final range = _dateRangeForDate(event.date, state.view);
-        add(LoadComunicados(
-          parentId: state.parentId!,
-          tenantId: state.tenantId,
-          startDate: range.startDate,
-          endDate: range.endDate,
-          studentId: state.selectedStudentId,
-        ));
+        add(
+          LoadComunicados(
+            parentId: state.parentId!,
+            tenantId: state.tenantId,
+            startDate: range.startDate,
+            endDate: range.endDate,
+            studentId: state.selectedStudentId,
+          ),
+        );
       }
     });
 
@@ -158,13 +184,15 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
       emit(state.copyWith(view: event.view));
       if (state.parentId != null) {
         final range = _dateRangeForDate(state.selectedDate, event.view);
-        add(LoadComunicados(
-          parentId: state.parentId!,
-          tenantId: state.tenantId,
-          startDate: range.startDate,
-          endDate: range.endDate,
-          studentId: state.selectedStudentId,
-        ));
+        add(
+          LoadComunicados(
+            parentId: state.parentId!,
+            tenantId: state.tenantId,
+            startDate: range.startDate,
+            endDate: range.endDate,
+            studentId: state.selectedStudentId,
+          ),
+        );
       }
     });
   }
@@ -173,8 +201,8 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
     final announcements =
         items.where((item) => item.type == 'ANNOUNCEMENT').toList()
           ..sort((a, b) {
-            final aDate = DateTime.tryParse(a.publishedAt ?? '') ?? DateTime(0);
-            final bDate = DateTime.tryParse(b.publishedAt ?? '') ?? DateTime(0);
+            final aDate = a.localDate ?? DateTime(0);
+            final bDate = b.localDate ?? DateTime(0);
             return bDate.compareTo(aDate);
           });
     return announcements;
@@ -191,31 +219,12 @@ class ComunicadosBloc extends Bloc<ComunicadosEvent, ComunicadosState> {
   }
 
   ({String startDate, String endDate}) _dateRangeForDate(
-      DateTime date, AgendaView view) {
-    switch (view) {
-      case AgendaView.daily:
-        final start = DateTime(date.year, date.month, date.day);
-        final end = start.add(const Duration(days: 2));
-        return (
-          startDate: _formatDate(start),
-          endDate: _formatDate(end),
-        );
-      case AgendaView.weekly:
-        final start = date.subtract(Duration(days: date.weekday - 1));
-        final startDay = DateTime(start.year, start.month, start.day);
-        final end = startDay.add(const Duration(days: 8));
-        return (
-          startDate: _formatDate(startDay),
-          endDate: _formatDate(end),
-        );
-      case AgendaView.monthly:
-        final start = DateTime(date.year, date.month, 1);
-        final end = DateTime(date.year, date.month + 1, 1);
-        return (
-          startDate: _formatDate(start),
-          endDate: _formatDate(end),
-        );
-    }
+    DateTime date,
+    AgendaView view,
+  ) {
+    final start = DateTime(date.year, date.month, 1);
+    final end = DateTime(date.year, date.month + 1, 1);
+    return (startDate: _formatDate(start), endDate: _formatDate(end));
   }
 
   String _formatDate(DateTime date) {

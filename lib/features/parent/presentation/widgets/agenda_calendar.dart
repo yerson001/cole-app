@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:coleapp/core/themes/app_colors.dart';
 import 'package:coleapp/features/parent/presentation/agenda/bloc/AgendaState.dart'
     show AgendaView;
+import 'package:coleapp/features/parent/presentation/widgets/type_colors.dart';
 
 typedef CalendarDayDots = List<Color> Function(DateTime day);
 
 Color calendarTypeColor(String type) {
   switch (type) {
     case 'ANNOUNCEMENT':
-      return Colors.green;
+      return announcementColor;
     case 'TASK':
-      return Colors.orange;
+      return taskColor;
     case 'STUDENT_OBSERVATION':
-      return Colors.red;
+      return observationColor;
     default:
       return Colors.grey;
   }

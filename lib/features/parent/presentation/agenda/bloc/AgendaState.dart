@@ -57,16 +57,15 @@ class AgendaState extends Equatable {
 
   List<AgendaItemModel> itemsOn(DateTime date) {
     return items.where((item) {
-      if (item.publishedAt == null) return false;
-      final published = DateTime.tryParse(item.publishedAt!);
+      final published = item.localDate;
       if (published == null) return false;
       return published.year == date.year &&
           published.month == date.month &&
           published.day == date.day;
     }).toList()
       ..sort((a, b) {
-        final aDate = DateTime.tryParse(a.publishedAt ?? '') ?? DateTime(0);
-        final bDate = DateTime.tryParse(b.publishedAt ?? '') ?? DateTime(0);
+        final aDate = a.localDate ?? DateTime(0);
+        final bDate = b.localDate ?? DateTime(0);
         return bDate.compareTo(aDate);
       });
   }
